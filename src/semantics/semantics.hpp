@@ -23,17 +23,17 @@ public:
             if(instanceOf<VariableDeclaration>(node)){
                 VariableDeclaration* declaration = dynamic_cast<VariableDeclaration*>(node);
                 Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
-                if(instanceOf<IntegerLiteral>(declaration->expression)){
-                    IntegerLiteral* value = dynamic_cast<IntegerLiteral*>(declaration->expression);
-                    ir += id->name + " = "+ value->value + '\n';
+                if(instanceOf<Literal>(declaration->expression)){
+                    Literal* value = dynamic_cast<Literal*>(declaration->expression);
+                    ir += id->name + " = "+ value->getValue() + '\n';
                 }
             }
             if(instanceOf<VariableRedeclaration>(node)){
                 VariableRedeclaration* declaration = dynamic_cast<VariableRedeclaration*>(node);
                 Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
-                if(instanceOf<IntegerLiteral>(declaration->expression)){
-                    IntegerLiteral* value = dynamic_cast<IntegerLiteral*>(declaration->expression);
-                    ir += id->name + " = "+ value->value + '\n';
+                if(instanceOf<Literal>(declaration->expression)){
+                    Literal* value = dynamic_cast<Literal*>(declaration->expression);
+                    ir += id->name + " = "+ value->getValue() + '\n';
                 }
             }
         }

@@ -6,4 +6,5 @@ num pi = 3.1415;
 mundo
 */
 var myVar = 23;
-myVar = 1.3;
+myVar = null;
+var mySecondVar;

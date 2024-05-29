@@ -127,7 +127,8 @@ private:
             {"int", int_keyword},
             {"num", num_keyword},
             {"var", var_keyword},
-            {"out", out_keyword}
+            {"out", out_keyword},
+            {"null",null_literal}
         };
         try {
             return keywords.at(symbol);

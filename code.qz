@@ -1,2 +1,2 @@
 int hola = 3;
-int adios;
+int adios = 2.1;

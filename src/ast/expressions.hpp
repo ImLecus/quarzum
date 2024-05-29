@@ -1,3 +1,4 @@
+#pragma once
 #include "astnode.hpp"
 class UnaryExpression : public ASTNode {
 public:

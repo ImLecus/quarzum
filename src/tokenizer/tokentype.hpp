@@ -6,12 +6,14 @@
  * 0xF0 - 0xFF : other
 */
 enum TokenType : unsigned int {
-    int_literal = 0x60,
-    num_literal = 0x61,
-    
+    int_keyword = 0x00,
+
     equal = 0x30,
     semicolon = 0x31,
-    int_keyword = 0x00,
+    plus = 0x32,
+
+    int_literal = 0x60,
+    num_literal = 0x61,
     
     identifier = 0xF0,
     token_error = 0xFF

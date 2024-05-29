@@ -1,3 +1,4 @@
+#pragma once
 #include "astnode.hpp"
 
 class IntegerLiteral : public ASTNode {

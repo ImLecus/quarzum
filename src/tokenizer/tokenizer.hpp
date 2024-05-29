@@ -77,7 +77,8 @@ private:
         
         static const std::unordered_map<std::string, TokenType> symbols = {
             {";", semicolon},
-            {"=", equal}
+            {"=", equal},
+            {"+", plus}
         };
         try {
             return symbols.at(symbol);

@@ -1,6 +1,7 @@
 #include "src/tokenizer/tokenizer.hpp"
 #include "src/parser/parser.hpp"
 #include "src/source.hpp"
+#include "src/semantics/semantics.hpp"
 
 int main(int argc, char** argv) {
 
@@ -18,7 +19,10 @@ int main(int argc, char** argv) {
     
     TokenList tokens = Tokenizer::tokenize(content);
     Parser parser = Parser(tokens);
-    parser.parse();
+    RootNode root = parser.parse();
+
+    Semantics s = Semantics();
+    s.check(root);
     /*
     for(Token token : tokens.getItems()) {
         std::cout << token.toString() << '\n';

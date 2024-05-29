@@ -3,6 +3,7 @@
 #include "../ast/literals.hpp"
 #include "../ast/nodes.hpp"
 #include "../ast/declarations.hpp"
+#include "../error.hpp"
 #include <vector>
 
 class Parser {
@@ -63,6 +64,10 @@ private:
         if(get(i).getType() == int_literal){
             return new IntegerLiteral(std::stoi(get(i).getValue()));
         }
-        return new IntegerLiteral(0);
+        if(get(i).getType() == num_literal){
+            return new NumericLiteral(std::stod(get(i).getValue()));
+        }
+        throwSyntaxError("Invalid expression");
+        return nullptr;
     }
 };

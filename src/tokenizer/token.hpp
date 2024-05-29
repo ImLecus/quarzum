@@ -34,7 +34,8 @@ public:
             {int_keyword, "int_keyword"},
             {int_literal, "int_literal"},
             {semicolon, "semicolon"},
-            {num_literal, "num_literal"}
+            {num_literal, "num_literal"},
+            {plus, "plus"},
         };
         try{
             return typeToString.at(this->type) + ": " + this->value;

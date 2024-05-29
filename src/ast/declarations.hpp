@@ -27,3 +27,26 @@ public:
         delete expression;
     }
 };
+
+class VariableRedeclaration : public ASTNode {
+public:
+    ASTNode* identifier;
+    ASTNode* expression;
+
+    VariableRedeclaration(ASTNode* varName, ASTNode* value): identifier(varName), expression(value) {}
+
+    void print() override  {
+        std::cout << "VariableRedeclaration:\n";
+        std::cout <<'\t';
+        identifier->print();
+        if (expression) {
+            std::cout <<'\t';
+            expression->print();
+        }
+    }
+
+    ~VariableRedeclaration() {
+        delete identifier;
+        delete expression;
+    }
+};

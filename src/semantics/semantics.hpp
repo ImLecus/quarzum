@@ -28,6 +28,14 @@ public:
                     ir += id->name + " = "+ value->value + '\n';
                 }
             }
+            if(instanceOf<VariableRedeclaration>(node)){
+                VariableRedeclaration* declaration = dynamic_cast<VariableRedeclaration*>(node);
+                Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
+                if(instanceOf<IntegerLiteral>(declaration->expression)){
+                    IntegerLiteral* value = dynamic_cast<IntegerLiteral*>(declaration->expression);
+                    ir += id->name + " = "+ value->value + '\n';
+                }
+            }
         }
         return ir;
     }

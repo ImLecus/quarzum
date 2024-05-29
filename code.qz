@@ -1,1 +1,5 @@
 int hola = 3;
+hola = 8;
+num pi = 3.1415;
+var myVar = 23;
+myVar = 1.3;

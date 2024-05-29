@@ -78,7 +78,13 @@ private:
         static const std::unordered_map<std::string, TokenType> symbols = {
             {";", semicolon},
             {"=", equal},
-            {"+", plus}
+            {"+", plus},
+            {"-", minus},
+            {"*", prod},
+            {"/", division},
+            {"%", mod},
+            {"(", left_par},
+            {")", right_par}
         };
         try {
             return symbols.at(symbol);
@@ -91,7 +97,10 @@ private:
     static TokenType bufferToKeyword(std::string symbol){
         
         static const std::unordered_map<std::string, TokenType> keywords = {
-            {"int", int_keyword}
+            {"int", int_keyword},
+            {"num", num_keyword},
+            {"var", var_keyword},
+            {"out", out_keyword}
         };
         try {
             return keywords.at(symbol);

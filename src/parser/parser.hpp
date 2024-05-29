@@ -3,6 +3,7 @@
 #include "../ast/literals.hpp"
 #include "../ast/nodes.hpp"
 #include "../ast/declarations.hpp"
+#include "../ast/statements.hpp"
 #include "../error.hpp"
 #include <vector>
 
@@ -14,6 +15,7 @@ public:
         RootNode root = RootNode();
 
         for(i = 0; i < tokens.size(); ++i){
+
             if(get(i).isKeyword()){
                 lastType = get(i).getValue();
                 ASTNode* type = new Type(lastType);
@@ -30,11 +32,26 @@ public:
                     if(get(i + 2).getType() == equal){
                         i += 3;
                         root.add(new VariableDeclaration(type, name, parseExpression()));
+                        if(get(++i).getType() != semicolon){
+                            throwSyntaxError("Expected semicolon");
+                        }
                         continue;
                     }
 
                     throwSyntaxError("Expected semicolon or expression");
 
+                }
+            }
+
+            if(get(i).getType() == identifier){
+                ASTNode* name = new Identifier(get(i).getValue());
+                if(get(i +1).getType() == equal){
+                    i += 2;
+                    root.add(new VariableRedeclaration(name, parseExpression()));
+                    if(get(++i).getType() != semicolon){
+                        throwSyntaxError("Expected semicolon");
+                    }
+                    continue;
                 }
             }
             

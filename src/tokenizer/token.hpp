@@ -36,6 +36,17 @@ public:
             {semicolon, "semicolon"},
             {num_literal, "num_literal"},
             {plus, "plus"},
+            {minus, "minus"},
+            {prod, "product"},
+            {division, "division"},
+            {mod, "module"},
+            {left_par, "left_par"},
+            {right_par, "right_par"},
+            {out_keyword, "out_keyword"},
+            {num_keyword, "num_keyword"},
+            {char_keyword, "char_keyword"},
+            {string_keyword, "string_keyword"},
+            {var_keyword, "var_keyword"}
         };
         try{
             return typeToString.at(this->type) + ": " + this->value;

@@ -10,4 +10,5 @@ myVar = null;
 var mySecondVar;
 
 bool me = true;
-me = false;
+me = 'a';
+string name = "Quarzum";

@@ -32,6 +32,35 @@ public:
             if(isComment or isMultiComment){
                 continue;
             }
+            if(content[index] == '\''){
+                buffer += '\'';
+                if(index + 1 <= content.size() and content[index + 1] == '\\'){
+                    buffer += content[++index];
+                }
+                if(index + 1 <= content.size() and isascii(content[index + 1])){
+                    buffer += content[index + 1];
+                    if(index + 2 <= content.size() and content[index + 2] == '\''){
+                        buffer += '\'';
+                        tokens.add(Token(char_literal, buffer));
+                        buffer.clear();
+                        index += 2;
+                        continue;
+                    }
+                    throwLexicalError("Unexpected token", lineNumber);
+                }
+                throwLexicalError("Unexpected token", lineNumber);
+            }
+            if(content[index] == '"'){
+                buffer += '"';
+                ++index;
+                while(index <= content.size() and content[index ] != '"'){
+                    buffer += content[index++];
+                }
+                buffer += '"';
+                tokens.add(Token(string_literal, buffer));
+                buffer.clear();
+                continue;
+            }
             // Identifiers and keywords
             if(isalpha(content[index])){
                 while (isalnum(content[index]))

@@ -97,6 +97,12 @@ private:
         if(get(i).getType() == true_literal or get(i).getType() == false_literal){
             return new BoolLiteral(get(i).getValue());
         }
+        if(get(i).getType() == char_literal){
+            return new CharLiteral(get(i).getValue());
+        }
+        if(get(i).getType() == string_literal){
+            return new StringLiteral(get(i).getValue());
+        }
         if(get(i).getType() == null_literal){
             return new NullLiteral();
         }

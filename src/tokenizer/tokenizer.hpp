@@ -1,9 +1,10 @@
+#pragma once
 #include "tokenlist.hpp"
-#include "../error/error.hpp"
+#include "../error.hpp"
 
 class Tokenizer {
     public:
-        static TokenList tokenize(const std::string content){
+        static TokenList tokenize(const std::string& content){
 
             TokenList tokens = TokenList();
             size_t index = 0;
@@ -18,8 +19,10 @@ class Tokenizer {
                     {
                         buffer += content[index++];
                     }
-                    tokens.add(Token(identifier, buffer));
+                    TokenType type = bufferToKeyword(buffer);
+                    tokens.add(Token(type == token_error? identifier : type, buffer));
                     buffer.clear();
+                    --index;
                     continue;
                 }
                 // Integers and numbers
@@ -77,6 +80,19 @@ class Tokenizer {
             };
             try {
                 return symbols.at(symbol);
+            }
+            catch(...){
+                return token_error;
+            }
+        }
+
+        static TokenType bufferToKeyword(std::string symbol){
+            
+            static const std::unordered_map<std::string, TokenType> keywords = {
+                {"int", int_keyword}
+            };
+            try {
+                return keywords.at(symbol);
             }
             catch(...){
                 return token_error;

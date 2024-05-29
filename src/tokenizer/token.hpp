@@ -13,6 +13,7 @@ class Token {
             return (unsigned int)this->type >= 0xF0;
         }
 
+
         std::string getValue(){
             return this -> value;
         }

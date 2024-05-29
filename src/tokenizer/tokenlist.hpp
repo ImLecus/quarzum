@@ -1,3 +1,4 @@
+#pragma once
 #include "token.hpp"
 #include <vector>
 
@@ -11,6 +12,18 @@ class TokenList {
 
         std::vector<Token> getItems(){
             return this -> tokens;
+        }
+
+        size_t size(){
+            return this->tokens.size();
+        }
+
+        Token get(size_t index){
+            return this->tokens.at(index);
+        }
+
+        Token operator[](size_t index){
+            return get(index);
         }
 
     private:

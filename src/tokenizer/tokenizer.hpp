@@ -126,9 +126,14 @@ private:
         static const std::unordered_map<std::string, TokenType> keywords = {
             {"int", int_keyword},
             {"num", num_keyword},
+            {"char", char_keyword},
+            {"string", string_keyword},
+            {"bool", bool_keyword},
             {"var", var_keyword},
             {"out", out_keyword},
-            {"null",null_literal}
+            {"null",null_literal},
+            {"true",true_literal},
+            {"false",false_literal}
         };
         try {
             return keywords.at(symbol);

@@ -27,6 +27,30 @@ public:
     }
 };
 
+class CharLiteral : public Literal {
+public:
+    CharLiteral(std::string value) : Literal(value) {}
+    void print() override{
+        std::cout << "CharLiteral: " << getValue() << '\n';
+    }
+};
+
+class StringLiteral : public Literal {
+public:
+    StringLiteral(std::string value) : Literal(value) {}
+    void print() override{
+        std::cout << "StringLiteral: " << getValue() << '\n';
+    }
+};
+
+class BoolLiteral : public Literal {
+public:
+    BoolLiteral(std::string value) : Literal(value) {}
+    void print() override{
+        std::cout << "BoolLiteral: " << getValue() << '\n';
+    }
+};
+
 class NullLiteral : public Literal {
 public:
     NullLiteral() : Literal("null") {}

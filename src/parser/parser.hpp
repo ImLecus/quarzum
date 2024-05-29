@@ -78,6 +78,9 @@ private:
         if(lastType == "num"){
             return new NumericLiteral("0");
         }
+        if(lastType == "bool"){
+            return new BoolLiteral("false");
+        }
         if(lastType == "var"){
             return new NullLiteral();
         }
@@ -90,6 +93,9 @@ private:
         }
         if(get(i).getType() == num_literal){
             return new NumericLiteral(get(i).getValue());
+        }
+        if(get(i).getType() == true_literal or get(i).getType() == false_literal){
+            return new BoolLiteral(get(i).getValue());
         }
         if(get(i).getType() == null_literal){
             return new NullLiteral();

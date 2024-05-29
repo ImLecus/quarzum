@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
     }
     
     TokenList tokens = Tokenizer::tokenize(content);
-    for(Token token : tokens.getItems()){
-        std::cout << token.toString() << '\n';
-    }
+    // for(Token token : tokens.getItems()){
+    //     std::cout << token.toString() << '\n';
+    // }
     Parser parser = Parser(tokens);
     RootNode root = parser.parse();
 

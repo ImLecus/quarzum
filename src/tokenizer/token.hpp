@@ -47,7 +47,11 @@ public:
             {char_keyword, "char_keyword"},
             {string_keyword, "string_keyword"},
             {var_keyword, "var_keyword"},
-            {null_literal, "null_literal"}
+            {null_literal, "null_literal"},
+            {char_literal, "char_literal"},
+            {string_literal, "string_literal"},
+            {true_literal, "true_literal"},
+            {false_literal, "false_literal"}
         };
         try{
             return typeToString.at(this->type) + ": " + this->value;

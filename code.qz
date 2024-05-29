@@ -8,3 +8,6 @@ mundo
 var myVar = 23;
 myVar = null;
 var mySecondVar;
+
+bool me = true;
+me = false;

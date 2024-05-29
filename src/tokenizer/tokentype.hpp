@@ -28,6 +28,10 @@ enum TokenType : unsigned int {
 
     int_literal = 0x60,
     num_literal = 0x61,
+    char_literal = 0x62,
+    string_literal = 0x63,
+    true_literal = 0x64,
+    false_literal = 0x65,
     null_literal = 0x66,
     
     identifier = 0xF0,

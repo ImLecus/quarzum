@@ -14,3 +14,7 @@ void throwLexicalError(const std::string message, size_t line){
     std::cout << RED << "LexicalError: " << NOCOLOR << message << " at line " << line << ".\n";
     exit(EXIT_FAILURE);
 }
+
+void throwWarning(const std::string message){
+    std::cout << YELLOW << "Warning: " << NOCOLOR << message << '\n';
+}

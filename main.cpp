@@ -17,14 +17,15 @@ int main(int argc, char** argv) {
     }
     
     TokenList tokens = Tokenizer::tokenize(content);
+    /*
     for(Token token : tokens.getItems()) {
         std::cout << token.toString() << '\n';
     }
+    */
+    ASTNode* u = new UnaryExpression("-", new IntegerLiteral(12));
+    u->print();
+    delete u;
 
-    std::vector<Statement> statements = Parser::parse(tokens);
-    for(Statement statement: statements){
-        std::cout << statement.toString() << '\n';
-    }
 
     return 0;
 }

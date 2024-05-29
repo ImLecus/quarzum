@@ -5,7 +5,7 @@ public:
     int value;
     IntegerLiteral(int value): value(value) {}
     const void print() override{
-        std::cout << "Integer Literal: " << value << '\n';
+        std::cout << "IntegerLiteral: " << value << '\n';
     }
 };
 
@@ -14,6 +14,6 @@ public:
     double value;
     NumericLiteral(double value) : value(value) {}
     const void print() override{
-        std::cout << "Numeric Literal: " << value << '\n';
+        std::cout << "NumericLiteral: " << value << '\n';
     }
 };

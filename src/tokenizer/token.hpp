@@ -13,6 +13,10 @@ public:
         return (unsigned int)this->type >= 0xF0;
     }
 
+    bool isKeyword(){
+        return (unsigned int)this->type <= 0x2F;
+    }
+
 
     std::string getValue(){
         return this -> value;

@@ -5,14 +5,14 @@
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
-    virtual const void print() = 0;
+    virtual void print() = 0;
 };
 
 class RootNode : public ASTNode {
 public:
     std::vector<ASTNode*> nodes;
     RootNode(){}
-    const void print() override {
+    void print() override {
         for(auto& node : nodes){
             node->print();
         }

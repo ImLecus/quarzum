@@ -58,14 +58,15 @@ private:
         if(lastType == "int"){
             return new IntegerLiteral(0);
         }
+        return nullptr;
     }
 
     ASTNode* parseExpression(){
         if(get(i).getType() == int_literal){
-            return new IntegerLiteral(std::stoi(get(i).getValue()));
+            return new IntegerLiteral(get(i).getValue());
         }
         if(get(i).getType() == num_literal){
-            return new NumericLiteral(std::stod(get(i).getValue()));
+            return new NumericLiteral(get(i).getValue());
         }
         throwSyntaxError("Invalid expression");
         return nullptr;

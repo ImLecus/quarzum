@@ -9,7 +9,7 @@ public:
 
     VariableDeclaration(ASTNode* varType, ASTNode* varName, ASTNode* initValue): type(varType), identifier(varName), expression(initValue) {}
 
-    const void print() override  {
+    void print() override  {
         std::cout << "VariableDeclaration:\n";
         std::cout <<'\t';
         type->print();

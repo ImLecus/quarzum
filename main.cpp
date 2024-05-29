@@ -23,6 +23,8 @@ int main(int argc, char** argv) {
 
     Semantics s = Semantics();
     s.check(root);
+
+    std::cout << s.rootToIR(root) << '\n';
     /*
     for(Token token : tokens.getItems()) {
         std::cout << token.toString() << '\n';

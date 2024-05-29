@@ -13,11 +13,23 @@ public:
                 if(type->type == "int" and not instanceOf<IntegerLiteral>(declaration->expression)){
                     throwTypeError("Invalid assignment type");
                 }
-                else{
-                    std::cout << "type is correct\n";
+            }
+        }
+    }
+
+    std::string rootToIR(RootNode root){
+        std::string ir = "";
+        for(ASTNode* node : root.nodes){
+            if(instanceOf<VariableDeclaration>(node)){
+                VariableDeclaration* declaration = dynamic_cast<VariableDeclaration*>(node);
+                Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
+                if(instanceOf<IntegerLiteral>(declaration->expression)){
+                    IntegerLiteral* value = dynamic_cast<IntegerLiteral*>(declaration->expression);
+                    ir += id->name + " = "+ value->value + '\n';
                 }
             }
         }
+        return ir;
     }
 private:
 

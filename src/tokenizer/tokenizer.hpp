@@ -11,9 +11,27 @@ public:
         size_t index = 0;
         size_t lineNumber = 0;
         std::string buffer;
+        bool isComment = false;
+        bool isMultiComment = false;
 
         for(; index <= content.length(); ++index){
-
+            if(content[index] == '\n'){
+                isComment = false;
+                ++lineNumber;
+                continue;
+            }
+            if(content[index] == '/' and index + 1 <= content.length() and content[index + 1] == '*'){
+                isMultiComment = true;
+                continue;
+            }
+            if(content[index] == '*' and index + 1 <= content.length() and content[index + 1] == '/'){
+                isMultiComment = false;
+                ++index;
+                continue;
+            }
+            if(isComment or isMultiComment){
+                continue;
+            }
             // Identifiers and keywords
             if(isalpha(content[index])){
                 while (isalnum(content[index]))
@@ -46,8 +64,14 @@ public:
                 buffer += content[index];
                 if(index + 1 <= content.length() and ispunct(content[index + 1])){
                     buffer += content[index + 1];
-                    if(symbolToType(buffer) != token_error){
-                        tokens.add(Token(symbolToType(buffer), buffer));
+                    TokenType type = symbolToType(buffer);
+                    if(type == comment){
+                        buffer.clear();
+                        isComment = true;
+                        continue;
+                    }
+                    if(type != token_error){
+                        tokens.add(Token(type, buffer));
                         buffer.clear();
                         continue;
                     }
@@ -57,6 +81,7 @@ public:
                 if(type == token_error){
                     throwLexicalError("Unexpected token", lineNumber);
                 }
+
                 tokens.add(Token(type, buffer));
                 buffer.clear();
                 continue;
@@ -73,6 +98,7 @@ public:
         return tokens;
     }
 private:
+
     static TokenType symbolToType(std::string symbol){
         
         static const std::unordered_map<std::string, TokenType> symbols = {
@@ -84,7 +110,8 @@ private:
             {"/", division},
             {"%", mod},
             {"(", left_par},
-            {")", right_par}
+            {")", right_par},
+            {"//", comment}
         };
         try {
             return symbols.at(symbol);

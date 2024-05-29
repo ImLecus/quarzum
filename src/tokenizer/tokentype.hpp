@@ -30,5 +30,6 @@ enum TokenType : unsigned int {
     num_literal = 0x61,
     
     identifier = 0xF0,
+    comment = 0xF1,
     token_error = 0xFF
 };

@@ -140,7 +140,13 @@ private:
             {"%", mod},
             {"(", left_par},
             {")", right_par},
-            {"//", comment}
+            {"//", comment},
+            {">", greater},
+            {"<", lower},
+            {">=", greater_eq},
+            {"<=", lower_eq},
+            {"==", is_equal},
+            {"!=", not_equal}
         };
         try {
             return symbols.at(symbol);
@@ -162,7 +168,11 @@ private:
             {"out", out_keyword},
             {"null",null_literal},
             {"true",true_literal},
-            {"false",false_literal}
+            {"false",false_literal},
+            {"or", or_op},
+            {"and", and_op},
+            {"xor", xor_op},
+            {"not", not_op}
         };
         try {
             return keywords.at(symbol);

@@ -51,7 +51,11 @@ public:
             {char_literal, "char_literal"},
             {string_literal, "string_literal"},
             {true_literal, "true_literal"},
-            {false_literal, "false_literal"}
+            {false_literal, "false_literal"},
+            {or_op, "or"},
+            {and_op, "and"},
+            {not_op, "not"},
+            {xor_op, "xor"}
         };
         try{
             return typeToString.at(this->type) + ": " + this->value;

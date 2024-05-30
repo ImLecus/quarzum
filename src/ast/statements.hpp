@@ -46,28 +46,22 @@ public:
 
 class FunctionContainer : public Container {
 public:
-    // std::vector<ASTNode*> args; TO BE IMPLEMENTED
     ASTNode* identifier;
     ASTNode* type;
-    FunctionContainer(ASTNode* identifier,ASTNode* type): Container(),identifier(identifier), type(type) {}
+    std::vector<ASTNode*> args;
+    FunctionContainer(ASTNode* identifier,ASTNode* type, std::vector<ASTNode*> args): 
+        Container(),identifier(identifier), type(type), args(args) {}
     void print() override{
         std::cout << "Function:\n";
         identifier->print();
         type->print();
+        for(auto& arg : args){
+            arg->print();
+        }
 
         for(auto& node : nodes){
             std::cout << '\t';
             node -> print();
         }
-    }
-};
-
-class FunctionCall : public ASTNode {
-public:
-    ASTNode* identifier;
-    FunctionCall(ASTNode* identifier): identifier(identifier) {}
-    void print() override{
-        std::cout << "FunctionCall:\n";
-        identifier->print();
     }
 };

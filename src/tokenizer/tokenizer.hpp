@@ -148,7 +148,8 @@ private:
             {"==", is_equal},
             {"!=", not_equal},
             {"{", left_curly},
-            {"}", right_curly}
+            {"}", right_curly},
+            {",", comma}
         };
         try {
             return symbols.at(symbol);

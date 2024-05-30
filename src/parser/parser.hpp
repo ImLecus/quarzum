@@ -39,12 +39,13 @@ public:
                     ASTNode* name = new Identifier(get(i + 1).getValue());
                     i += 2;
                     if(get(i).getType() == left_par){
-                        // TO-DO: parse arguments
-                        if(get(++i).getType() == right_par and get(++i).getType() == left_curly){
-                            openIdentation<FunctionContainer>(new FunctionContainer(name,type));
+                        ++i;
+                        std::vector<ASTNode*> args = parseArguments();
+                        if(get(i).getType() == right_par and get(++i).getType() == left_curly){
+                            openIdentation<FunctionContainer>(new FunctionContainer(name,type,args));
                             continue;
                         }
-                        continue;
+                        throwSyntaxError("Expected arguments or function body");
                     }
                     if(get(i).getType() == semicolon){
                         getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
@@ -68,11 +69,17 @@ public:
                     EXPECT_SEMICOLON
                     continue;
                 }
-                if(get(i +1).getType() == left_par and get(i + 2).getType() == right_par){
-                    i += 3;
-                    getLastLayer()->add(new FunctionCall(name));
-                    EXPECT_SEMICOLON
-                    continue;
+                if(get(i +1).getType() == left_par){
+                    i += 2;
+                    std::vector<ASTNode*> args = parseAgumentsInCall();
+                    std::cout<< get(i).getValue();
+                    if(get(i).getType() == right_par){
+                        getLastLayer()->add(new FunctionCall(name, args));
+                        ++i;
+                        EXPECT_SEMICOLON
+                        continue;
+                    }
+                    throwSyntaxError("Expected arguments or function call");  
                 }
             }
 
@@ -140,6 +147,9 @@ private:
             expressionTokens = getExpressionTerms();
         }
         
+        if(expressionTokens.size() == 0){
+            return new NullLiteral();
+        }
         // Parsing literals
         if(expressionTokens.size() == 1){
             switch (expressionTokens[0].getType())
@@ -157,6 +167,8 @@ private:
                 return new StringLiteral(expressionTokens[0].getValue());
             case null_literal:
                 return new NullLiteral();
+            case identifier:
+                return new NullLiteral(); // TO BE IMPLEMENTED
             default:
                 throwSyntaxError("Invalid expression");
                 break;
@@ -230,5 +242,54 @@ private:
             throwSyntaxError("Expected module body");
         }
         throwSyntaxError("Expected identifier");
+    }
+
+    std::vector<ASTNode*> parseArguments(){
+        std::vector<ASTNode*> arguments;
+        bool valid = true;
+        while(valid){
+            if(get(i).isTypeKeyword() and get(i + 1).getType() == identifier){
+                ASTNode* type = new Type(get(i).getValue());
+                ASTNode* id = new Identifier(get(i + 1).getValue());
+                i+=2;
+                // default value parsing
+                arguments.push_back(new Argument(type, id));
+                if(get(i).getType() != comma){
+                    valid = false;
+                    continue;
+                }
+                ++i;
+                continue;
+            }
+            valid = false;
+        }
+        return arguments;
+    }
+
+    std::vector<ASTNode*> parseAgumentsInCall(){
+        std::vector<ASTNode*> arguments;
+        bool valid = true;
+        while(valid){
+            ASTNode* expression = parseExpression();
+            if(instanceOf<NullLiteral>(expression)){
+                valid = false;
+                continue;
+            }
+            arguments.push_back(expression);
+            if(get(i).getType() != comma){
+                valid = false;
+                continue;
+            }
+            ++i;
+        }
+        return arguments;
+    }
+
+    template<typename T, typename U>
+    bool instanceOf(const U& object){
+        if(T* type = dynamic_cast<T*>(object)){
+            return true;
+        }
+        return false;
     }
 };

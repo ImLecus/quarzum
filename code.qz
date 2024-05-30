@@ -1,13 +1,12 @@
 module Program {
     function main(){
-        int i = 12;
-        two();
+        two(2+2, 3, "string");
     }
 
     /*
     * Returns two.
     */
-    int two(){
-        return 2;
+    int two(int a, int b){
+        return 2 + 2;
     }
 }

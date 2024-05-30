@@ -46,6 +46,7 @@ enum TokenType : unsigned int {
     right_par = 0x63,
     left_curly = 0x64,
     right_curly = 0x65,
+    comma = 0x66,
     // literals
     int_literal = 0x80,
     num_literal = 0x81,

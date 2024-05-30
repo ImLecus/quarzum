@@ -18,7 +18,7 @@ public:
 
         for(i = 0; i < tokens.size(); ++i){
 
-            if(get(i).isKeyword()){
+            if(get(i).isTypeKeyword()){
                 lastType = get(i).getValue();
                 ASTNode* type = new Type(lastType);
 
@@ -39,7 +39,6 @@ public:
                     }
 
                     throwSyntaxError("Expected semicolon or expression");
-
                 }
             }
 
@@ -82,6 +81,12 @@ private:
         if(lastType == "var"){
             return new NullLiteral();
         }
+        if(lastType == "char"){
+            return new CharLiteral("''");
+        }
+        if(lastType == "string"){
+            return new StringLiteral("\"\"");
+        }
         return nullptr;
     }
 
@@ -96,7 +101,8 @@ private:
             string_literal, 
             null_literal,
             plus,
-            minus
+            minus,
+            prod
         };
         while(true){
             for(TokenType term : validTerms){
@@ -136,18 +142,27 @@ private:
                 break;
             }
         }
-        // Parsing composite expressions
-        for(unsigned int i = 0; i <= expressionTokens.size(); ++i){
+        // Parsing composite expressions, in reverse priority order
+        u_int16_t i;
+
+        for(i = 0; i < expressionTokens.size(); ++i){
             if(expressionTokens[i].getType() == plus){
                 return new BinaryExpression(
                     "+",
                     parseExpression(expressionTokens.split(0,i)),
                     parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
-                    
                 );
             }
         }
-
+        for(i = 0; i < expressionTokens.size(); ++i){
+            if(expressionTokens[i].getType() == prod){
+                return new BinaryExpression(
+                    "*",
+                    parseExpression(expressionTokens.split(0,i)),
+                    parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
+                );
+            }
+        }
 
         
         return nullptr;

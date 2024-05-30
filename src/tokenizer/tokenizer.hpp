@@ -146,7 +146,9 @@ private:
             {">=", greater_eq},
             {"<=", lower_eq},
             {"==", is_equal},
-            {"!=", not_equal}
+            {"!=", not_equal},
+            {"{", left_curly},
+            {"}", right_curly}
         };
         try {
             return symbols.at(symbol);
@@ -172,7 +174,8 @@ private:
             {"or", or_op},
             {"and", and_op},
             {"xor", xor_op},
-            {"not", not_op}
+            {"not", not_op},
+            {"function", function_keyword}
         };
         try {
             return keywords.at(symbol);

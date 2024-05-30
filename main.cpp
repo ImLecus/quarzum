@@ -2,6 +2,7 @@
 #include "src/parser/parser.hpp"
 #include "src/source.hpp"
 #include "src/semantics/semantics.hpp"
+#include "src/debug.hpp"
 
 int main(int argc, char** argv) {
 
@@ -19,7 +20,7 @@ int main(int argc, char** argv) {
     
     TokenList tokens = Tokenizer::tokenize(content);
     // for(Token token : tokens.getItems()){
-    //     std::cout << token.toString() << '\n';
+    //     Debug::printToken(token);
     // }
     Parser parser = Parser(tokens);
     RootNode root = parser.parse();

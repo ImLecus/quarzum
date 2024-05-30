@@ -12,6 +12,7 @@ enum TokenType : unsigned int {
     string_keyword = 0x03,
     bool_keyword = 0x04,
     var_keyword = 0x05,
+    function_keyword = 0x09,
 
     out_keyword = 0x10,
 
@@ -35,6 +36,8 @@ enum TokenType : unsigned int {
 
     left_par = 0x41,
     right_par = 0x42,
+    left_curly = 0x43,
+    right_curly = 0x44,
 
     int_literal = 0x60,
     num_literal = 0x61,

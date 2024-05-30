@@ -23,7 +23,15 @@ public:
                 continue;
             }
 
+            if(get(i).getType() == return_keyword){
+                ++i;
+                getLastLayer()->add(new Return(parseExpression()));
+                EXPECT_SEMICOLON;
+                continue;
+            }
+
             if(get(i).isTypeKeyword()){
+                bool constant = get(i - 1).getType() == const_keyword;
                 lastType = get(i).getValue();
                 ASTNode* type = new Type(lastType);
 
@@ -32,13 +40,13 @@ public:
 
                     if(get(i + 2).getType() == semicolon){
                         i += 2;
-                        getLastLayer()->add(new VariableDeclaration(type, name, getNullValue()));
+                        getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
                         continue;
                     }
 
                     if(get(i + 2).getType() == equal){
                         i += 3;
-                        getLastLayer()->add(new VariableDeclaration(type, name, parseExpression()));
+                        getLastLayer()->add(new VariableDeclaration(type, name, parseExpression(), constant));
                         EXPECT_SEMICOLON
                         continue;
                     }

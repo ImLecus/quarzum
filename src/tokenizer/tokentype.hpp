@@ -16,6 +16,8 @@ enum TokenType : unsigned int {
     bool_keyword = 0x04,
     var_keyword = 0x05,
     // keywords
+    const_keyword = 0x07,
+    return_keyword = 0x08,
     function_keyword = 0x09,
     module_keyword = 0x0A,
     class_keyword = 0x0B,

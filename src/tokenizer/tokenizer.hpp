@@ -177,7 +177,9 @@ private:
             {"not", not_op},
             {"function", function_keyword},
             {"module", module_keyword},
-            {"class", class_keyword}
+            {"class", class_keyword},
+            {"return", return_keyword},
+            {"const", const_keyword}
         };
         try {
             return keywords.at(symbol);

@@ -38,7 +38,9 @@ public:
             {left_curly, "left_curly_bracket"},
             {right_curly, "rigth_curly_bracket"},
             {module_keyword, "module"},
-            {class_keyword, "class"}
+            {class_keyword, "class"},
+            {return_keyword, "return"},
+            {const_keyword, "const"}
         };
         try{
             std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';

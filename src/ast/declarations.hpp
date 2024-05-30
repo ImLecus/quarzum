@@ -1,13 +1,26 @@
 #pragma once
 #include "astnode.hpp"
 
+class Return : public ASTNode {
+public:
+    ASTNode* value;
+    Return(ASTNode* value): value(value) {}
+    void print() override  {
+        std::cout << "Return:\n";
+        std::cout <<'\t';
+        value->print();
+    }
+};
+
 class VariableDeclaration : public ASTNode {
 public:
     ASTNode* type;
     ASTNode* identifier;
     ASTNode* expression;
+    bool constant;
 
-    VariableDeclaration(ASTNode* varType, ASTNode* varName, ASTNode* initValue): type(varType), identifier(varName), expression(initValue) {}
+    VariableDeclaration(ASTNode* varType, ASTNode* varName, ASTNode* initValue, bool constant): 
+        type(varType), identifier(varName), expression(initValue), constant(constant) {}
 
     void print() override  {
         std::cout << "VariableDeclaration:\n";
@@ -15,10 +28,9 @@ public:
         type->print();
         std::cout <<'\t';
         identifier->print();
-        if (expression) {
-            std::cout <<'\t';
-            expression->print();
-        }
+        std::cout <<"\tconstant: " << constant << '\n';
+        std::cout <<'\t';
+        expression->print();
     }
 
     ~VariableDeclaration() {

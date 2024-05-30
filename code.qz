@@ -1,3 +1,5 @@
 module class Program {
-    int i = 16 / 4 + 2 * 3;
+    int i = 16;
+    const int j = 12 + 1;
+    return 13;
 }

@@ -19,9 +19,6 @@ int main(int argc, char** argv) {
     }
     
     TokenList tokens = Tokenizer::tokenize(content);
-    // for(Token token : tokens.getItems()){
-    //     Debug::printToken(token);
-    // }
     Parser parser = Parser(tokens);
     RootNode root = parser.parse();
 

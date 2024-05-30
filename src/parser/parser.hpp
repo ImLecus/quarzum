@@ -37,20 +37,25 @@ public:
 
                 if(get(i + 1).getType() == identifier){
                     ASTNode* name = new Identifier(get(i + 1).getValue());
-
-                    if(get(i + 2).getType() == semicolon){
-                        i += 2;
+                    i += 2;
+                    if(get(i).getType() == left_par){
+                        // TO-DO: parse arguments
+                        if(get(++i).getType() == right_par and get(++i).getType() == left_curly){
+                            openIdentation<FunctionContainer>(new FunctionContainer(name,type));
+                            continue;
+                        }
+                        continue;
+                    }
+                    if(get(i).getType() == semicolon){
                         getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
                         continue;
                     }
-
-                    if(get(i + 2).getType() == equal){
-                        i += 3;
+                    if(get(i).getType() == equal){
+                        ++i;
                         getLastLayer()->add(new VariableDeclaration(type, name, parseExpression(), constant));
                         EXPECT_SEMICOLON
                         continue;
                     }
-
                     throwSyntaxError("Expected semicolon or expression");
                 }
             }
@@ -63,23 +68,20 @@ public:
                     EXPECT_SEMICOLON
                     continue;
                 }
+                if(get(i +1).getType() == left_par and get(i + 2).getType() == right_par){
+                    i += 3;
+                    getLastLayer()->add(new FunctionCall(name));
+                    EXPECT_SEMICOLON
+                    continue;
+                }
             }
 
             if(get(i).getType() == module_keyword){
-                bool moduleClass = false;
-                if(get(i + 1).getType() == class_keyword){
-                    moduleClass = true;
-                    ++i;
-                }
-                if(get(i + 1).getType() == identifier){
-                    ASTNode* identifier = new Identifier(get(i + 1).getValue());
-                    if(get(i + 2).getType() == left_curly){
-                        openIdentation<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
-                        continue;
-                    }
-                    throwSyntaxError("Expected module body");
-                }
-                throwSyntaxError("Expected identifier");
+                parseModuleStatement();
+            }
+
+            if(get(i).getType() == if_keyword){
+                parseIfStatement();
             }
             
         }
@@ -92,8 +94,6 @@ private:
     TokenList tokens;
     size_t i;
     std::string lastType;
-
-
 
     Token get(size_t index){
         if(index <= tokens.size()){
@@ -174,6 +174,8 @@ private:
                 }
             }
         }
+
+        throwSyntaxError("Invalid expression");
         return nullptr;
     }
 
@@ -195,5 +197,38 @@ private:
         Container* lastLayer = getLastLayer();
         layers.pop_back();
         getLastLayer()->add(lastLayer);
+    }
+
+    void parseIfStatement(){
+        if(get(++i).getType() == left_par){
+            ++i;
+            ASTNode* condition = parseExpression();
+            if(get(i).getType() == right_par){
+                if(get(i+ 1).getType() == left_curly){
+                    openIdentation<IfContainer>(new IfContainer(condition));
+                    return;
+                }
+                throwSyntaxError("Expected if body");
+            }
+            throwSyntaxError("Expected condition");
+        }
+        throwSyntaxError("Expected condition");
+    }
+
+    void parseModuleStatement(){
+        bool moduleClass = false;
+        if(get(i + 1).getType() == class_keyword){
+            moduleClass = true;
+            ++i;
+        }
+        if(get(i + 1).getType() == identifier){
+            ASTNode* identifier = new Identifier(get(i + 1).getValue());
+            if(get(i + 2).getType() == left_curly){
+                openIdentation<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
+                return;
+            }
+            throwSyntaxError("Expected module body");
+        }
+        throwSyntaxError("Expected identifier");
     }
 };

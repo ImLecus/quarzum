@@ -179,7 +179,8 @@ private:
             {"module", module_keyword},
             {"class", class_keyword},
             {"return", return_keyword},
-            {"const", const_keyword}
+            {"const", const_keyword},
+            {"if", if_keyword}
         };
         try {
             return keywords.at(symbol);

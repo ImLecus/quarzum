@@ -1,5 +1,13 @@
-module class Program {
-    int i = 16;
-    const int j = 12 + 1;
-    return 13;
+module Program {
+    function main(){
+        int i = 12;
+        two();
+    }
+
+    /*
+    * Returns two.
+    */
+    int two(){
+        return 2;
+    }
 }

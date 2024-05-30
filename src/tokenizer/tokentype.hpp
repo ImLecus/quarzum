@@ -15,13 +15,14 @@ enum TokenType : unsigned int {
     string_keyword = 0x03,
     bool_keyword = 0x04,
     var_keyword = 0x05,
+    function_keyword = 0x06,
     // keywords
     const_keyword = 0x07,
     return_keyword = 0x08,
-    function_keyword = 0x09,
     module_keyword = 0x0A,
     class_keyword = 0x0B,
-    out_keyword = 0x0C,
+    if_keyword = 0x0C,
+    out_keyword = 0x1D,
     // operators
     plus = 0x30,
     minus = 0x31,

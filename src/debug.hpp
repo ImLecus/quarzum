@@ -40,7 +40,8 @@ public:
             {module_keyword, "module"},
             {class_keyword, "class"},
             {return_keyword, "return"},
-            {const_keyword, "const"}
+            {const_keyword, "const"},
+            {if_keyword, "if_keyword"}
         };
         try{
             std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';

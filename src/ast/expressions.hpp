@@ -8,7 +8,7 @@ public:
     UnaryExpression(const std::string& oper, ASTNode* expr) : op(oper), operand(expr) {}
 
     void print() override {
-        std::cout << "UnaryExpression: (" << op << ")\n";
+        std::cout << "UnaryExpression: (" << op << ")\n\t";
         operand->print();
     }
 
@@ -27,7 +27,9 @@ public:
 
     void print() override{
         std::cout << "BinaryExpression: (" << op << ")\n";
+        std::cout << '\t';
         left->print();
+        std::cout << '\t';
         right->print();
     }
 

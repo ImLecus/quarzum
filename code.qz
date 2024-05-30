@@ -1,14 +1,1 @@
-int hola = 3;
-hola = 8;
-// hola
-num pi = 3.1415;
-/* hola
-mundo
-*/
-var myVar = 23;
-myVar = null;
-var mySecondVar;
-
-bool me = true;
-me = 'a';
-string name = "Quarzum";
+int i = 16 + 2 + 1;

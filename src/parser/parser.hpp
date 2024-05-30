@@ -7,6 +7,8 @@
 #include "../error.hpp"
 #include <vector>
 
+#define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon");}
+
 class Parser {
 public:
     Parser(TokenList tokens): tokens(tokens) {}
@@ -32,9 +34,7 @@ public:
                     if(get(i + 2).getType() == equal){
                         i += 3;
                         root.add(new VariableDeclaration(type, name, parseExpression()));
-                        if(get(++i).getType() != semicolon){
-                            throwSyntaxError("Expected semicolon");
-                        }
+                        EXPECT_SEMICOLON
                         continue;
                     }
 
@@ -48,9 +48,7 @@ public:
                 if(get(i +1).getType() == equal){
                     i += 2;
                     root.add(new VariableRedeclaration(name, parseExpression()));
-                    if(get(++i).getType() != semicolon){
-                        throwSyntaxError("Expected semicolon");
-                    }
+                    EXPECT_SEMICOLON
                     continue;
                 }
             }
@@ -87,26 +85,71 @@ private:
         return nullptr;
     }
 
-    ASTNode* parseExpression(){
-        if(get(i).getType() == int_literal){
-            return new IntegerLiteral(get(i).getValue());
+    TokenList getExpressionTerms(){
+        TokenList expressionTokens;
+        TokenType validTerms[] = {
+            int_literal, 
+            num_literal, 
+            true_literal, 
+            false_literal, 
+            char_literal, 
+            string_literal, 
+            null_literal,
+            plus,
+            minus
+        };
+        while(true){
+            for(TokenType term : validTerms){
+                if(get(i).getType() == term){
+                    expressionTokens.add(get(i++));
+                    continue;
+                }
+            }
+            return expressionTokens;
         }
-        if(get(i).getType() == num_literal){
-            return new NumericLiteral(get(i).getValue());
+    }
+
+    ASTNode* parseExpression(TokenList expressionTokens = TokenList()){
+        if(expressionTokens.isEmpty()) {
+            expressionTokens = getExpressionTerms();
         }
-        if(get(i).getType() == true_literal or get(i).getType() == false_literal){
-            return new BoolLiteral(get(i).getValue());
+        
+        // Parsing literals
+        if(expressionTokens.size() == 1){
+            switch (expressionTokens[0].getType())
+            {
+            case int_literal:
+                return new IntegerLiteral(expressionTokens[0].getValue());
+            case num_literal:
+                return new NumericLiteral(expressionTokens[0].getValue());
+            case true_literal:
+            case false_literal:
+                return new BoolLiteral(expressionTokens[0].getValue());
+            case char_literal:
+                return new CharLiteral(expressionTokens[0].getValue());
+            case string_literal:
+                return new StringLiteral(expressionTokens[0].getValue());
+            case null_literal:
+                return new NullLiteral();
+            default:
+                throwSyntaxError("Invalid expression");
+                break;
+            }
         }
-        if(get(i).getType() == char_literal){
-            return new CharLiteral(get(i).getValue());
+        // Parsing composite expressions
+        for(unsigned int i = 0; i <= expressionTokens.size(); ++i){
+            if(expressionTokens[i].getType() == plus){
+                return new BinaryExpression(
+                    "+",
+                    parseExpression(expressionTokens.split(0,i)),
+                    parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
+                    
+                );
+            }
         }
-        if(get(i).getType() == string_literal){
-            return new StringLiteral(get(i).getValue());
-        }
-        if(get(i).getType() == null_literal){
-            return new NullLiteral();
-        }
-        throwSyntaxError("Invalid expression");
+
+
+        
         return nullptr;
     }
 };

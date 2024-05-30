@@ -6,7 +6,7 @@ class TokenList {
 public:
     TokenList(){}
 
-    void add(Token token){
+    void add(const Token token){
         this -> tokens.push_back(token);
     }
 
@@ -18,12 +18,20 @@ public:
         return this->tokens.size();
     }
 
-    Token get(size_t index){
+    Token operator[](const size_t index){
         return this->tokens.at(index);
     }
 
-    Token operator[](size_t index){
-        return get(index);
+    TokenList split(unsigned int from, const unsigned int to){
+        TokenList newList = TokenList();
+        for(; from < to; ++from){
+            newList.add(this->tokens[from]);
+        }
+        return newList;
+    }
+
+    bool isEmpty(){
+        return this->tokens.size() == 0;
     }
 
 private:

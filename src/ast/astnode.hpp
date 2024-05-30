@@ -8,10 +8,15 @@ public:
     virtual void print() = 0;
 };
 
-class RootNode : public ASTNode {
+class Container : public ASTNode {
 public:
     std::vector<ASTNode*> nodes;
-    RootNode(){}
+    Container(): nodes{}{}
+    ~Container(){
+        for(auto& node : nodes){
+            delete node;
+        }
+    }
     void print() override {
         for(auto& node : nodes){
             node->print();
@@ -20,5 +25,10 @@ public:
     void add(ASTNode* node) {
         nodes.push_back(node);
     }
+};
+
+class RootNode : public Container {
+public:
+    RootNode(): Container(){}
 
 };

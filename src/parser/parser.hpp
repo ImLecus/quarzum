@@ -5,7 +5,6 @@
 #include "../ast/declarations.hpp"
 #include "../ast/statements.hpp"
 #include "../error.hpp"
-#include <vector>
 
 #define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon");}
 
@@ -15,8 +14,14 @@ public:
 
     RootNode parse(){
         RootNode root = RootNode();
+        openIdentation(&root);
 
         for(i = 0; i < tokens.size(); ++i){
+
+            if(get(i).getType() == right_curly and identationLayer > 1){
+                closeIdentation();
+                continue;
+            }
 
             if(get(i).isTypeKeyword()){
                 lastType = get(i).getValue();
@@ -27,13 +32,13 @@ public:
 
                     if(get(i + 2).getType() == semicolon){
                         i += 2;
-                        root.add(new VariableDeclaration(type, name, getNullValue()));
+                        getLastLayer()->add(new VariableDeclaration(type, name, getNullValue()));
                         continue;
                     }
 
                     if(get(i + 2).getType() == equal){
                         i += 3;
-                        root.add(new VariableDeclaration(type, name, parseExpression()));
+                        getLastLayer()->add(new VariableDeclaration(type, name, parseExpression()));
                         EXPECT_SEMICOLON
                         continue;
                     }
@@ -46,10 +51,27 @@ public:
                 ASTNode* name = new Identifier(get(i).getValue());
                 if(get(i +1).getType() == equal){
                     i += 2;
-                    root.add(new VariableRedeclaration(name, parseExpression()));
+                    getLastLayer()->add(new VariableRedeclaration(name, parseExpression()));
                     EXPECT_SEMICOLON
                     continue;
                 }
+            }
+
+            if(get(i).getType() == module_keyword){
+                bool moduleClass = false;
+                if(get(i + 1).getType() == class_keyword){
+                    moduleClass = true;
+                    ++i;
+                }
+                if(get(i + 1).getType() == identifier){
+                    ASTNode* identifier = new Identifier(get(i + 1).getValue());
+                    if(get(i + 2).getType() == left_curly){
+                        openIdentation<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
+                        continue;
+                    }
+                    throwSyntaxError("Expected module body");
+                }
+                throwSyntaxError("Expected identifier");
             }
             
         }
@@ -61,13 +83,17 @@ public:
 private:
     TokenList tokens;
     size_t i;
+    std::string lastType;
+
+
+
     Token get(size_t index){
         if(index <= tokens.size()){
             return tokens[index];
         }
         return ERROR_TOKEN;
     }
-    std::string lastType;
+    
     ASTNode* getNullValue(){
         if(lastType == "int"){
             return new IntegerLiteral("0");
@@ -92,24 +118,10 @@ private:
 
     TokenList getExpressionTerms(){
         TokenList expressionTokens;
-        TokenType validTerms[] = {
-            int_literal, 
-            num_literal, 
-            true_literal, 
-            false_literal, 
-            char_literal, 
-            string_literal, 
-            null_literal,
-            plus,
-            minus,
-            prod
-        };
         while(true){
-            for(TokenType term : validTerms){
-                if(get(i).getType() == term){
-                    expressionTokens.add(get(i++));
-                    continue;
-                }
+            if(get(i).isOperator() or get(i).isLiteral()){
+                expressionTokens.add(get(i++));
+                continue;
             }
             return expressionTokens;
         }
@@ -143,28 +155,37 @@ private:
             }
         }
         // Parsing composite expressions, in reverse priority order
-        u_int16_t i;
-
-        for(i = 0; i < expressionTokens.size(); ++i){
-            if(expressionTokens[i].getType() == plus){
-                return new BinaryExpression(
-                    "+",
-                    parseExpression(expressionTokens.split(0,i)),
-                    parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
-                );
+        for(u_int8_t priority = 0; priority < Token::MAX_PRIORITY; ++priority){
+            for(u_int16_t i = 0; i < expressionTokens.size(); ++i){
+                if(expressionTokens[i].getPriority() == priority){
+                    return new BinaryExpression(
+                        expressionTokens[i].getValue(),
+                        parseExpression(expressionTokens.split(0,i)),
+                        parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
+                    );
+                }
             }
         }
-        for(i = 0; i < expressionTokens.size(); ++i){
-            if(expressionTokens[i].getType() == prod){
-                return new BinaryExpression(
-                    "*",
-                    parseExpression(expressionTokens.split(0,i)),
-                    parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
-                );
-            }
-        }
-
-        
         return nullptr;
+    }
+
+    u_int16_t identationLayer; 
+    std::vector<Container*> layers;
+
+    Container* getLastLayer(){
+        return layers.at(layers.size() - 1);
+    }
+
+    template<typename T>
+    void openIdentation(T* layer){
+        ++identationLayer;
+        layers.push_back(layer);
+    }
+
+    void closeIdentation(){
+        --identationLayer;
+        Container* lastLayer = getLastLayer();
+        layers.pop_back();
+        getLastLayer()->add(lastLayer);
     }
 };

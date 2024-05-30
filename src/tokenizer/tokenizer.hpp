@@ -175,7 +175,9 @@ private:
             {"and", and_op},
             {"xor", xor_op},
             {"not", not_op},
-            {"function", function_keyword}
+            {"function", function_keyword},
+            {"module", module_keyword},
+            {"class", class_keyword}
         };
         try {
             return keywords.at(symbol);

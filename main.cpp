@@ -25,10 +25,10 @@ int main(int argc, char** argv) {
     Parser parser = Parser(tokens);
     RootNode root = parser.parse();
 
-    Semantics s = Semantics();
-    s.check(root);
+    //Semantics s = Semantics();
+    //s.check(root);
 
-    std::cout << s.rootToIR(root) << '\n';
+    //std::cout << s.rootToIR(root) << '\n';
 
 
     return 0;

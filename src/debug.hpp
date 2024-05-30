@@ -4,7 +4,8 @@
 #include <string>
 
 class Debug {
-    void printToken(Token token){
+public:
+    static void printToken(Token token){
         static const std::unordered_map<TokenType, std::string> typeToString = {
             {identifier, "identifier"},
             {equal, "equal"},
@@ -35,10 +36,12 @@ class Debug {
             {xor_op, "xor"},
             {function_keyword, "function_keyword"},
             {left_curly, "left_curly_bracket"},
-            {right_curly, "rigth_curly_bracket"}
+            {right_curly, "rigth_curly_bracket"},
+            {module_keyword, "module"},
+            {class_keyword, "class"}
         };
         try{
-            std::cout << typeToString.at(this->type) << ": " << this->value << '\n';
+            std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';
         }
         catch(...){return;}
     }

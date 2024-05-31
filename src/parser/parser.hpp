@@ -114,7 +114,6 @@ public:
                         }
                         ++i;
                         vector<ASTNode*> args = parseArguments();
-                         std::cout<<get(i).getValue();
                         if(get(i).getType() == right_par and get(++i).getType() == left_curly){
                             identation.open<FunctionContainer>(new FunctionContainer(name,type,args));
                             continue;
@@ -302,6 +301,7 @@ private:
             if(expressionTokens[0].getType() == not_op and expressionTokens[1].isLiteral()){
                 return new UnaryExpression("not", parseExpression(expressionTokens.split(1,expressionTokens.size())));
             }
+
         }
         // Parsing composite expressions, in reverse priority order
         for(u_int8_t priority = 0; priority < Token::MAX_PRIORITY; ++priority){

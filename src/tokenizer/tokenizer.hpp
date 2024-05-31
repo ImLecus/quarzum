@@ -158,7 +158,11 @@ private:
             {"--", minus_unary},
             {"=>", arrow},
             {"[", left_square},
-            {"]", right_square}
+            {"]", right_square},
+            {"&", bit_and},
+            {"|", bit_or},
+            {"^", bit_xor},
+            {"~", bit_not}
         };
         try {
             return symbols.at(symbol);

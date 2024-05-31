@@ -8,7 +8,7 @@ module class Math {
 
     int abs(int a = 0){
         if(a >= 0){
-            return a;
+            return a++;
         }
         return -a;
     }

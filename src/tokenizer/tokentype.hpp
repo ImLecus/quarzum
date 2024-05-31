@@ -48,6 +48,10 @@ enum TokenType : unsigned char {
     lower_eq = 0x3E,
     plus_unary = 0x3F,
     minus_unary = 0x40,
+    bit_or = 0x41,
+    bit_and = 0x42,
+    bit_xor = 0x43,
+    bit_not = 0x44,
     // symbols
     equal = 0x60,
     semicolon = 0x61,

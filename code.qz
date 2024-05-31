@@ -2,6 +2,8 @@ import Vector2 from "physics.qz"
 module class Program {
     function main() {
     
-        const int[] a = {2};
+        while(true and false & 1){
+            exit 0;
+        }
     }
 }

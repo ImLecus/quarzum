@@ -30,18 +30,21 @@ public:
     u_int8_t getPriority(){
         switch (this->type)
         {
+        case is_equal:
+        case not_equal:
+            return 0;
         case lower:
         case lower_eq:
         case greater:
         case greater_eq:
-            return 0;
+            return 1;
         case plus:
         case minus:
-            return 1;
+            return 2;
         case prod:
         case division:
         case mod:
-            return 2;
+            return 3;
         
         default:
             return __UINT8_MAX__;

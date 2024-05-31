@@ -1,6 +1,7 @@
 #pragma once
 #include "tokenlist.hpp"
 #include "../error.hpp"
+#include "../debug.hpp"
 
 class Tokenizer {
     
@@ -95,14 +96,16 @@ public:
                 if(index + 1 <= content.length() and ispunct(content[index + 1])){
                     buffer += content[index + 1];
                     TokenType type = symbolToType(buffer);
+
                     if(type == comment){
                         buffer.clear();
                         isComment = true;
                         continue;
                     }
-                    if(type != token_error){
+                    if(type != token_error){ 
                         tokens.add(Token(type, buffer));
                         buffer.clear();
+                        ++index;
                         continue;
                     }
                     buffer.pop_back();

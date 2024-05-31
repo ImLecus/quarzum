@@ -1,5 +1,6 @@
 #pragma once
 #include "astnode.hpp"
+
 class UnaryExpression : public ASTNode {
 public:
     std::string op; 
@@ -36,5 +37,13 @@ public:
     ~BinaryExpression() {
         delete left;
         delete right;
+    }
+};
+
+class NullExpression : public ASTNode {
+public:
+    NullExpression(){}
+    void print() override{
+        std::cout << "NullExpression\n";
     }
 };

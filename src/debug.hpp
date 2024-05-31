@@ -1,10 +1,17 @@
 #pragma once
 #include "./tokenizer/token.hpp"
+#include "error.h"
 #include <iostream>
 #include <string>
 
 class Debug {
 public:
+    static void printTokens(TokenList tokens){
+        for(Token token : tokens.getItems()){
+            printToken(token);
+        }
+    }
+
     static void printToken(Token token){
         static const std::unordered_map<TokenType, std::string> typeToString = {
             {identifier, "identifier"},
@@ -47,7 +54,8 @@ public:
             {from_keyword, "from_keyword"},
             {plus_unary, "++"},
             {minus_unary, "--"},
-            {byte_keyword, "byte_keyword"}
+            {byte_keyword, "byte_keyword"},
+            {is_equal, "is_equal"}
         };
         try{
             std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';

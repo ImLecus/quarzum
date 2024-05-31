@@ -8,6 +8,8 @@
 
 #define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon", tokens.getLine(i));}
 
+using std::vector;
+
 class Parser {
 public:
     Parser(TokenList tokens): tokens(tokens) {}
@@ -21,7 +23,7 @@ public:
             if(get(i).getType() == import_keyword){
                 ++i;
                 bool valid = true;
-                std::vector<ASTNode*> imports;
+                vector<ASTNode*> imports;
                 while(valid){
                     if(get(i).getType() == identifier){
                         imports.push_back(new Identifier(get(i++).getValue()));
@@ -51,27 +53,23 @@ public:
 
             if(get(i).getType() == return_keyword){
                 ++i;
-                getLastLayer()->add(new Return(parseExpression()));
-                EXPECT_SEMICOLON;
+                parseSimpleStatement(new Return(parseExpression()));
                 continue;
             }
 
             if(get(i).getType() == exit_keyword){
                 ++i;
-                getLastLayer()->add(new Exit(parseExpression()));
-                EXPECT_SEMICOLON;
+                parseSimpleStatement(new Exit(parseExpression()));
                 continue;
             }
             if(get(i).getType() == break_keyword){
                 ++i;
-                getLastLayer()->add(new Break());
-                EXPECT_SEMICOLON;
+                parseSimpleStatement(new Break());
                 continue;
             }
             if(get(i).getType() == continue_keyword){
                 ++i;
-                getLastLayer()->add(new Continue());
-                EXPECT_SEMICOLON;
+                parseSimpleStatement(new Continue());
                 continue;
             }
 
@@ -85,7 +83,7 @@ public:
                     i += 2;
                     if(get(i).getType() == left_par){
                         ++i;
-                        std::vector<ASTNode*> args = parseArguments();
+                        vector<ASTNode*> args = parseArguments();
                         if(get(i).getType() == right_par and get(++i).getType() == left_curly){
                             openIdentation<FunctionContainer>(new FunctionContainer(name,type,args));
                             continue;
@@ -116,7 +114,7 @@ public:
                 }
                 if(get(i +1).getType() == left_par){
                     i += 2;
-                    std::vector<ASTNode*> args = parseAgumentsInCall();
+                    vector<ASTNode*> args = parseAgumentsInCall();
                     if(get(i).getType() == right_par){
                         getLastLayer()->add(new FunctionCall(name, args));
                         ++i;
@@ -195,7 +193,7 @@ private:
         }
         
         if(expressionTokens.size() == 0){
-            return new NullLiteral();
+            return new NullExpression();
         }
         // Parsing literals
         if(expressionTokens.size() == 1){
@@ -248,8 +246,8 @@ private:
     //  LAYERS RELATED
     //
 
-    u_int16_t identationLayer; 
-    std::vector<Container*> layers;
+    u_int8_t identationLayer; 
+    vector<Container*> layers;
 
     Container* getLastLayer(){
         return layers.at(layers.size() - 1);
@@ -325,8 +323,8 @@ private:
         throwSyntaxError("Expected identifier", tokens.getLine(i));
     }
 
-    std::vector<ASTNode*> parseArguments(){
-        std::vector<ASTNode*> arguments;
+    vector<ASTNode*> parseArguments(){
+        vector<ASTNode*> arguments;
         bool valid = true;
         while(valid){
             if(get(i).isTypeKeyword() and get(i + 1).getType() == identifier){
@@ -337,7 +335,7 @@ private:
                 if(get(i).getType() == equal){
                     ++i;
                     defaultValue = parseExpression();
-                    if(instanceOf<NullLiteral>(defaultValue)){
+                    if(instanceOf<NullExpression>(defaultValue)){
                         throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
                         break;
                     }
@@ -356,12 +354,12 @@ private:
         return arguments;
     }
 
-    std::vector<ASTNode*> parseAgumentsInCall(){
-        std::vector<ASTNode*> arguments;
+    vector<ASTNode*> parseAgumentsInCall(){
+        vector<ASTNode*> arguments;
         bool valid = true;
         while(valid){
             ASTNode* expression = parseExpression();
-            if(instanceOf<NullLiteral>(expression)){
+            if(instanceOf<NullExpression>(expression)){
                 valid = false;
                 continue;
             }
@@ -381,5 +379,10 @@ private:
             return true;
         }
         return false;
+    }
+      
+    void parseSimpleStatement(ASTNode* node){
+        getLastLayer()->add(node);
+        EXPECT_SEMICOLON;
     }
 };

@@ -29,10 +29,16 @@ class Argument : public ASTNode {
 public:
     ASTNode* type;
     ASTNode* identifier;
+    ASTNode* defaultValue = nullptr;
     Argument(ASTNode* type, ASTNode* identifier): type(type), identifier(identifier) {}
+    Argument(ASTNode* type, ASTNode* identifier, ASTNode* defaultValue): 
+    type(type), identifier(identifier), defaultValue(defaultValue) {}
     void print() override{
         std::cout << "Argument:\n";
         type->print();
         identifier->print();
+        if(defaultValue != nullptr){
+            defaultValue -> print();
+        }
     }
 };

@@ -18,6 +18,32 @@ public:
 
         for(i = 0; i < tokens.size(); ++i){
 
+            if(get(i).getType() == import_keyword){
+                ++i;
+                bool valid = true;
+                std::vector<ASTNode*> imports;
+                while(valid){
+                    if(get(i).getType() == identifier){
+                        imports.push_back(new Identifier(get(i++).getValue()));
+                        if(get(i).getType() != comma){
+                            valid = false;
+                        }
+                        continue;
+                    }
+                    valid = false;
+                }
+                if(imports.empty()){
+                    throwSyntaxError("Invalid import statement");
+                }
+                std::string location;
+                if(get(i).getType() != from_keyword or get(i + 1).getType() != string_literal){
+                    throwSyntaxError("Missing import path");
+                }
+                location = get(++i).getValue();
+                getLastLayer()->add(new ImportStatement(imports, location));
+                continue;
+            }
+
             if(get(i).getType() == right_curly and identationLayer > 1){
                 closeIdentation();
                 continue;
@@ -206,6 +232,10 @@ private:
         return nullptr;
     }
 
+    //
+    //  LAYERS RELATED
+    //
+
     u_int16_t identationLayer; 
     std::vector<Container*> layers;
 
@@ -213,6 +243,10 @@ private:
         return layers.at(layers.size() - 1);
     }
 
+    /*
+    * Opens an indentation of type T. While this indentation is
+    * the last layer, it will contain all the next nodes as childs.
+    */
     template<typename T>
     void openIdentation(T* layer){
         ++identationLayer;
@@ -225,6 +259,10 @@ private:
         layers.pop_back();
         getLastLayer()->add(lastLayer);
     }
+
+    //
+    // PARSING RELATED
+    //
 
     void parseIfStatement(){
         if(get(++i).getType() == left_par){
@@ -282,9 +320,18 @@ private:
             if(get(i).isTypeKeyword() and get(i + 1).getType() == identifier){
                 ASTNode* type = new Type(get(i).getValue());
                 ASTNode* id = new Identifier(get(i + 1).getValue());
+                ASTNode* defaultValue = nullptr;
                 i+=2;
+                if(get(i).getType() == equal){
+                    ++i;
+                    defaultValue = parseExpression();
+                    if(instanceOf<NullLiteral>(defaultValue)){
+                        throwSyntaxError("Invalid default value assignation");
+                        break;
+                    }
+                }
                 // default value parsing
-                arguments.push_back(new Argument(type, id));
+                arguments.push_back(new Argument(type, id, defaultValue));
                 if(get(i).getType() != comma){
                     valid = false;
                     continue;

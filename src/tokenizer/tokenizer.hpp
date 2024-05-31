@@ -149,7 +149,9 @@ private:
             {"!=", not_equal},
             {"{", left_curly},
             {"}", right_curly},
-            {",", comma}
+            {",", comma},
+            {"++", plus_unary},
+            {"--", minus_unary}
         };
         try {
             return symbols.at(symbol);
@@ -183,7 +185,9 @@ private:
             {"const", const_keyword},
             {"if", if_keyword},
             {"while", while_keyword},
-            {"exit", exit_keyword}
+            {"exit", exit_keyword},
+            {"import", import_keyword},
+            {"from", from_keyword}
         };
         try {
             return keywords.at(symbol);

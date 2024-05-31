@@ -43,7 +43,11 @@ public:
             {const_keyword, "const"},
             {if_keyword, "if_keyword"},
             {while_keyword, "while_keyword"},
-            {exit_keyword, "exit_keyword"}
+            {exit_keyword, "exit_keyword"},
+            {import_keyword, "import_keyword"},
+            {from_keyword, "from_keyword"},
+            {plus_unary, "++"},
+            {minus_unary, "--"}
         };
         try{
             std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';

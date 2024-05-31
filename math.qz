@@ -1,11 +1,36 @@
+import Physics from "./physics.qz"
 module class Math {
+    const num PI = 3.1415926535;
+
     int sum(int a, int b){
         return a + b;
     }
 
-    int abs(int a){
+    int abs(int a = 0){
         if(a > 0){
             return a;
         }
+        return -a;
+    }
+
+    num max(num a, num b){
+        if(a > b){
+            return a;
+        }
+        return b;
+    }
+
+    /*
+    * Returns the number in
+    * the range [0,1]
+    */
+    num clamp01(num a){
+        if(a > 1){
+            return 1;
+        }
+        if(a < 0){
+            return 0;
+        }
+        return a;
     }
 }

@@ -13,6 +13,19 @@ public:
 
 };
 
+class ImportStatement : public Statement {
+public:
+    std::string path;
+    ImportStatement(std::vector<ASTNode*> imports, std::string path): Statement(imports), path(path) {}
+    void print() override {
+        std::cout << "Import: \n\t";
+        std::cout << "Path: " << this->path << "\n\t";
+        for(auto& import : children){
+            import ->print();
+        }
+    }
+};
+
 class ModuleContainer : public Container {
 public:
     ASTNode* identifier;

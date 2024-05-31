@@ -18,7 +18,7 @@ public:
         return (unsigned int)this->type <= 0x2F;
     }
     bool isTypeKeyword(){
-        return (unsigned int)this->type <= 0x06;
+        return (unsigned int)this->type <= 0x06 or this->type == identifier;
     }
     bool isOperator(){
         return (unsigned int)this->type >= 0x30 and (unsigned int)this->type <= 0x5F;

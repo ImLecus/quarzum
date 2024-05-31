@@ -25,6 +25,8 @@ enum TokenType : unsigned int {
     while_keyword = 0x0D,
     exit_keyword = 0x10,
     out_keyword = 0x1D,
+    import_keyword = 0x1E,
+    from_keyword = 0x1F,
     // operators
     plus = 0x30,
     minus = 0x31,
@@ -41,6 +43,8 @@ enum TokenType : unsigned int {
     lower = 0x3C,
     greater_eq = 0x3D,
     lower_eq = 0x3E,
+    plus_unary = 0x3F,
+    minus_unary = 0x40,
     // symbols
     equal = 0x60,
     semicolon = 0x61,

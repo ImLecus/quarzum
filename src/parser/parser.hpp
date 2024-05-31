@@ -5,6 +5,7 @@
 #include "../ast/declarations.hpp"
 #include "../ast/statements.hpp"
 #include "../error.hpp"
+#include "identation.hpp"
 #include <array>
 
 #define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon", tokens.getLine(i));}
@@ -17,7 +18,7 @@ public:
 
     RootNode parse(){
         RootNode root = RootNode();
-        openIdentation(&root);
+        identation.open(&root);
 
         for(i = 0; i < tokens.size(); ++i){
 
@@ -28,9 +29,11 @@ public:
                 while(valid){
                     if(get(i).getType() == identifier){
                         imports.push_back(new Identifier(get(i++).getValue()));
-                        if(get(i).getType() != comma){
-                            valid = false;
+                        if(get(i).getType() == comma){
+                            ++i;
+                            continue;
                         }
+                        valid = false;
                         continue;
                     }
                     valid = false;
@@ -43,12 +46,12 @@ public:
                     throwSyntaxError("Missing import path", tokens.getLine(i));
                 }
                 location = get(++i).getValue();
-                getLastLayer()->add(new ImportStatement(imports, location));
+                identation.getLastLayer()->add(new ImportStatement(imports, location));
                 continue;
             }
 
-            if(get(i).getType() == right_curly and identationLayer > 1){
-                closeIdentation();
+            if(get(i).getType() == right_curly and identation.hasLayers()){
+                identation.close();
                 continue;
             }
 
@@ -79,7 +82,7 @@ public:
                 bool array = false;
                 bool sizeDefined = false;
                 lastType = get(i).getValue();
-                ASTNode* type = new Type(lastType);
+                Type* type = new Type(lastType);
                 ASTNode* length = nullptr;
 
                 // Check if it's an array
@@ -88,10 +91,9 @@ public:
                     array = true;
                     ASTNode* expression = parseExpression();
                     sizeDefined = not instanceOf<NullExpression>(expression);
-                    if(sizeDefined){
-                        if(get(i).getType() != right_square){
-                            throwSyntaxError("Expected array initializer", tokens.getLine(i));
-                        }
+                    if(sizeDefined and get(i).getType() != right_square){
+                        throwSyntaxError("Expected array initializer", tokens.getLine(i));
+
                     }
                     length = expression;
                     if(get(i).getType() != right_square){
@@ -101,41 +103,48 @@ public:
 
 
                 if(get(i + 1).getType() == identifier){
-                    ASTNode* name = new Identifier(get(i + 1).getValue());
+                    Identifier* name = new Identifier(get(i + 1).getValue());
                     i += 2;
                     if(get(i).getType() == left_par){
+                        if(array and sizeDefined){
+                            throwSyntaxError("Array-type functions must not have defined size", tokens.getLine(i));
+                        }
+                        if(array){
+                            type->type += "[]";
+                        }
                         ++i;
                         vector<ASTNode*> args = parseArguments();
+                         std::cout<<get(i).getValue();
                         if(get(i).getType() == right_par and get(++i).getType() == left_curly){
-                            openIdentation<FunctionContainer>(new FunctionContainer(name,type,args));
+                            identation.open<FunctionContainer>(new FunctionContainer(name,type,args));
                             continue;
                         }
                         throwSyntaxError("Expected arguments or function body", tokens.getLine(i));
                     }
                     if(get(i).getType() == semicolon){
                         if(array and sizeDefined){
-                            getLastLayer()->add(new ArrayDeclaration(type, name,{},constant, length));
+                            identation.getLastLayer()->add(new ArrayDeclaration(type, name,{},constant, length));
                             continue;
                         }
-                        getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
+                        identation.getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
                         continue;
                     }
                     if(get(i).getType() == equal){
                         ++i;
                         if(array and not sizeDefined){
-                            if(get(i).getType() == left_curly){
-                                ++i;
-                                vector<ASTNode*> elements = parseAgumentsInCall();
-                                if(get(i).getType() == right_curly){
-                                    ++i;
-                                    getLastLayer()->add(new ArrayDeclaration(type, name,elements,constant, new IntegerLiteral(std::to_string(elements.size()))));
-                                    continue;
-                                }
+                            if(get(i).getType() != left_curly){
                                 throwSyntaxError("Expected array elements", tokens.getLine(i));
                             }
-                            throwSyntaxError("Expected array elements", tokens.getLine(i));
+                            ++i;
+                            vector<ASTNode*> elements = parseAgumentsInCall();
+                            if(get(i).getType() != right_curly){
+                                throwSyntaxError("Expected array elements", tokens.getLine(i));  
+                            }
+                            ++i;
+                            identation.getLastLayer()->add(new ArrayDeclaration(type, name,elements,constant, new IntegerLiteral(std::to_string(elements.size()))));
+                            continue;
                         }
-                        getLastLayer()->add(new VariableDeclaration(type, name, parseExpression(), constant));
+                        identation.getLastLayer()->add(new VariableDeclaration(type, name, parseExpression(), constant));
                         EXPECT_SEMICOLON
                         continue;
                         
@@ -146,23 +155,23 @@ public:
             }
 
             if(get(i).getType() == identifier){
-                ASTNode* name = new Identifier(get(i).getValue());
+                Identifier* name = new Identifier(get(i).getValue());
                 if(get(i +1).getType() == equal){
                     i += 2;
-                    getLastLayer()->add(new VariableRedeclaration(name, parseExpression()));
+                    identation.getLastLayer()->add(new VariableRedeclaration(name, parseExpression()));
                     EXPECT_SEMICOLON
                     continue;
                 }
                 if(get(i +1).getType() == left_par){
                     i += 2;
                     vector<ASTNode*> args = parseAgumentsInCall();
-                    if(get(i).getType() == right_par){
-                        getLastLayer()->add(new FunctionCall(name, args));
-                        ++i;
-                        EXPECT_SEMICOLON
-                        continue;
+                    if(get(i).getType() != right_par){
+                        throwSyntaxError("Expected arguments or function call", tokens.getLine(i));                       
                     }
-                    throwSyntaxError("Expected arguments or function call", tokens.getLine(i));  
+                    identation.getLastLayer()->add(new FunctionCall(name, args));
+                    ++i;
+                    EXPECT_SEMICOLON
+                    continue;
                 }
             }
 
@@ -178,28 +187,29 @@ public:
             }
 
             if(get(i).getType() == enum_keyword){
-                if(get(i + 1).getType() == identifier){
-                    ASTNode* name = new Identifier(get(i + 1).getValue());
-                    ASTNode* extend = nullptr;
+                if(get(i + 1).getType() != identifier){
+                    throwSyntaxError("Expected identifier", tokens.getLine(i));
+                }
+                Identifier* name = new Identifier(get(i + 1).getValue());
+                ASTNode* extend = nullptr;
+                i += 2;
+                if(get(i).getType() == arrow and get(i + 1).isTypeKeyword()){
+                    extend = new Type(get(i + 1).getValue());
                     i += 2;
-                    if(get(i).getType() == arrow and get(i + 1).isTypeKeyword()){
-                        extend = new Type(get(i + 1).getValue());
-                        i += 2;
-                    }
-                    if(get(i).getType() == left_curly){
-                        ++i;
-                        if(extend == nullptr){extend = new Type("int");}
-                        
-                        vector<ASTNode*> elements = parseEnumElements();
-                        if(get(i).getType() == right_curly){
-                            getLastLayer()->add(new EnumStatement(elements, name, extend));
-                            continue;
-                        }
-                        throwSyntaxError("Expected end of enumeration", tokens.getLine(i));
-                    }
+                }
+                if(get(i).getType() != left_curly){
                     throwSyntaxError("Expected enumeration", tokens.getLine(i));
                 }
-                throwSyntaxError("Expected identifier", tokens.getLine(i));
+                
+                ++i;
+                if(extend == nullptr){extend = new Type("int");}    
+                vector<ASTNode*> elements = parseEnumElements();
+                if(get(i).getType() != right_curly){
+                    throwSyntaxError("Expected end of enumeration", tokens.getLine(i));
+                }
+                identation.getLastLayer()->add(new EnumStatement(elements, name, extend));
+                continue;
+                
             }
             
         }
@@ -212,6 +222,7 @@ private:
     TokenList tokens;
     size_t i;
     std::string lastType;
+    IdentationManager identation;
 
     Token get(size_t index){
         if(index <= tokens.size()){
@@ -220,7 +231,8 @@ private:
         return ERROR_TOKEN;
     }
     
-    ASTNode* getNullValue(){
+    
+    Literal* getNullValue(){
         if(lastType == "int"){
             return new IntegerLiteral("0");
         }
@@ -309,98 +321,68 @@ private:
     }
 
     //
-    //  LAYERS RELATED
-    //
-
-    u_int8_t identationLayer; 
-    vector<Container*> layers;
-
-    Container* getLastLayer(){
-        return layers.at(layers.size() - 1);
-    }
-
-    /*
-    * Opens an indentation of type T. While this indentation is
-    * the last layer, it will contain all the next nodes as childs.
-    */
-    template<typename T>
-    void openIdentation(T* layer){
-        ++identationLayer;
-        layers.push_back(layer);
-    }
-
-    void closeIdentation(){
-        --identationLayer;
-        Container* lastLayer = getLastLayer();
-        layers.pop_back();
-        getLastLayer()->add(lastLayer);
-    }
-
-    //
     // PARSING RELATED
     //
 
     void parseIfStatement(){
-        if(get(++i).getType() == left_par){
-            ++i;
-            ASTNode* condition = parseExpression();
-            if(get(i).getType() == right_par){
-                if(get(i+ 1).getType() == left_curly){
-                    openIdentation<IfContainer>(new IfContainer(condition));
-                    return;
-                }
-                throwSyntaxError("Expected if body", tokens.getLine(i));
-            }
+        if(get(++i).getType() != left_par){
+            throwSyntaxError("Expected condition", tokens.getLine(i));
+        } 
+        ++i;
+        ASTNode* condition = parseExpression();
+        if(get(i).getType() != right_par){
             throwSyntaxError("Expected condition", tokens.getLine(i));
         }
-        throwSyntaxError("Expected condition", tokens.getLine(i));
+        if(get(i+ 1).getType() != left_curly){
+            throwSyntaxError("Expected if body", tokens.getLine(i));
+        }
+        identation.open<IfContainer>(new IfContainer(condition));
     }
 
     void parseWhileStatement(){
-        if(get(++i).getType() == left_par){
-            ++i;
-            ASTNode* condition = parseExpression();
-            if(get(i).getType() == right_par){
-                if(get(i+ 1).getType() == left_curly){
-                    openIdentation<WhileContainer>(new WhileContainer(condition));
-                    return;
-                }
-                throwSyntaxError("Expected while body", tokens.getLine(i));
-            }
+        if(get(++i).getType() != left_par){
             throwSyntaxError("Expected condition", tokens.getLine(i));
         }
-        throwSyntaxError("Expected condition", tokens.getLine(i));
+        ++i;
+        ASTNode* condition = parseExpression();
+        if(get(i).getType() != right_par){
+            throwSyntaxError("Expected condition", tokens.getLine(i));
+        }
+        if(get(i+ 1).getType() != left_curly){
+            throwSyntaxError("Expected while body", tokens.getLine(i));
+        }
+        identation.open<WhileContainer>(new WhileContainer(condition));
     }
 
     void parseModuleStatement(){
+        ++i;
         bool moduleClass = false;
-        if(get(i + 1).getType() == class_keyword){
+        if(get(i).getType() == class_keyword){
             moduleClass = true;
             ++i;
         }
-        if(get(i + 1).getType() == identifier){
-            ASTNode* identifier = new Identifier(get(i + 1).getValue());
-            if(get(i + 2).getType() == left_curly){
-                openIdentation<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
-                return;
-            }
+        if(get(i).getType() != identifier){
+           throwSyntaxError("Expected identifier", tokens.getLine(i));
+        }
+        ASTNode* identifier = new Identifier(get(i++).getValue());
+        if(get(i).getType() != left_curly){
             throwSyntaxError("Expected module body", tokens.getLine(i));
         }
-        throwSyntaxError("Expected identifier", tokens.getLine(i));
+        identation.open<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
     }
 
     vector<ASTNode*> parseArguments(){
         vector<ASTNode*> arguments;
         bool valid = true;
         while(valid){
-            if(get(i).isTypeKeyword() and get(i + 1).getType() == identifier){
-                ASTNode* type = new Type(get(i++).getValue());
-                std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
-                arguments.push_back(new Argument(type, nameAndValue[0], nameAndValue[1]));
-                if(get(i).getType() != comma){
-                    valid = false;
-                    continue;
-                }
+            if(not get(i).isTypeKeyword() or get(i + 1).getType() != identifier){
+                valid = false;
+                continue;
+            }
+            ASTNode* type = new Type(get(i++).getValue());
+            std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
+            arguments.push_back(new Argument(type, nameAndValue[0], nameAndValue[1]));
+            if(get(i).getType() == comma){
                 ++i;
                 continue;
             }
@@ -413,17 +395,16 @@ private:
         vector<ASTNode*> elements;
         bool valid = true;
         while(valid){
-            if(get(i).getType() == identifier){
-                std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
-                elements.push_back(new EnumElement(nameAndValue[0], nameAndValue[1]));
-                if(get(i).getType() != comma){
-                    valid = false;
-                    continue;
-                }
-                ++i;
+            if(get(i).getType() != identifier){
+                valid = false;
+            }
+            std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
+            elements.push_back(new EnumElement(nameAndValue[0], nameAndValue[1]));
+            if(get(i).getType() != comma){
+                valid = false;
                 continue;
             }
-            valid = false;
+            ++i;
         }
         return elements;
     }
@@ -433,7 +414,7 @@ private:
     * Throws a syntax error if it can't be found.
     */
     std::array<ASTNode*, 2> parseIdWithOptionalValue(){
-        ASTNode* name;
+        Identifier* name;
         ASTNode* value = nullptr;
         if(get(i).getType() == identifier){
             name = new Identifier(get(i++).getValue());
@@ -476,7 +457,7 @@ private:
     }
       
     void parseSimpleStatement(ASTNode* node){
-        getLastLayer()->add(node);
+        identation.getLastLayer()->add(node);
         EXPECT_SEMICOLON;
     }
 };

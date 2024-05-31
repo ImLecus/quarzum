@@ -1,5 +1,7 @@
-function main() {
-    int a = 0;
-    int[3] i;
-    int[] j = {1,2,3,4};
+import Vector2 from "physics.qz"
+module class Program {
+    function main() {
+    
+        const int[] a = {2};
+    }
 }

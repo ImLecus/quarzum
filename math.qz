@@ -37,7 +37,9 @@ module class Math {
     out("Hello world!");
 
     enum colors {green, red, blue}
-    enum colorsDetailed => byte {
+
+
+    enum colorsDetailed => int {
         green = 0,
         red = 1,
         blue = 2

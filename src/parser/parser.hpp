@@ -5,6 +5,7 @@
 #include "../ast/declarations.hpp"
 #include "../ast/statements.hpp"
 #include "../error.hpp"
+#include <array>
 
 #define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon", tokens.getLine(i));}
 
@@ -75,8 +76,29 @@ public:
 
             if(get(i).isTypeKeyword()){
                 bool constant = get(i - 1).getType() == const_keyword;
+                bool array = false;
+                bool sizeDefined = false;
                 lastType = get(i).getValue();
                 ASTNode* type = new Type(lastType);
+                ASTNode* length = nullptr;
+
+                // Check if it's an array
+                if(get(i + 1).getType() == left_square){
+                    i += 2;
+                    array = true;
+                    ASTNode* expression = parseExpression();
+                    sizeDefined = not instanceOf<NullExpression>(expression);
+                    if(sizeDefined){
+                        if(get(i).getType() != right_square){
+                            throwSyntaxError("Expected array initializer", tokens.getLine(i));
+                        }
+                    }
+                    length = expression;
+                    if(get(i).getType() != right_square){
+                        throwSyntaxError("Expected array initializer", tokens.getLine(i));
+                    }
+                }
+
 
                 if(get(i + 1).getType() == identifier){
                     ASTNode* name = new Identifier(get(i + 1).getValue());
@@ -91,17 +113,36 @@ public:
                         throwSyntaxError("Expected arguments or function body", tokens.getLine(i));
                     }
                     if(get(i).getType() == semicolon){
+                        if(array and sizeDefined){
+                            getLastLayer()->add(new ArrayDeclaration(type, name,{},constant, length));
+                            continue;
+                        }
                         getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
                         continue;
                     }
                     if(get(i).getType() == equal){
                         ++i;
+                        if(array and not sizeDefined){
+                            if(get(i).getType() == left_curly){
+                                ++i;
+                                vector<ASTNode*> elements = parseAgumentsInCall();
+                                if(get(i).getType() == right_curly){
+                                    ++i;
+                                    getLastLayer()->add(new ArrayDeclaration(type, name,elements,constant, new IntegerLiteral(std::to_string(elements.size()))));
+                                    continue;
+                                }
+                                throwSyntaxError("Expected array elements", tokens.getLine(i));
+                            }
+                            throwSyntaxError("Expected array elements", tokens.getLine(i));
+                        }
                         getLastLayer()->add(new VariableDeclaration(type, name, parseExpression(), constant));
                         EXPECT_SEMICOLON
                         continue;
+                        
                     }
                     throwSyntaxError("Expected semicolon or expression", tokens.getLine(i));
                 }
+                
             }
 
             if(get(i).getType() == identifier){
@@ -353,19 +394,9 @@ private:
         bool valid = true;
         while(valid){
             if(get(i).isTypeKeyword() and get(i + 1).getType() == identifier){
-                ASTNode* type = new Type(get(i).getValue());
-                ASTNode* id = new Identifier(get(i + 1).getValue());
-                ASTNode* defaultValue = nullptr;
-                i+=2;
-                if(get(i).getType() == equal){
-                    ++i;
-                    defaultValue = parseExpression();
-                    if(instanceOf<NullExpression>(defaultValue)){
-                        throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
-                        break;
-                    }
-                }
-                arguments.push_back(new Argument(type, id, defaultValue));
+                ASTNode* type = new Type(get(i++).getValue());
+                std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
+                arguments.push_back(new Argument(type, nameAndValue[0], nameAndValue[1]));
                 if(get(i).getType() != comma){
                     valid = false;
                     continue;
@@ -383,18 +414,8 @@ private:
         bool valid = true;
         while(valid){
             if(get(i).getType() == identifier){
-                ASTNode* id = new Identifier(get(i).getValue());
-                ASTNode* defaultValue = nullptr;
-                ++i;
-                if(get(i).getType() == equal){
-                    ++i;
-                    defaultValue = parseExpression();
-                    if(instanceOf<NullExpression>(defaultValue)){
-                        throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
-                        break;
-                    }
-                }
-                elements.push_back(new EnumElement(id, defaultValue));
+                std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
+                elements.push_back(new EnumElement(nameAndValue[0], nameAndValue[1]));
                 if(get(i).getType() != comma){
                     valid = false;
                     continue;
@@ -405,6 +426,26 @@ private:
             valid = false;
         }
         return elements;
+    }
+
+    /*
+    * Searches for the structure id = value |  id. 
+    * Throws a syntax error if it can't be found.
+    */
+    std::array<ASTNode*, 2> parseIdWithOptionalValue(){
+        ASTNode* name;
+        ASTNode* value = nullptr;
+        if(get(i).getType() == identifier){
+            name = new Identifier(get(i++).getValue());
+            if(get(i).getType() == equal){
+                ++i;
+                value = parseExpression();
+                if(instanceOf<NullExpression>(value)){
+                    throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
+                }
+            }
+        }
+        return {name,value};
     }
 
     vector<ASTNode*> parseAgumentsInCall(){

@@ -55,8 +55,10 @@ enum TokenType : unsigned char {
     right_par = 0x63,
     left_curly = 0x64,
     right_curly = 0x65,
-    comma = 0x66,
-    arrow = 0x67,
+    left_square = 0x66,
+    right_square = 0x67,
+    comma = 0x68,
+    arrow = 0x69,
     // literals
     int_literal = 0x80,
     num_literal = 0x81,

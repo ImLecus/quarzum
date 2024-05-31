@@ -47,13 +47,11 @@ public:
         type(varType), identifier(varName), expression(initValue), constant(constant) {}
 
     void print() override  {
-        std::cout << "VariableDeclaration:\n";
-        std::cout <<'\t';
+        std::cout << "VariableDeclaration:\n\t";
         type->print();
         std::cout <<'\t';
         identifier->print();
-        std::cout <<"\tconstant: " << constant << '\n';
-        std::cout <<'\t';
+        std::cout <<"\tconstant: " << constant << "\n\t";
         expression->print();
     }
 
@@ -61,6 +59,43 @@ public:
         delete type;
         delete identifier;
         delete expression;
+    }
+};
+
+class ArrayDeclaration : public ASTNode {
+public:
+    ASTNode* type;
+    ASTNode* identifier;
+    std::vector<ASTNode*> elements;
+    bool constant;
+    ASTNode* size;
+
+    ArrayDeclaration(ASTNode* varType, ASTNode* varName, std::vector<ASTNode*> elements, bool constant): 
+        type(varType), identifier(varName), elements(elements), constant(constant) {
+            size = new IntegerLiteral(std::to_string(elements.size()));
+        }
+    ArrayDeclaration(ASTNode* varType, ASTNode* varName, std::vector<ASTNode*> elements, bool constant, ASTNode* size): 
+        type(varType), identifier(varName), elements(elements), constant(constant), size(size) {}
+
+    void print() override  {
+        std::cout << "ArrayDeclaration:\n\t";
+        type->print();
+        std::cout <<'\t';
+        identifier->print();
+        std::cout <<"\tconstant: " << constant << "\n\t";
+        size->print();
+        for(auto& element : elements){
+            element->print();
+        }
+    }
+
+    ~ArrayDeclaration() {
+        delete type;
+        delete identifier;
+        for(auto& element: elements){
+            delete element;
+        }
+        delete size;
     }
 };
 

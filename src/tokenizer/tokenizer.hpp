@@ -156,7 +156,9 @@ private:
             {",", comma},
             {"++", plus_unary},
             {"--", minus_unary},
-            {"=>", arrow}
+            {"=>", arrow},
+            {"[", left_square},
+            {"]", right_square}
         };
         try {
             return symbols.at(symbol);

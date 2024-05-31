@@ -1,19 +1,5 @@
-module Program {
-    function main(){
-        two(2+2, 3, "string");
-    }
-
-    /*
-    * Returns two.
-    */
-    int two(int a, int b){
-        return a + b;
-    }
-
-    while(not true){
-        two("a");
-        continue;
-        break;
-        exit 0;
-    }
+function main() {
+    int a = 0;
+    int[3] i;
+    int[] j = {1,2,3,4};
 }

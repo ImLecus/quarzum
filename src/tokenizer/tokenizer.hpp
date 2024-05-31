@@ -181,7 +181,9 @@ private:
             {"class", class_keyword},
             {"return", return_keyword},
             {"const", const_keyword},
-            {"if", if_keyword}
+            {"if", if_keyword},
+            {"while", while_keyword},
+            {"exit", exit_keyword}
         };
         try {
             return keywords.at(symbol);

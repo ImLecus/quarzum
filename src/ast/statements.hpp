@@ -44,6 +44,21 @@ public:
     }
 };
 
+class WhileContainer : public Container {
+public:
+    ASTNode* condition;
+
+    WhileContainer(ASTNode* condition): Container(), condition(condition) {}
+    void print() override{
+        std::cout << "While:\n\t";
+        condition->print();
+        for(auto& node : nodes){
+            std::cout << '\t';
+            node -> print();
+        }
+    }
+};
+
 class FunctionContainer : public Container {
 public:
     ASTNode* identifier;

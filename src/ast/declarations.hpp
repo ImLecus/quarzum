@@ -6,8 +6,17 @@ public:
     ASTNode* value;
     Return(ASTNode* value): value(value) {}
     void print() override  {
-        std::cout << "Return:\n";
-        std::cout <<'\t';
+        std::cout << "Return:\n\t";
+        value->print();
+    }
+};
+
+class Exit : public ASTNode {
+public:
+    ASTNode* value;
+    Exit(ASTNode* value): value(value) {}
+    void print() override  {
+        std::cout << "Exit:\n\t";
         value->print();
     }
 };

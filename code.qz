@@ -7,6 +7,11 @@ module Program {
     * Returns two.
     */
     int two(int a, int b){
-        return 2 + 2;
+        return a + b;
+    }
+
+    while(not true){
+        two("a");
+        exit 0;
     }
 }

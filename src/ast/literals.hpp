@@ -11,6 +11,14 @@ private:
     std::string value;
 };
 
+class Identifier : public Literal {
+public:
+    Identifier(std::string name) : Literal(name) {}
+    void print() override{
+        std::cout << "Identifier: " << getValue() << '\n';
+    }
+};
+
 class IntegerLiteral : public Literal {
 public:
     IntegerLiteral(std::string value): Literal(value) {}

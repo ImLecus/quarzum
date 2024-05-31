@@ -30,6 +30,13 @@ public:
                 continue;
             }
 
+            if(get(i).getType() == exit_keyword){
+                ++i;
+                getLastLayer()->add(new Exit(parseExpression()));
+                EXPECT_SEMICOLON;
+                continue;
+            }
+
             if(get(i).isTypeKeyword()){
                 bool constant = get(i - 1).getType() == const_keyword;
                 lastType = get(i).getValue();
@@ -72,7 +79,6 @@ public:
                 if(get(i +1).getType() == left_par){
                     i += 2;
                     std::vector<ASTNode*> args = parseAgumentsInCall();
-                    std::cout<< get(i).getValue();
                     if(get(i).getType() == right_par){
                         getLastLayer()->add(new FunctionCall(name, args));
                         ++i;
@@ -89,6 +95,9 @@ public:
 
             if(get(i).getType() == if_keyword){
                 parseIfStatement();
+            }
+            if(get(i).getType() == while_keyword){
+                parseWhileStatement();
             }
             
         }
@@ -134,7 +143,7 @@ private:
     TokenList getExpressionTerms(){
         TokenList expressionTokens;
         while(true){
-            if(get(i).isOperator() or get(i).isLiteral()){
+            if(get(i).isOperator() or get(i).isLiteral() or get(i).getType() == identifier){
                 expressionTokens.add(get(i++));
                 continue;
             }
@@ -168,10 +177,16 @@ private:
             case null_literal:
                 return new NullLiteral();
             case identifier:
-                return new NullLiteral(); // TO BE IMPLEMENTED
+                return new Identifier(expressionTokens[0].getValue());
             default:
                 throwSyntaxError("Invalid expression");
                 break;
+            }
+        }
+        // Parsing unary expressions
+        if(expressionTokens.size() == 2){
+            if(expressionTokens[0].getType() == not_op and expressionTokens[1].isLiteral()){
+                return new UnaryExpression("not", parseExpression(expressionTokens.split(1,expressionTokens.size())));
             }
         }
         // Parsing composite expressions, in reverse priority order
@@ -221,6 +236,22 @@ private:
                     return;
                 }
                 throwSyntaxError("Expected if body");
+            }
+            throwSyntaxError("Expected condition");
+        }
+        throwSyntaxError("Expected condition");
+    }
+
+    void parseWhileStatement(){
+        if(get(++i).getType() == left_par){
+            ++i;
+            ASTNode* condition = parseExpression();
+            if(get(i).getType() == right_par){
+                if(get(i+ 1).getType() == left_curly){
+                    openIdentation<WhileContainer>(new WhileContainer(condition));
+                    return;
+                }
+                throwSyntaxError("Expected while body");
             }
             throwSyntaxError("Expected condition");
         }

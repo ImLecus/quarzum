@@ -25,7 +25,7 @@ public:
                 Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
                 if(instanceOf<Literal>(declaration->expression)){
                     Literal* value = dynamic_cast<Literal*>(declaration->expression);
-                    ir += id->name + " = "+ value->getValue() + '\n';
+                    ir += id->getValue() + " = "+ value->getValue() + '\n';
                 }
             }
             if(instanceOf<VariableRedeclaration>(node)){
@@ -33,7 +33,7 @@ public:
                 Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
                 if(instanceOf<Literal>(declaration->expression)){
                     Literal* value = dynamic_cast<Literal*>(declaration->expression);
-                    ir += id->name + " = "+ value->getValue() + '\n';
+                    ir += id->getValue() + " = "+ value->getValue() + '\n';
                 }
             }
         }

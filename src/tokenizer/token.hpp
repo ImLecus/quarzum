@@ -30,19 +30,24 @@ public:
     u_int8_t getPriority(){
         switch (this->type)
         {
+        case lower:
+        case lower_eq:
+        case greater:
+        case greater_eq:
+            return 0;
         case plus:
         case minus:
-            return 0;
+            return 1;
         case prod:
         case division:
         case mod:
-            return 1;
+            return 2;
         
         default:
-            return 255;
+            return __UINT8_MAX__;
         }
     }
-    static const u_int8_t MAX_PRIORITY = 3;
+    static const u_int8_t MAX_PRIORITY = 4;
 
     std::string getValue(){
         return this -> value;

@@ -1,0 +1,11 @@
+module class Math {
+    int sum(int a, int b){
+        return a + b;
+    }
+
+    int abs(int a){
+        if(a > 0){
+            return a;
+        }
+    }
+}

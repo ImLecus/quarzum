@@ -22,6 +22,8 @@ enum TokenType : unsigned int {
     module_keyword = 0x0A,
     class_keyword = 0x0B,
     if_keyword = 0x0C,
+    while_keyword = 0x0D,
+    exit_keyword = 0x10,
     out_keyword = 0x1D,
     // operators
     plus = 0x30,

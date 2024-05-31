@@ -41,7 +41,9 @@ public:
             {class_keyword, "class"},
             {return_keyword, "return"},
             {const_keyword, "const"},
-            {if_keyword, "if_keyword"}
+            {if_keyword, "if_keyword"},
+            {while_keyword, "while_keyword"},
+            {exit_keyword, "exit_keyword"}
         };
         try{
             std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';

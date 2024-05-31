@@ -6,7 +6,7 @@
 #include "../ast/statements.hpp"
 #include "../error.hpp"
 
-#define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon");}
+#define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon", tokens.getLine(i));}
 
 class Parser {
 public:
@@ -33,11 +33,11 @@ public:
                     valid = false;
                 }
                 if(imports.empty()){
-                    throwSyntaxError("Invalid import statement");
+                    throwSyntaxError("Invalid import statement", tokens.getLine(i));
                 }
                 std::string location;
                 if(get(i).getType() != from_keyword or get(i + 1).getType() != string_literal){
-                    throwSyntaxError("Missing import path");
+                    throwSyntaxError("Missing import path", tokens.getLine(i));
                 }
                 location = get(++i).getValue();
                 getLastLayer()->add(new ImportStatement(imports, location));
@@ -78,7 +78,7 @@ public:
                             openIdentation<FunctionContainer>(new FunctionContainer(name,type,args));
                             continue;
                         }
-                        throwSyntaxError("Expected arguments or function body");
+                        throwSyntaxError("Expected arguments or function body", tokens.getLine(i));
                     }
                     if(get(i).getType() == semicolon){
                         getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
@@ -90,7 +90,7 @@ public:
                         EXPECT_SEMICOLON
                         continue;
                     }
-                    throwSyntaxError("Expected semicolon or expression");
+                    throwSyntaxError("Expected semicolon or expression", tokens.getLine(i));
                 }
             }
 
@@ -111,7 +111,7 @@ public:
                         EXPECT_SEMICOLON
                         continue;
                     }
-                    throwSyntaxError("Expected arguments or function call");  
+                    throwSyntaxError("Expected arguments or function call", tokens.getLine(i));  
                 }
             }
 
@@ -205,7 +205,7 @@ private:
             case identifier:
                 return new Identifier(expressionTokens[0].getValue());
             default:
-                throwSyntaxError("Invalid expression");
+                throwSyntaxError("Invalid expression", tokens.getLine(i));
                 break;
             }
         }
@@ -228,7 +228,7 @@ private:
             }
         }
 
-        throwSyntaxError("Invalid expression");
+        throwSyntaxError("Invalid expression", tokens.getLine(i));
         return nullptr;
     }
 
@@ -273,11 +273,11 @@ private:
                     openIdentation<IfContainer>(new IfContainer(condition));
                     return;
                 }
-                throwSyntaxError("Expected if body");
+                throwSyntaxError("Expected if body", tokens.getLine(i));
             }
-            throwSyntaxError("Expected condition");
+            throwSyntaxError("Expected condition", tokens.getLine(i));
         }
-        throwSyntaxError("Expected condition");
+        throwSyntaxError("Expected condition", tokens.getLine(i));
     }
 
     void parseWhileStatement(){
@@ -289,11 +289,11 @@ private:
                     openIdentation<WhileContainer>(new WhileContainer(condition));
                     return;
                 }
-                throwSyntaxError("Expected while body");
+                throwSyntaxError("Expected while body", tokens.getLine(i));
             }
-            throwSyntaxError("Expected condition");
+            throwSyntaxError("Expected condition", tokens.getLine(i));
         }
-        throwSyntaxError("Expected condition");
+        throwSyntaxError("Expected condition", tokens.getLine(i));
     }
 
     void parseModuleStatement(){
@@ -308,9 +308,9 @@ private:
                 openIdentation<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
                 return;
             }
-            throwSyntaxError("Expected module body");
+            throwSyntaxError("Expected module body", tokens.getLine(i));
         }
-        throwSyntaxError("Expected identifier");
+        throwSyntaxError("Expected identifier", tokens.getLine(i));
     }
 
     std::vector<ASTNode*> parseArguments(){
@@ -326,7 +326,7 @@ private:
                     ++i;
                     defaultValue = parseExpression();
                     if(instanceOf<NullLiteral>(defaultValue)){
-                        throwSyntaxError("Invalid default value assignation");
+                        throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
                         break;
                     }
                 }

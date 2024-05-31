@@ -16,8 +16,8 @@ void throwLexicalError(const std::string message, size_t line){
     exit(EXIT_FAILURE);
 }
 
-void throwSyntaxError(const std::string message){
-    std::cout << RED << "SyntaxError" << NOCOLOR << ": " << message << ".\n";
+void throwSyntaxError(const std::string message, size_t line){
+    std::cout << RED << "SyntaxError" << NOCOLOR << ": " << message << " at line " << line << ".\n";
     exit(EXIT_FAILURE);
 }
 

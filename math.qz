@@ -33,4 +33,6 @@ module class Math {
         }
         return a;
     }
+
+    out("Hello world!");
 }

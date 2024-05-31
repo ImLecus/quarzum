@@ -24,7 +24,6 @@ enum TokenType : unsigned int {
     if_keyword = 0x0C,
     while_keyword = 0x0D,
     exit_keyword = 0x10,
-    out_keyword = 0x1D,
     import_keyword = 0x1E,
     from_keyword = 0x1F,
     // operators

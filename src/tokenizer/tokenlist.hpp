@@ -8,6 +8,7 @@ public:
 
     void add(const Token token){
         this -> tokens.push_back(token);
+        this -> length += 1;
     }
 
     std::vector<Token> getItems(){
@@ -34,6 +35,22 @@ public:
         return this->tokens.size() == 0;
     }
 
+    void addLine(size_t index){
+        lineJumps.push_back(index);
+    }
+
+    size_t getLine(size_t index){
+        for(u_int32_t i = 0; i < lineJumps.size(); ++i){
+            if(lineJumps[i] > index){
+                return i + 1;
+            }
+        }
+        return lineJumps.at(lineJumps.size());
+    }
+
+    size_t length;
 private:
     std::vector<Token> tokens;
+    std::vector<size_t> lineJumps;
+    
 };

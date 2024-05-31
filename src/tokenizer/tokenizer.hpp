@@ -17,6 +17,7 @@ public:
         for(; index <= content.length(); ++index){
             if(content[index] == '\n'){
                 isComment = false;
+                tokens.addLine(tokens.length);
                 ++lineNumber;
                 continue;
             }
@@ -170,7 +171,6 @@ private:
             {"string", string_keyword},
             {"bool", bool_keyword},
             {"var", var_keyword},
-            {"out", out_keyword},
             {"null",null_literal},
             {"true",true_literal},
             {"false",false_literal},

@@ -29,6 +29,7 @@ enum TokenType : unsigned char {
     from_keyword = 0x1F,
     continue_keyword = 0x20,
     break_keyword = 0x21,
+    enum_keyword = 0x22,
     // operators
     plus = 0x30,
     minus = 0x31,
@@ -55,6 +56,7 @@ enum TokenType : unsigned char {
     left_curly = 0x64,
     right_curly = 0x65,
     comma = 0x66,
+    arrow = 0x67,
     // literals
     int_literal = 0x80,
     num_literal = 0x81,

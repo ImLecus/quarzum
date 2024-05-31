@@ -155,7 +155,8 @@ private:
             {"}", right_curly},
             {",", comma},
             {"++", plus_unary},
-            {"--", minus_unary}
+            {"--", minus_unary},
+            {"=>", arrow}
         };
         try {
             return symbols.at(symbol);
@@ -193,7 +194,8 @@ private:
             {"import", import_keyword},
             {"from", from_keyword},
             {"break", break_keyword},
-            {"continue", continue_keyword}
+            {"continue", continue_keyword},
+            {"enum", enum_keyword}
         };
         try {
             return keywords.at(symbol);

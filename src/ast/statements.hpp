@@ -7,10 +7,19 @@ public:
     Statement(std::vector<ASTNode*> children): children(children) {}
 };
 
-class FunctionStatement : public Statement {
+class EnumStatement : public Statement {
 public:
-    FunctionStatement(std::vector<ASTNode*> children): Statement(children) {}
-
+    ASTNode* name;
+    ASTNode* extend;
+    EnumStatement(std::vector<ASTNode*> children,ASTNode* name, ASTNode* extend) :Statement(children), name(name),extend(extend)  {}
+    void print () override {
+        std::cout << "EnumStatement:\n\t";
+        name->print();
+        extend->print();
+        for(auto& element : children){
+            element->print();
+        }
+    }
 };
 
 class ImportStatement : public Statement {

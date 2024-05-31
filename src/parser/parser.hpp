@@ -135,6 +135,31 @@ public:
             if(get(i).getType() == while_keyword){
                 parseWhileStatement();
             }
+
+            if(get(i).getType() == enum_keyword){
+                if(get(i + 1).getType() == identifier){
+                    ASTNode* name = new Identifier(get(i + 1).getValue());
+                    ASTNode* extend = nullptr;
+                    i += 2;
+                    if(get(i).getType() == arrow and get(i + 1).isTypeKeyword()){
+                        extend = new Type(get(i + 1).getValue());
+                        i += 2;
+                    }
+                    if(get(i).getType() == left_curly){
+                        ++i;
+                        if(extend == nullptr){extend = new Type("int");}
+                        
+                        vector<ASTNode*> elements = parseEnumElements();
+                        if(get(i).getType() == right_curly){
+                            getLastLayer()->add(new EnumStatement(elements, name, extend));
+                            continue;
+                        }
+                        throwSyntaxError("Expected end of enumeration", tokens.getLine(i));
+                    }
+                    throwSyntaxError("Expected enumeration", tokens.getLine(i));
+                }
+                throwSyntaxError("Expected identifier", tokens.getLine(i));
+            }
             
         }
 
@@ -340,7 +365,6 @@ private:
                         break;
                     }
                 }
-                // default value parsing
                 arguments.push_back(new Argument(type, id, defaultValue));
                 if(get(i).getType() != comma){
                     valid = false;
@@ -352,6 +376,35 @@ private:
             valid = false;
         }
         return arguments;
+    }
+
+    vector<ASTNode*> parseEnumElements(){
+        vector<ASTNode*> elements;
+        bool valid = true;
+        while(valid){
+            if(get(i).getType() == identifier){
+                ASTNode* id = new Identifier(get(i).getValue());
+                ASTNode* defaultValue = nullptr;
+                ++i;
+                if(get(i).getType() == equal){
+                    ++i;
+                    defaultValue = parseExpression();
+                    if(instanceOf<NullExpression>(defaultValue)){
+                        throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
+                        break;
+                    }
+                }
+                elements.push_back(new EnumElement(id, defaultValue));
+                if(get(i).getType() != comma){
+                    valid = false;
+                    continue;
+                }
+                ++i;
+                continue;
+            }
+            valid = false;
+        }
+        return elements;
     }
 
     vector<ASTNode*> parseAgumentsInCall(){

@@ -42,3 +42,19 @@ public:
         }
     }
 };
+
+class EnumElement : public ASTNode {
+public:
+    ASTNode* identifier;
+    ASTNode* defaultValue = nullptr;
+   
+    EnumElement(ASTNode* identifier, ASTNode* defaultValue): 
+    identifier(identifier), defaultValue(defaultValue) {}
+    void print() override{
+        std::cout << "EnumElement:\n";
+        identifier->print();
+        if(defaultValue != nullptr){
+            defaultValue -> print();
+        }
+    }
+};

@@ -12,6 +12,8 @@ module Program {
 
     while(not true){
         two("a");
+        continue;
+        break;
         exit 0;
     }
 }

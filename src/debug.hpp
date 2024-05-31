@@ -46,7 +46,8 @@ public:
             {import_keyword, "import_keyword"},
             {from_keyword, "from_keyword"},
             {plus_unary, "++"},
-            {minus_unary, "--"}
+            {minus_unary, "--"},
+            {byte_keyword, "byte_keyword"}
         };
         try{
             std::cout << typeToString.at(token.getType()) << ": " << token.getValue() << '\n';

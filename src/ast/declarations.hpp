@@ -11,6 +11,21 @@ public:
     }
 };
 
+class Continue : public ASTNode {
+public:
+    Continue() {}
+    void print() override  {
+        std::cout << "Continue\n";
+    }
+};
+class Break : public ASTNode {
+public:
+    Break() {}
+    void print() override  {
+        std::cout << "Break\n";
+    }
+};
+
 class Exit : public ASTNode {
 public:
     ASTNode* value;

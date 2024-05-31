@@ -2,7 +2,7 @@
 #include <fstream>
 
 bool format(const std::string filename, const std::string format){
-    for(size_t i = 0; i <= filename.length() && i <= format.length(); ++i){
+    for(u_int16_t i = 0; i <= filename.length() && i <= format.length(); ++i){
         if(filename[filename.length() - i] != format[format.length() - i]){
             return false;
         }

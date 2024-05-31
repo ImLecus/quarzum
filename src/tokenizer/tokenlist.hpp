@@ -32,7 +32,7 @@ public:
     }
 
     bool isEmpty(){
-        return this->tokens.size() == 0;
+        return this->tokens.empty();
     }
 
     void addLine(size_t index){

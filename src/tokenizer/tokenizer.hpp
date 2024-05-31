@@ -174,6 +174,7 @@ private:
             {"null",null_literal},
             {"true",true_literal},
             {"false",false_literal},
+            {"byte", byte_keyword},
             {"or", or_op},
             {"and", and_op},
             {"xor", xor_op},
@@ -187,7 +188,9 @@ private:
             {"while", while_keyword},
             {"exit", exit_keyword},
             {"import", import_keyword},
-            {"from", from_keyword}
+            {"from", from_keyword},
+            {"break", break_keyword},
+            {"continue", continue_keyword}
         };
         try {
             return keywords.at(symbol);

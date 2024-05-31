@@ -62,6 +62,18 @@ public:
                 EXPECT_SEMICOLON;
                 continue;
             }
+            if(get(i).getType() == break_keyword){
+                ++i;
+                getLastLayer()->add(new Break());
+                EXPECT_SEMICOLON;
+                continue;
+            }
+            if(get(i).getType() == continue_keyword){
+                ++i;
+                getLastLayer()->add(new Continue());
+                EXPECT_SEMICOLON;
+                continue;
+            }
 
             if(get(i).isTypeKeyword()){
                 bool constant = get(i - 1).getType() == const_keyword;

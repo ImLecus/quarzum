@@ -7,7 +7,7 @@
  * 0x80 - 0x9F : literals
  * 0xF0 - 0xFF : other
 */
-enum TokenType : unsigned int {
+enum TokenType : unsigned char {
     // type keywords
     int_keyword = 0x00,
     num_keyword = 0x01,
@@ -16,9 +16,10 @@ enum TokenType : unsigned int {
     bool_keyword = 0x04,
     var_keyword = 0x05,
     function_keyword = 0x06,
+    byte_keyword = 0x07,
     // keywords
-    const_keyword = 0x07,
-    return_keyword = 0x08,
+    const_keyword = 0x08,
+    return_keyword = 0x09,
     module_keyword = 0x0A,
     class_keyword = 0x0B,
     if_keyword = 0x0C,
@@ -26,6 +27,8 @@ enum TokenType : unsigned int {
     exit_keyword = 0x10,
     import_keyword = 0x1E,
     from_keyword = 0x1F,
+    continue_keyword = 0x20,
+    break_keyword = 0x21,
     // operators
     plus = 0x30,
     minus = 0x31,

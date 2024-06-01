@@ -81,6 +81,25 @@ public:
     }
 };
 
+class ForeachContainer : public Container {
+public:
+    ASTNode* identifier;
+    ASTNode* iterable;
+    ASTNode* type;
+
+    ForeachContainer(ASTNode* identifier, ASTNode* iterable, ASTNode* type): Container(), identifier(identifier), iterable(iterable), type(type) {}
+    void print() override{
+        std::cout << " Foreach:\n\t";
+        identifier->print();
+        type -> print();
+        iterable -> print();
+        for(auto& node : nodes){
+            std::cout << '\t';
+            node -> print();
+        }
+    }
+};
+
 class FunctionContainer : public Container {
 public:
     ASTNode* identifier;

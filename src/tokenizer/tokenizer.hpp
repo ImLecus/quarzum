@@ -1,14 +1,13 @@
 #pragma once
 #include "tokenlist.hpp"
 #include "../error.hpp"
-#include "../debug.hpp"
 
 class Tokenizer {
     
 public:
     static TokenList tokenize(const std::string& content){
 
-        TokenList tokens = TokenList();
+        TokenList tokens;
         size_t index = 0;
         size_t lineNumber = 0;
         std::string buffer;
@@ -132,7 +131,7 @@ public:
     }
 private:
 
-    static TokenType symbolToType(std::string symbol){
+    static TokenType symbolToType(std::string& symbol){
         
         static const std::unordered_map<std::string, TokenType> symbols = {
             {";", semicolon},
@@ -172,7 +171,7 @@ private:
         }
     }
 
-    static TokenType bufferToKeyword(std::string symbol){
+    static TokenType bufferToKeyword(std::string& symbol){
         
         static const std::unordered_map<std::string, TokenType> keywords = {
             {"int", int_keyword},
@@ -201,7 +200,9 @@ private:
             {"from", from_keyword},
             {"break", break_keyword},
             {"continue", continue_keyword},
-            {"enum", enum_keyword}
+            {"enum", enum_keyword},
+            {"foreach", foreach_keyword},
+            {"in", in_keyword}
         };
         try {
             return keywords.at(symbol);

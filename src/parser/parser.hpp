@@ -14,9 +14,9 @@ using std::vector;
 
 class Parser {
 public:
-    Parser(TokenList tokens): tokens(tokens) {}
+    Parser(const TokenList& tokens): tokens(tokens) {}
 
-    RootNode parse(){
+    const RootNode parse(){
         RootNode root = RootNode();
         identation.open(&root);
 
@@ -153,6 +153,32 @@ public:
                 
             }
 
+            if(get(i).getType() == foreach_keyword){
+                if(get(i + 1).getType() != left_par){
+                    throwSyntaxError("Expected foreach statement", tokens.getLine(i));
+                }
+                if(not get(i + 2).isTypeKeyword()){
+                    throwSyntaxError("Expected type", tokens.getLine(i));
+                }
+                Type* type = new Type(get(i + 2).getValue());
+                if(get(i + 3).getType() != identifier){
+                    throwSyntaxError("Expected identifier", tokens.getLine(i));
+                }
+                Identifier* id = new Identifier(get(i + 3).getValue());
+                if(get(i + 4).getType() != in_keyword){
+                    throwSyntaxError("Expected 'in' keyword", tokens.getLine(i));
+                }
+                i += 5;
+                ASTNode* expression = parseExpression();
+                if(instanceOf<NullExpression>(expression)){
+                    throwSyntaxError("Expected iterable expression", tokens.getLine(i));
+                }
+                if(get(i).getType() != right_par or get(++i).getType() != left_curly){
+                    throwSyntaxError("Expected ')'", tokens.getLine(i));
+                }
+                identation.open<ForeachContainer>(new ForeachContainer(id, expression, type));
+            }
+
             if(get(i).getType() == identifier){
                 Identifier* name = new Identifier(get(i).getValue());
                 if(get(i +1).getType() == equal){
@@ -223,7 +249,7 @@ private:
     std::string lastType;
     IdentationManager identation;
 
-    Token get(size_t index){
+    Token get(const size_t& index){
         if(index <= tokens.size()){
             return tokens[index];
         }
@@ -279,9 +305,6 @@ private:
             case int_literal:
                 return new IntegerLiteral(expressionTokens[0].getValue());
             case num_literal:
-                return new NumericLiteral(expressionTokens[0].getValue());
-            case true_literal:
-            case false_literal:
                 return new BoolLiteral(expressionTokens[0].getValue());
             case char_literal:
                 return new CharLiteral(expressionTokens[0].getValue());
@@ -301,7 +324,9 @@ private:
             if(expressionTokens[0].getType() == not_op and expressionTokens[1].isLiteral()){
                 return new UnaryExpression("not", parseExpression(expressionTokens.split(1,expressionTokens.size())));
             }
-
+            if(expressionTokens[0].getType() == minus and expressionTokens[1].isLiteral()){
+                return new UnaryExpression("-", parseExpression(expressionTokens.split(1,expressionTokens.size())));
+            }
         }
         // Parsing composite expressions, in reverse priority order
         for(u_int8_t priority = 0; priority < Token::MAX_PRIORITY; ++priority){

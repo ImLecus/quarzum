@@ -30,6 +30,8 @@ enum TokenType : unsigned char {
     continue_keyword = 0x20,
     break_keyword = 0x21,
     enum_keyword = 0x22,
+    foreach_keyword = 0x23,
+    in_keyword = 0x24,
     // operators
     plus = 0x30,
     minus = 0x31,

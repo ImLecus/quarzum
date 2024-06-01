@@ -1,8 +1,9 @@
 import Vector2 from "physics.qz"
 module class Program {
     function main() {
-    
-        while(true and false & 1){
+
+        int[] tokens = {12, 3, -2};
+        foreach(int token in tokens){
             exit 0;
         }
     }

@@ -5,29 +5,29 @@
 
 class Token {
 public:
-    explicit Token(const TokenType type, const std::string value){
+    explicit Token(const TokenType type, const std::string& value){
         this->type = type;
         this->value = value;
     }
 
-    bool isSymbol(){
+    bool isSymbol() const {
         return (u_int8_t)this->type >= 0x60 and (u_int8_t)this->type <= 0x7F;
     }
 
-    bool isKeyword(){
+    bool isKeyword() const {
         return (u_int8_t)this->type <= 0x2F;
     }
-    bool isTypeKeyword(){
+    bool isTypeKeyword() const {
         return (u_int8_t)this->type <= 0x07 or this->type == identifier;
     }
-    bool isOperator(){
+    bool isOperator() const {
         return (u_int8_t)this->type >= 0x30 and (u_int8_t)this->type <= 0x5F;
     }
-    bool isLiteral(){
+    bool isLiteral() const {
         return (u_int8_t)this->type >= 0x80 and (u_int8_t)this->type <= 0x9F;
     }
 
-    u_int8_t getPriority(){
+    u_int8_t getPriority() const {
         switch (this->type)
         {
         case or_op:
@@ -66,11 +66,11 @@ public:
     }
     static const u_int8_t MAX_PRIORITY = 9;
 
-    std::string getValue(){
+    std::string getValue() const{
         return this -> value;
     }
 
-    TokenType getType(){
+    TokenType getType() const{
         return this -> type;
     }
 

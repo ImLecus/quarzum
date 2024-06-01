@@ -1,7 +1,7 @@
 #include <string>
 #include <fstream>
 
-bool format(const std::string filename, const std::string format){
+bool format(const std::string& filename, const std::string& format){
     for(u_int16_t i = 0; i <= filename.length() && i <= format.length(); ++i){
         if(filename[filename.length() - i] != format[format.length() - i]){
             return false;
@@ -10,7 +10,7 @@ bool format(const std::string filename, const std::string format){
     return true;
 }
 
-std::string getSource(const std::string filename){
+std::string getSource(const std::string& filename){
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open()) {

@@ -7,10 +7,12 @@
 #include "../error.hpp"
 #include "identation.hpp"
 #include <array>
+#include <stack>
 
 #define EXPECT_SEMICOLON if(get(i).getType() != semicolon){throwSyntaxError("Expected semicolon", tokens.getLine(i));}
 
 using std::vector;
+
 
 class Parser {
 public:
@@ -21,6 +23,55 @@ public:
         identation.open(&root);
 
         for(i = 0; i < tokens.size(); ++i){
+
+
+            
+            if(auto dec = parseTypeAndId()){
+                if(get(i).getType() == semicolon){
+                    if(dec->array and dec->sizeDefined){
+                        identation.getLastLayer()->add(new ArrayDeclaration(dec->type, dec->id,{},dec->constant, dec->arrayLength));
+                        continue;
+                    }
+                    identation.getLastLayer()->add(new VariableDeclaration(dec->type, dec->id, getNullValue(dec->type), dec->constant));
+                    continue;
+                }
+                if(get(i).getType() == equal){
+                    ++i;
+                    if(dec->array and not dec->sizeDefined){
+                        if(get(i).getType() != left_curly){
+                            throwSyntaxError("Expected array elements", tokens.getLine(i));
+                        }
+                        ++i;
+                        vector<ASTNode*> elements = parseAgumentsInCall();
+                        if(get(i).getType() != right_curly){
+                            throwSyntaxError("Expected array elements", tokens.getLine(i));  
+                        }
+                        ++i;
+                        identation.getLastLayer()->add(new ArrayDeclaration(dec->type, dec->id,elements,dec->constant, new IntegerLiteral(std::to_string(elements.size()))));
+                        continue;
+                    }
+                    identation.getLastLayer()->add(new VariableDeclaration(dec->type, dec->id, parseExpression(), dec->constant));
+                    EXPECT_SEMICOLON
+                    continue;
+                        
+                }
+                if(get(i).getType() == left_par){
+                    if(dec->array and dec->sizeDefined){
+                        throwSyntaxError("Array-type functions must not have defined size", tokens.getLine(i));
+                    }
+                    ++i;
+                    vector<ASTNode*> args = parseArguments();
+                    if(get(i).getType() == right_par and get(++i).getType() == left_curly){
+                        identation.open<FunctionContainer>(new FunctionContainer(dec->id,dec->type,args));
+                        continue;
+                    }
+                    throwSyntaxError("Expected arguments or function body", tokens.getLine(i));
+                }
+                throwSyntaxError("Expected semicolon or expression", tokens.getLine(i));
+            }
+
+
+
 
             if(get(i).getType() == import_keyword){
                 ++i;
@@ -77,98 +128,19 @@ public:
                 continue;
             }
 
-            if(get(i).isTypeKeyword()){
-                bool constant = get(i - 1).getType() == const_keyword;
-                bool array = false;
-                bool sizeDefined = false;
-                lastType = get(i).getValue();
-                Type* type = new Type(lastType);
-                ASTNode* length = nullptr;
-
-                // Check if it's an array
-                if(get(i + 1).getType() == left_square){
-                    i += 2;
-                    array = true;
-                    ASTNode* expression = parseExpression();
-                    sizeDefined = not instanceOf<NullExpression>(expression);
-                    if(sizeDefined and get(i).getType() != right_square){
-                        throwSyntaxError("Expected array initializer", tokens.getLine(i));
-
-                    }
-                    length = expression;
-                    if(get(i).getType() != right_square){
-                        throwSyntaxError("Expected array initializer", tokens.getLine(i));
-                    }
-                }
-
-
-                if(get(i + 1).getType() == identifier){
-                    Identifier* name = new Identifier(get(i + 1).getValue());
-                    i += 2;
-                    if(get(i).getType() == left_par){
-                        if(array and sizeDefined){
-                            throwSyntaxError("Array-type functions must not have defined size", tokens.getLine(i));
-                        }
-                        if(array){
-                            type->type += "[]";
-                        }
-                        ++i;
-                        vector<ASTNode*> args = parseArguments();
-                        if(get(i).getType() == right_par and get(++i).getType() == left_curly){
-                            identation.open<FunctionContainer>(new FunctionContainer(name,type,args));
-                            continue;
-                        }
-                        throwSyntaxError("Expected arguments or function body", tokens.getLine(i));
-                    }
-                    if(get(i).getType() == semicolon){
-                        if(array and sizeDefined){
-                            identation.getLastLayer()->add(new ArrayDeclaration(type, name,{},constant, length));
-                            continue;
-                        }
-                        identation.getLastLayer()->add(new VariableDeclaration(type, name, getNullValue(), constant));
-                        continue;
-                    }
-                    if(get(i).getType() == equal){
-                        ++i;
-                        if(array and not sizeDefined){
-                            if(get(i).getType() != left_curly){
-                                throwSyntaxError("Expected array elements", tokens.getLine(i));
-                            }
-                            ++i;
-                            vector<ASTNode*> elements = parseAgumentsInCall();
-                            if(get(i).getType() != right_curly){
-                                throwSyntaxError("Expected array elements", tokens.getLine(i));  
-                            }
-                            ++i;
-                            identation.getLastLayer()->add(new ArrayDeclaration(type, name,elements,constant, new IntegerLiteral(std::to_string(elements.size()))));
-                            continue;
-                        }
-                        identation.getLastLayer()->add(new VariableDeclaration(type, name, parseExpression(), constant));
-                        EXPECT_SEMICOLON
-                        continue;
-                        
-                    }
-                    throwSyntaxError("Expected semicolon or expression", tokens.getLine(i));
-                }
-                
-            }
-
             if(get(i).getType() == foreach_keyword){
                 if(get(i + 1).getType() != left_par){
                     throwSyntaxError("Expected foreach statement", tokens.getLine(i));
                 }
-                if(not get(i + 2).isTypeKeyword()){
-                    throwSyntaxError("Expected type", tokens.getLine(i));
+                i += 2;
+                Symbol* symbol = parseTypeAndId();
+                if(symbol == nullptr){
+                    throwSyntaxError("Expected iterable declaration", tokens.getLine(i));
                 }
-                Type* type = new Type(get(i + 2).getValue());
-                if(get(i + 3).getType() != identifier){
-                    throwSyntaxError("Expected identifier", tokens.getLine(i));
-                }
-                Identifier* id = new Identifier(get(i + 3).getValue());
-                if(get(i + 4).getType() != in_keyword){
+                if(get(i).getType() != in_keyword){
                     throwSyntaxError("Expected 'in' keyword", tokens.getLine(i));
                 }
-                i += 5;
+                ++i;
                 ASTNode* expression = parseExpression();
                 if(instanceOf<NullExpression>(expression)){
                     throwSyntaxError("Expected iterable expression", tokens.getLine(i));
@@ -176,7 +148,7 @@ public:
                 if(get(i).getType() != right_par or get(++i).getType() != left_curly){
                     throwSyntaxError("Expected ')'", tokens.getLine(i));
                 }
-                identation.open<ForeachContainer>(new ForeachContainer(id, expression, type));
+                identation.open<ForeachContainer>(new ForeachContainer(symbol->id, expression, symbol->type));
             }
 
             if(get(i).getType() == identifier){
@@ -257,23 +229,23 @@ private:
     }
     
     
-    Literal* getNullValue(){
-        if(lastType == "int"){
+    Literal* getNullValue(Type* type){
+        if(type->type == "int"){
             return new IntegerLiteral("0");
         }
-        if(lastType == "num"){
+        if(type->type == "num"){
             return new NumericLiteral("0");
         }
-        if(lastType == "bool"){
+        if(type->type == "bool"){
             return new BoolLiteral("false");
         }
-        if(lastType == "var"){
+        if(type->type == "var"){
             return new NullLiteral();
         }
-        if(lastType == "char"){
+        if(type->type == "char"){
             return new CharLiteral("''");
         }
-        if(lastType == "string"){
+        if(type->type == "string"){
             return new StringLiteral("\"\"");
         }
         return nullptr;
@@ -484,5 +456,44 @@ private:
     void parseSimpleStatement(ASTNode* node){
         identation.getLastLayer()->add(node);
         EXPECT_SEMICOLON;
+    }
+
+    /*
+    * Searches for the sequence [type] [arrayDefinition?] [name]
+    */
+    Symbol* parseTypeAndId(){
+        Identifier* name;
+        Type* type;
+        bool isConst = get(i - 1).getType() == const_keyword;
+        bool isArray = false;
+        bool sizeDefined = false;
+        ASTNode* length = nullptr;
+
+        if(not get(i).isTypeKeyword()){
+            return nullptr;
+        }
+        type = new Type(get(i++).getValue());
+
+        if(get(i).getType() == left_square){
+            i++;
+            isArray = true;
+            ASTNode* expression = parseExpression();
+            sizeDefined = not instanceOf<NullExpression>(expression);
+            if(sizeDefined and get(i).getType() != right_square){
+                throwSyntaxError("Expected array initializer", tokens.getLine(i));
+
+            }
+            length = expression;
+            if(get(i++).getType() != right_square){
+                throwSyntaxError("Expected array initializer", tokens.getLine(i));
+            }
+            type->type += "[]";
+        }
+        
+        if(get(i).getType() != identifier){
+           return nullptr;
+        }
+        name = new Identifier(get(i++).getValue());
+        return new Symbol(type,name, isConst, isArray, sizeDefined, length);
     }
 };

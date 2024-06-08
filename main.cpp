@@ -16,7 +16,8 @@ int main(int argc, char** argv) {
     if(not format(filename, ".qz")){
         throwError("File format must be .qz or .quarzum.");
     }
-    
+
+
     Parser parser = Parser(Tokenizer::tokenize(content));
     RootNode root = parser.parse();
 

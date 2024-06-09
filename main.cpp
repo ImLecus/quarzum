@@ -1,7 +1,7 @@
 #include "src/tokenizer/tokenizer.hpp"
 #include "src/parser/parser.hpp"
 #include "src/source.hpp"
-#include "src/semantics/semantics.hpp"
+//#include "src/semantics/semantics.hpp"
 
 int main(int argc, char** argv) {
 

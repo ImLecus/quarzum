@@ -27,6 +27,10 @@ public:
         return identationLayer > 1;
     }
 
+    void addElement(ASTNode* object){
+        getLastLayer()->add(object);
+    }   
+
 private:
     u_int8_t identationLayer; 
     std::vector<Container*> layers;

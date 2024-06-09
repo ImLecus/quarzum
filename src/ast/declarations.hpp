@@ -38,26 +38,23 @@ public:
 
 class VariableDeclaration : public ASTNode {
 public:
-    ASTNode* type;
-    ASTNode* identifier;
+    Symbol* symbol;
     ASTNode* expression;
-    bool constant;
 
-    VariableDeclaration(ASTNode* varType, ASTNode* varName, ASTNode* initValue, bool constant): 
-        type(varType), identifier(varName), expression(initValue), constant(constant) {}
+    VariableDeclaration(Symbol* symbol, ASTNode* initValue): 
+        symbol(symbol), expression(initValue) {}
 
     void print() override  {
         std::cout << "VariableDeclaration:\n\t";
-        type->print();
+        symbol->type->print();
         std::cout <<'\t';
-        identifier->print();
-        std::cout <<"\tconstant: " << constant << "\n\t";
+        symbol->id->print();
+        std::cout <<"\tconstant: " << symbol->constant << "\n\t";
         expression->print();
     }
 
     ~VariableDeclaration() {
-        delete type;
-        delete identifier;
+        delete symbol;
         delete expression;
     }
 };

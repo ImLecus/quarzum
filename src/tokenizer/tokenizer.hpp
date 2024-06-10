@@ -161,7 +161,11 @@ private:
             {"&", bit_and},
             {"|", bit_or},
             {"^", bit_xor},
-            {"~", bit_not}
+            {"~", bit_not},
+            {"+=", plus_eq},
+            {"-=", minus_eq},
+            {"*=", prod_eq},
+            {"/=", div_eq}
         };
         try {
             return symbols.at(symbol);

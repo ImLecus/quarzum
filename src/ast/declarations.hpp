@@ -1,8 +1,7 @@
 #pragma once
 #include "astnode.hpp"
 
-class Return : public ASTNode {
-public:
+struct Return : public ASTNode {
     ASTNode* value;
     Return(ASTNode* value): value(value) {}
     void print() override  {
@@ -11,23 +10,18 @@ public:
     }
 };
 
-class Continue : public ASTNode {
-public:
-    Continue() {}
+struct Continue : public ASTNode {
     void print() override  {
         std::cout << "Continue\n";
     }
 };
-class Break : public ASTNode {
-public:
-    Break() {}
+struct Break : public ASTNode {
     void print() override  {
         std::cout << "Break\n";
     }
 };
 
-class Exit : public ASTNode {
-public:
+struct Exit : public ASTNode {
     ASTNode* value;
     Exit(ASTNode* value): value(value) {}
     void print() override  {
@@ -36,8 +30,7 @@ public:
     }
 };
 
-class VariableDeclaration : public ASTNode {
-public:
+struct VariableDeclaration : public ASTNode {
     Symbol* symbol;
     ASTNode* expression;
 
@@ -67,8 +60,7 @@ public:
     }
 };
 
-class ArrayDeclaration : public ASTNode {
-public:
+struct ArrayDeclaration : public ASTNode {
     ASTNode* type;
     ASTNode* identifier;
     std::vector<ASTNode*> elements;
@@ -104,8 +96,7 @@ public:
     }
 };
 
-class VariableRedeclaration : public ASTNode {
-public:
+struct VariableRedeclaration : public ASTNode {
     ASTNode* identifier;
     ASTNode* expression;
 

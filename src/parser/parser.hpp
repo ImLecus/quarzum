@@ -23,7 +23,7 @@ public:
         identation.open(&root);
 
         for(i = 0; i < tokens.size(); ++i){
-            
+
             if(auto dec = parseTypeAndId()){
                 if(ask(semicolon)){
                     if(dec->array and dec->sizeDefined){
@@ -69,7 +69,7 @@ public:
                 throwSyntaxError("Expected semicolon or expression", tokens.getLine(i));
             }
 
-
+            
 
 
             if(ask(import_keyword)){
@@ -151,6 +151,7 @@ public:
             }
 
             if(ask(identifier)){
+                
                 Identifier* name = new Identifier(get(i).getValue());
                 if(ask(equal, 1)){
                     i += 2;
@@ -158,6 +159,7 @@ public:
                     EXPECT_SEMICOLON
                     continue;
                 }
+                
                 if(ask(left_par, 1)){
                     i += 2;
                     vector<ASTNode*> args = parseAgumentsInCall();
@@ -247,7 +249,7 @@ private:
         if(type->type == "string"){
             return new StringLiteral("\"\"");
         }
-        throwTypeError("Unable to find null value for type " + type->type, tokens.getLine(i));
+        throwTypeError("Unable to find null value for type " + type->type);
         return nullptr;
     }
 
@@ -330,9 +332,10 @@ private:
         if(not ask(right_par)){
             throwSyntaxError("Expected condition", tokens.getLine(i));
         }
-        if(get(i+ 1).getType() != left_curly){
+        if(not ask(left_curly, 1)){
             throwSyntaxError("Expected if body", tokens.getLine(i));
         }
+        ++i;
         identation.open<IfContainer>(new IfContainer(condition));
     }
 
@@ -377,8 +380,14 @@ private:
                 valid = false;
                 continue;
             }
-            std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
-            arguments.push_back(new Argument(symbol->type, nameAndValue[0], nameAndValue[1]));
+            ASTNode* value = parseExpression();
+            if(instanceOf<NullExpression>(value)){
+                arguments.push_back(new Argument(symbol));
+            }
+            else{
+                arguments.push_back(new Argument(symbol, value));
+            }
+            
             if(ask(comma)){
                 ++i;
                 continue;
@@ -472,8 +481,8 @@ private:
         if(not get(i).isTypeKeyword()){
             return nullptr;
         }
-        type = new Type(get(i++).getValue());
-
+        type = new Type(get(i).getValue());
+        i++;
         if(ask(left_square)){
             i++;
             isArray = true;
@@ -481,7 +490,6 @@ private:
             sizeDefined = not instanceOf<NullExpression>(expression);
             if(sizeDefined and not ask(right_square)){
                 throwSyntaxError("Expected array initializer", tokens.getLine(i));
-
             }
             length = expression;
             if(get(i++).getType() != right_square){
@@ -491,6 +499,7 @@ private:
         }
         
         if(not ask(identifier)){
+            --i;
            return nullptr;
         }
         name = new Identifier(get(i++).getValue());

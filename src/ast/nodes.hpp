@@ -1,8 +1,7 @@
 #pragma once
 #include "astnode.hpp"
 
-class Type : public ASTNode {
-public:
+struct Type : public ASTNode {
     std::string type;
     Type(std::string type) : type(type) {}
     void print() override{
@@ -10,8 +9,7 @@ public:
     }
 };
 
-class Symbol : public ASTNode {
-public:
+struct Symbol : public ASTNode {
     Type* type;
     Identifier* id;
     bool constant;
@@ -31,8 +29,7 @@ public:
 };
 
 
-class FunctionCall : public ASTNode {
-public:
+struct FunctionCall : public ASTNode {
     ASTNode* identifier;
     std::vector<ASTNode*> args;
     FunctionCall(ASTNode* identifier, std::vector<ASTNode*> args): identifier(identifier), args(args) {}
@@ -45,26 +42,22 @@ public:
     }
 };
 
-class Argument : public ASTNode {
-public:
-    ASTNode* type;
-    ASTNode* identifier;
+struct Argument : public ASTNode {
+    Symbol* symbol;
+
     ASTNode* defaultValue = nullptr;
-    Argument(ASTNode* type, ASTNode* identifier): type(type), identifier(identifier) {}
-    Argument(ASTNode* type, ASTNode* identifier, ASTNode* defaultValue): 
-    type(type), identifier(identifier), defaultValue(defaultValue) {}
+    Argument(Symbol* symbol): symbol(symbol) {}
+    Argument(Symbol* symbol, ASTNode* defaultValue): symbol(symbol), defaultValue(defaultValue) {}
     void print() override{
         std::cout << "Argument:\n";
-        type->print();
-        identifier->print();
+        symbol->print();
         if(defaultValue != nullptr){
             defaultValue -> print();
         }
     }
 };
 
-class EnumElement : public ASTNode {
-public:
+struct EnumElement : public ASTNode {
     ASTNode* identifier;
     ASTNode* defaultValue = nullptr;
    

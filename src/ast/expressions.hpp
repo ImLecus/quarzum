@@ -1,8 +1,7 @@
 #pragma once
 #include "astnode.hpp"
 
-class UnaryExpression : public ASTNode {
-public:
+struct UnaryExpression : public ASTNode {
     std::string op; 
     ASTNode* operand;
 
@@ -18,8 +17,7 @@ public:
     }
 };
 
-class BinaryExpression : public ASTNode {
-public:
+struct BinaryExpression : public ASTNode {
     std::string op;
     ASTNode* left; 
     ASTNode* right;
@@ -40,8 +38,7 @@ public:
     }
 };
 
-class NullExpression : public ASTNode {
-public:
+struct NullExpression : public ASTNode {
     NullExpression(){}
     void print() override{
         std::cout << "NullExpression\n";

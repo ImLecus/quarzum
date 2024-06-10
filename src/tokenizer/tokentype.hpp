@@ -62,6 +62,12 @@ enum TokenType : unsigned char {
     bit_and = 0x42,
     bit_xor = 0x43,
     bit_not = 0x44,
+    plus_eq = 0x45,
+    minus_eq = 0x46,
+    prod_eq = 0x47,
+    div_eq = 0x48,
+    mod_eq = 0x49,
+    pow_eq = 0x4A,
     // symbols
     equal = 0x60,
     semicolon = 0x61,

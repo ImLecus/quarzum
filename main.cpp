@@ -1,7 +1,7 @@
 #include "src/tokenizer/tokenizer.hpp"
 #include "src/parser/parser.hpp"
 #include "src/source.hpp"
-//#include "src/semantics/semantics.hpp"
+#include "src/semantics/semantics.hpp"
 
 int main(int argc, char** argv) {
 
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     Parser parser = Parser(Tokenizer::tokenize(content));
     RootNode root = parser.parse();
 
-    //Semantics s = Semantics();
+    Semantics s = Semantics();
     //s.check(root);
 
     //std::cout << s.rootToIR(root) << '\n';

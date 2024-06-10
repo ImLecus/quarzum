@@ -7,13 +7,14 @@ class Semantics {
 public:
     void check(RootNode root){
         for(ASTNode* node : root.nodes){
-            if(instanceOf<VariableDeclaration>(node)){
-                VariableDeclaration* declaration = dynamic_cast<VariableDeclaration*>(node);
-                Type* type = dynamic_cast<Type*>(declaration->type);
+
+            if(VariableDeclaration* declaration = dynamic_cast<VariableDeclaration*>(node)){
+                Type* type = dynamic_cast<Type*>(declaration->symbol->type);
                 if(type->type == "int" and not instanceOf<IntegerLiteral>(declaration->expression)){
                     throwTypeError("Invalid assignment type");
                 }
             }
+
         }
     }
 
@@ -22,7 +23,7 @@ public:
         for(ASTNode* node : root.nodes){
             if(instanceOf<VariableDeclaration>(node)){
                 VariableDeclaration* declaration = dynamic_cast<VariableDeclaration*>(node);
-                Identifier* id = dynamic_cast<Identifier*>(declaration->identifier);
+                Identifier* id = dynamic_cast<Identifier*>(declaration->symbol->id);
                 if(instanceOf<Literal>(declaration->expression)){
                     Literal* value = dynamic_cast<Literal*>(declaration->expression);
                     ir += id->getValue() + " = "+ value->getValue() + '\n';

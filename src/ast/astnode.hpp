@@ -8,8 +8,7 @@ public:
     virtual void print() = 0;
 };
 
-class Container : public ASTNode {
-public:
+struct Container : public ASTNode {
     std::vector<ASTNode*> nodes;
     Container(): nodes{}{}
     ~Container(){
@@ -27,8 +26,6 @@ public:
     }
 };
 
-class RootNode : public Container {
-public:
+struct RootNode : public Container {
     RootNode(): Container(){}
-
 };

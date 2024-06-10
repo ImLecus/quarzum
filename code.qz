@@ -1,8 +1,14 @@
-int8 b;
-int16 c;
-int d;
-int32 e;
-int64 f;
-num n;
-num64 m;
-decimal s;
+import Math from "math.qz"
+module Program {
+    function main(int argc, string[] argv){
+        /*
+        * Simple program made in Quarzum
+        */
+        int8 v = 2;
+        if(v >= 0){
+            out("v is positive");
+        }
+        v = 4;
+    }
+}
+

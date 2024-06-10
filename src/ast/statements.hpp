@@ -1,14 +1,12 @@
 #pragma once
 #include "astnode.hpp"
 
-class Statement : public ASTNode {
-public: 
+struct Statement : public ASTNode {
     std::vector<ASTNode*> children;
     Statement(std::vector<ASTNode*> children): children(children) {}
 };
 
-class EnumStatement : public Statement {
-public:
+struct EnumStatement : public Statement {
     ASTNode* name;
     ASTNode* extend;
     EnumStatement(std::vector<ASTNode*> children,ASTNode* name, ASTNode* extend) :Statement(children), name(name),extend(extend)  {}
@@ -22,8 +20,7 @@ public:
     }
 };
 
-class ImportStatement : public Statement {
-public:
+struct ImportStatement : public Statement {
     std::string path;
     ImportStatement(std::vector<ASTNode*> imports, std::string path): Statement(imports), path(path) {}
     void print() override {
@@ -35,8 +32,7 @@ public:
     }
 };
 
-class ModuleContainer : public Container {
-public:
+struct ModuleContainer : public Container {
     ASTNode* identifier;
     bool isClass;
     ModuleContainer(ASTNode* identifier, bool isClass): Container(), identifier(identifier), isClass(isClass) {}
@@ -51,8 +47,7 @@ public:
     }
 };
 
-class IfContainer : public Container {
-public:
+struct IfContainer : public Container {
     ASTNode* condition;
 
     IfContainer(ASTNode* condition): Container(), condition(condition) {}
@@ -66,8 +61,7 @@ public:
     }
 };
 
-class WhileContainer : public Container {
-public:
+struct WhileContainer : public Container {
     ASTNode* condition;
 
     WhileContainer(ASTNode* condition): Container(), condition(condition) {}
@@ -81,8 +75,7 @@ public:
     }
 };
 
-class ForeachContainer : public Container {
-public:
+struct ForeachContainer : public Container {
     ASTNode* identifier;
     ASTNode* iterable;
     ASTNode* type;
@@ -100,8 +93,7 @@ public:
     }
 };
 
-class FunctionContainer : public Container {
-public:
+struct FunctionContainer : public Container {
     ASTNode* identifier;
     ASTNode* type;
     std::vector<ASTNode*> args;

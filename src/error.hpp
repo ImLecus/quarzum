@@ -21,8 +21,8 @@ void throwSyntaxError(const std::string& message, size_t line){
     exit(EXIT_FAILURE);
 }
 
-void throwTypeError(const std::string& message, size_t line){
-    std::cout << RED << "TypeError" << NOCOLOR << ": " << message << " at line " << line << ".\n";
+void throwTypeError(const std::string& message){
+    std::cout << RED << "TypeError" << NOCOLOR << ": " << message << '\n';
     exit(EXIT_FAILURE);
 }
 

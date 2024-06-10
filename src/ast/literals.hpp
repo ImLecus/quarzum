@@ -1,66 +1,58 @@
 #pragma once
 #include "astnode.hpp"
 
-class Literal : public ASTNode {
-public:
+struct Literal : public ASTNode {
+    std::string value;
     Literal(std::string value): value(value) {}
     std::string getValue(){
-        return this->value;
+        return value;
     }
-private:
-    std::string value;
+    
 };
 
-class Identifier : public Literal {
-public:
+struct Identifier : public Literal {
     Identifier(std::string name) : Literal(name) {}
     void print() override{
         std::cout << "Identifier: " << getValue() << '\n';
     }
 };
 
-class IntegerLiteral : public Literal {
-public:
+struct IntegerLiteral : public Literal {
     IntegerLiteral(std::string value): Literal(value) {}
     void print() override{
         std::cout << "IntegerLiteral: " << getValue() << '\n';
     }
 };
 
-class NumericLiteral : public Literal {
-public:
+struct NumericLiteral : public Literal {
     NumericLiteral(std::string value) : Literal(value) {}
     void print() override{
         std::cout << "NumericLiteral: " << getValue() << '\n';
     }
 };
 
-class CharLiteral : public Literal {
-public:
+struct CharLiteral : public Literal {
     CharLiteral(std::string value) : Literal(value) {}
     void print() override{
         std::cout << "CharLiteral: " << getValue() << '\n';
     }
 };
 
-class StringLiteral : public Literal {
-public:
+struct StringLiteral : public Literal {
     StringLiteral(std::string value) : Literal(value) {}
     void print() override{
         std::cout << "StringLiteral: " << getValue() << '\n';
     }
 };
 
-class BoolLiteral : public Literal {
-public:
+struct BoolLiteral : public Literal {
     BoolLiteral(std::string value) : Literal(value) {}
     void print() override{
         std::cout << "BoolLiteral: " << getValue() << '\n';
     }
 };
 
-class NullLiteral : public Literal {
-public:
+struct NullLiteral : public Literal {
     NullLiteral() : Literal("null") {}
     void print() override{
         std::cout << "NullLiteral\n";

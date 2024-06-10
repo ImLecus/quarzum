@@ -229,10 +229,10 @@ private:
     
     
     Literal* getNullValue(Type* type){
-        if(type->type == "int"){
+        if(type->type.find("int") != std::string::npos ){
             return new IntegerLiteral("0");
         }
-        if(type->type == "num"){
+        if(type->type == "num" or type -> type == "num64" or type -> type == "decimal"){
             return new NumericLiteral("0");
         }
         if(type->type == "bool"){
@@ -247,6 +247,7 @@ private:
         if(type->type == "string"){
             return new StringLiteral("\"\"");
         }
+        throwTypeError("Unable to find null value for type " + type->type, tokens.getLine(i));
         return nullptr;
     }
 

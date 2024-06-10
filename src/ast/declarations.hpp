@@ -51,6 +51,14 @@ public:
         symbol->id->print();
         std::cout <<"\tconstant: " << symbol->constant << "\n\t";
         expression->print();
+
+    }
+
+    void generateIR(){
+        if(Literal* l = dynamic_cast<Literal*>(expression)){
+            std::cout << symbol->id->getValue() << " = LOADI " << l->getValue() << '\n';
+        }
+        
     }
 
     ~VariableDeclaration() {

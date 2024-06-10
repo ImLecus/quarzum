@@ -18,7 +18,7 @@ public:
         return (u_int8_t)this->type <= 0x2F;
     }
     bool isTypeKeyword() const {
-        return (u_int8_t)this->type <= 0x07 or this->type == identifier;
+        return (u_int8_t)this->type <= 0x0F or this->type == identifier;
     }
     bool isOperator() const {
         return (u_int8_t)this->type >= 0x30 and (u_int8_t)this->type <= 0x5F;

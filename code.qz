@@ -1,2 +1,8 @@
-exit 2;
-int i = 8;
+int8 b;
+int16 c;
+int d;
+int32 e;
+int64 f;
+num n;
+num64 m;
+decimal s;

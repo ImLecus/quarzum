@@ -9,8 +9,6 @@
 #include <array>
 #include <stack>
 
-#define EXPECT_SEMICOLON if(not ask(semicolon)){throwSyntaxError("Expected semicolon", tokens.getLine(i));}
-
 using std::vector;
 
 
@@ -36,20 +34,14 @@ public:
                 if(ask(equal)){
                     ++i;
                     if(dec->array and not dec->sizeDefined){
-                        if(not ask(left_curly)){
-                            throwSyntaxError("Expected array elements", tokens.getLine(i));
-                        }
-                        ++i;
+                        expect(left_curly, "Expected array elements");
                         vector<ASTNode*> elements = parseAgumentsInCall();
-                        if(not ask(right_curly)){
-                            throwSyntaxError("Expected array elements", tokens.getLine(i));  
-                        }
-                        ++i;
+                        expect(right_curly, "Expected array elements");
                         identation.addElement(new ArrayDeclaration(dec->type, dec->id,elements,dec->constant, new IntegerLiteral(std::to_string(elements.size()))));
                         continue;
                     }
                     identation.addElement(new VariableDeclaration(dec, parseExpression()));
-                    EXPECT_SEMICOLON
+                    expect(semicolon, "Expected semicolon");
                     continue;
                         
                 }
@@ -72,74 +64,40 @@ public:
             
 
 
-            if(ask(import_keyword)){
-                ++i;
-                bool valid = true;
-                vector<ASTNode*> imports;
-                while(valid){
-                    if(ask(identifier)){
-                        imports.push_back(new Identifier(get(i++).getValue()));
-                        if(ask(comma)){
-                            ++i;
-                            continue;
-                        }
-                        valid = false;
-                        continue;
-                    }
-                    valid = false;
-                }
-                if(imports.empty()){
-                    throwSyntaxError("Invalid import statement", tokens.getLine(i));
-                }
-                std::string location;
-                if(not ask(from_keyword) or not ask(string_literal, 1)){
-                    throwSyntaxError("Missing import path", tokens.getLine(i));
-                }
-                location = get(++i).getValue();
-                identation.addElement(new ImportStatement(imports, location));
-                continue;
+            else if(ask(import_keyword)){
+                parseImport();
             }
 
-            if(ask(right_curly) and identation.hasLayers()){
+            else if(ask(right_curly) and identation.hasLayers()){
                 identation.close();
-                continue;
             }
 
-            if(ask(return_keyword)){
+            else if(ask(return_keyword)){
                 ++i;
                 parseSimpleStatement(new Return(parseExpression()));
-                continue;
             }
 
-            if(ask(exit_keyword)){
+            else if(ask(exit_keyword)){
                 ++i;
                 parseSimpleStatement(new Exit(parseExpression()));
-                continue;
             }
-            if(ask(break_keyword)){
+            else if(ask(break_keyword)){
                 ++i;
                 parseSimpleStatement(new Break());
-                continue;
             }
-            if(ask(continue_keyword)){
+            else if(ask(continue_keyword)){
                 ++i;
                 parseSimpleStatement(new Continue());
-                continue;
             }
 
-            if(ask(foreach_keyword)){
-                if(not ask(left_par, 1)){
-                    throwSyntaxError("Expected foreach statement", tokens.getLine(i));
-                }
-                i += 2;
+            else if(ask(foreach_keyword)){
+                ++i;
+                expect(left_par, "Expected foreach statement");
                 Symbol* symbol = parseTypeAndId();
                 if(symbol == nullptr){
                     throwSyntaxError("Expected iterable declaration", tokens.getLine(i));
                 }
-                if(not ask(in_keyword)){
-                    throwSyntaxError("Expected 'in' keyword", tokens.getLine(i));
-                }
-                ++i;
+                expect(in_keyword, "Expected 'in' keyword");
                 ASTNode* expression = parseExpression();
                 if(instanceOf<NullExpression>(expression)){
                     throwSyntaxError("Expected iterable expression", tokens.getLine(i));
@@ -150,64 +108,40 @@ public:
                 identation.open<ForeachContainer>(new ForeachContainer(symbol->id, expression, symbol->type));
             }
 
-            if(ask(identifier)){
+            else if(ask(identifier)){
                 
                 Identifier* name = new Identifier(get(i).getValue());
                 if(ask(equal, 1)){
                     i += 2;
                     identation.addElement(new VariableRedeclaration(name, parseExpression()));
-                    EXPECT_SEMICOLON
+                    expect(semicolon, "Expected semicolon");
                     continue;
                 }
                 
                 if(ask(left_par, 1)){
                     i += 2;
                     vector<ASTNode*> args = parseAgumentsInCall();
-                    if(not ask(right_par)){
-                        throwSyntaxError("Expected arguments or function call", tokens.getLine(i));                       
-                    }
+                    expect(right_par, "Expected arguments or function call");
                     identation.addElement(new FunctionCall(name, args));
-                    ++i;
-                    EXPECT_SEMICOLON
+                   
+                    expect(semicolon, "Expected semicolon");
                     continue;
                 }
             }
 
-            if(ask(module_keyword)){
+            else if(ask(module_keyword)){
                 parseModuleStatement();
             }
 
-            if(ask(if_keyword)){
+            else if(ask(if_keyword)){
                 parseIfStatement();
             }
-            if(ask(while_keyword)){
+            else if(ask(while_keyword)){
                 parseWhileStatement();
             }
 
-            if(ask(enum_keyword)){
-                if(not ask(identifier, 1)){
-                    throwSyntaxError("Expected identifier", tokens.getLine(i));
-                }
-                Identifier* name = new Identifier(get(i + 1).getValue());
-                ASTNode* extend = nullptr;
-                i += 2;
-                if(ask(arrow) and get(i + 1).isTypeKeyword()){
-                    extend = new Type(get(i + 1).getValue());
-                    i += 2;
-                }
-                if(not ask(left_curly)){
-                    throwSyntaxError("Expected enumeration", tokens.getLine(i));
-                }
-                
-                ++i;
-                if(extend == nullptr){extend = new Type("int");}    
-                vector<ASTNode*> elements = parseEnumElements();
-                if(not ask(right_curly)){
-                    throwSyntaxError("Expected end of enumeration", tokens.getLine(i));
-                }
-                identation.addElement(new EnumStatement(elements, name, extend));
-                continue;
-                
+            else if(ask(enum_keyword)){
+                parseEnum();
             }
             
         }
@@ -222,13 +156,29 @@ private:
     std::string lastType;
     IdentationManager identation;
 
+
     Token get(const size_t& index){
         if(index <= tokens.size()){
             return tokens[index];
         }
         return ERROR_TOKEN;
     }
-    
+
+    bool ask(const TokenType type,const int8_t distance = 0){
+        return get(i + distance).getType() == type;
+    }
+
+    void expect(const TokenType t, const char* description){
+        if(get(i).getType() != t){
+            throwSyntaxError(description, tokens.getLine(i));
+            return;
+        }
+        ++i;
+    }
+
+    /**
+     * EXPRESSION PARSING
+    */
     
     Literal* getNullValue(Type* type){
         if(type->type.find("int") != std::string::npos ){
@@ -319,38 +269,67 @@ private:
         return nullptr;
     }
 
-    //
-    // PARSING RELATED
-    //
+    /*
+    * STATEMENT PARSING
+    */
+    void parseEnum(){
+        ++i;
+        expect(identifier, "Expected identifier");
+        Identifier* name = new Identifier(get(i - 1).getValue());
+        ASTNode* extend = nullptr;
+        
+        if(ask(arrow) and get(i + 1).isTypeKeyword()){
+            extend = new Type(get(i + 1).getValue());
+            i += 2;
+        }
+        expect(left_curly, "Expected enumeration");
+        if(extend == nullptr){extend = new Type("int");}    
+        vector<ASTNode*> elements = parseEnumElements();
+        expect(right_curly, "Expected end of enumeration");
+        identation.addElement(new EnumStatement(elements, name, extend));
+    }
+
+    void parseImport(){
+        ++i;
+        bool valid = true;
+        vector<ASTNode*> imports;
+        while(valid){
+            if(ask(identifier)){
+                imports.push_back(new Identifier(get(i++).getValue()));
+                if(ask(comma)){
+                    ++i;
+                    continue;
+                }
+                valid = false;
+            }
+            valid = false;
+        }
+        if(imports.empty()){
+            throwSyntaxError("Invalid import statement", tokens.getLine(i));
+        }
+        std::string location;
+        if(not ask(from_keyword) or not ask(string_literal, 1)){
+            throwSyntaxError("Missing import path", tokens.getLine(i));
+        }
+        location = get(++i).getValue();
+        identation.addElement(new ImportStatement(imports, location));
+    }
 
     void parseIfStatement(){
-        if(get(++i).getType() != left_par){
-            throwSyntaxError("Expected condition", tokens.getLine(i));
-        } 
         ++i;
+        expect(left_par, "Expected condition");
         ASTNode* condition = parseExpression();
-        if(not ask(right_par)){
-            throwSyntaxError("Expected condition", tokens.getLine(i));
-        }
-        if(not ask(left_curly, 1)){
-            throwSyntaxError("Expected if body", tokens.getLine(i));
-        }
-        ++i;
+        expect(right_par, "Expected condition");
+        expect(left_curly, "Expected if body");
         identation.open<IfContainer>(new IfContainer(condition));
     }
 
     void parseWhileStatement(){
-        if(get(++i).getType() != left_par){
-            throwSyntaxError("Expected condition", tokens.getLine(i));
-        }
         ++i;
+        expect(left_par, "Expected condition");
         ASTNode* condition = parseExpression();
-        if(not ask(right_par)){
-            throwSyntaxError("Expected condition", tokens.getLine(i));
-        }
-        if(get(i+ 1).getType() != left_curly){
-            throwSyntaxError("Expected while body", tokens.getLine(i));
-        }
+        expect(right_par, "Expected condition");
+        expect(left_curly, "Expected while body");
         identation.open<WhileContainer>(new WhileContainer(condition));
     }
 
@@ -361,10 +340,8 @@ private:
             moduleClass = true;
             ++i;
         }
-        if(not ask(identifier)){
-           throwSyntaxError("Expected identifier", tokens.getLine(i));
-        }
-        ASTNode* identifier = new Identifier(get(i++).getValue());
+        expect(identifier, "Expected identifier");
+        ASTNode* identifier = new Identifier(get(i - 1).getValue());
         if(not ask(left_curly)){
             throwSyntaxError("Expected module body", tokens.getLine(i));
         }
@@ -464,7 +441,7 @@ private:
       
     void parseSimpleStatement(ASTNode* node){
         identation.addElement(node);
-        EXPECT_SEMICOLON;
+        expect(semicolon, "Expected semicolon");;
     }
 
     /*
@@ -504,9 +481,5 @@ private:
         }
         name = new Identifier(get(i++).getValue());
         return new Symbol(type,name, isConst, isArray, sizeDefined, length);
-    }
-
-    bool ask(TokenType type, int8_t distance = 0){
-        return get(i + distance).getType() == type;
     }
 };

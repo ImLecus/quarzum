@@ -1,16 +1,17 @@
 #include <string>
 #include <fstream>
+#include "string.h"
 
-bool format(const std::string& filename, const std::string& format){
-    for(u_int16_t i = 0; i <= filename.length() && i <= format.length(); ++i){
-        if(filename[filename.length() - i] != format[format.length() - i]){
+bool format(const char* filename, const char* format){
+    for(u_int16_t i = 0; i < strlen(filename) && i < strlen(format); ++i){
+        if(filename[strlen(filename) - i] != format[strlen(format) - i]){
             return false;
         }
     }
     return true;
 }
 
-std::string getSource(const std::string& filename){
+std::string getSource(const char* filename){
     std::ifstream inputFile(filename);
 
     if (!inputFile.is_open()) {

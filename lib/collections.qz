@@ -1,0 +1,59 @@
+module Collections {
+    
+    class Pair<T,U> {
+
+        constructor(T left, U right){
+            this.first = left;
+            this.second = right;
+        }
+
+        private T first;
+        private U second;
+    }
+
+    class List<T> {
+        
+        public function add(T object){
+            
+            if(length <= capacity){
+                length++;
+                this.objects[length] = object;
+            }
+            else {
+                this.expand();
+                add(object);
+            }
+        }
+
+        public function remove(uint index){
+            this.objects[index] = null;
+        }
+
+        public T pop(){
+            T result = this.objects[this.length];
+            remove(length);
+            length--;
+            return result;
+        }
+
+        public T operator[](uint index){
+            return this.objects[index];
+        }
+
+        private T[] objects;
+        private uint length;
+        private uint capacity;
+
+        private function expand(){
+            capacity *= 2;
+            T[capacity] newList;
+            for(uint i = 0; i < length; i++){
+                newList[i] = this.objects[i];
+            }
+            delete this.objects;
+            this.objects = newList;
+        }
+    }
+
+
+}

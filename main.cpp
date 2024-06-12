@@ -1,16 +1,16 @@
-#include "src/tokenizer/tokenizer.hpp"
+#include "src/tokenizer/tokenizer.cpp"
 #include "src/parser/parser.hpp"
 #include "src/source.hpp"
 #include "src/semantics/semantics.hpp"
 
-int main(int argc, char** argv) {
+int main(const int argc,const char** argv) {
 
     if(argc < 2){
         throwError("No file specified.");
     }
-    const std::string filename = argv[1];
+    const char* filename = argv[1];
     const std::string content = getSource(filename);
-    if(content == ""){
+    if(not content[0]){
         throwError("File not found.");
     }
     if(not format(filename, ".qz")){
@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
     }
 
 
-    Parser parser = Parser(Tokenizer::tokenize(content));
+    Parser parser = Parser(tokenize(content));
     RootNode root = parser.parse();
 
     Semantics s = Semantics();

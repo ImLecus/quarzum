@@ -15,14 +15,14 @@ TokenType bufferToKeyword(const std::string& buffer);
 /**
  * @brief Reads a string with the source code and creates a TokenList.
  * If some unexpected token appears, the function throws an 
- * error and the program ends.
+ * error.
  * @param content The source code.
 */
 TokenList tokenize(const std::string& content);
 /**
- * @brief Prints a lexical error message and stops the program.
+ * @brief Prints a lexical error message.
 */
-void throwLexicalError(const char* message, const size_t line);
+void throwLexicalError(const char* message, const size_t line,auto index);
 
 const std::unordered_map<std::string, TokenType> symbols = {
     {";", semicolon},

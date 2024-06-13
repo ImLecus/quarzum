@@ -49,10 +49,10 @@ TokenList tokenize(const std::string& content){
                     index += 2;
                     continue;
                 }
-                throwLexicalError("Unexpected token",index, lineNumber);
+                throwLexicalError("Unexpected token", lineNumber,index);
                 err = true;
             }
-            throwLexicalError("Unexpected token",index, lineNumber);
+            throwLexicalError("Unexpected token", lineNumber, index);
             err = true;
         }
         if(*index == '"'){
@@ -114,7 +114,7 @@ TokenList tokenize(const std::string& content){
             }
             TokenType type = bufferToSymbol(buffer);
             if(type == token_error){
-                throwLexicalError("Unexpected token",index, lineNumber);
+                throwLexicalError("Unexpected token", lineNumber, index);
                 err = true;
             }
 
@@ -127,8 +127,9 @@ TokenList tokenize(const std::string& content){
             continue;
         }
         else{
-            throwLexicalError("Unexpected token",index, lineNumber);
+            throwLexicalError("Unexpected token", lineNumber, index);
             err = true;
+            ++index;
         }
     }
     if(err){return TokenList();}
@@ -151,6 +152,16 @@ TokenType bufferToKeyword(const std::string& buffer){
     return identifier;
 }
 
-void throwLexicalError(const char* message, const size_t index, const size_t line){
-    std::cout << "\e[31m" << "LexicalError" << "\e[0m" << ": " << message << " at line " << line << ".\n";
+void throwLexicalError(const char* message, const size_t lineNumber,auto index){
+    std::cout << "\e[31m" << "LexicalError" << "\e[0m" << ": " << message << " at line " << lineNumber << ".\n";
+    std::string line;
+    u_int16_t margin = 0;
+    while(*(index-1) != '\n'){--index;++margin;}
+    while(*index != '\n'){line += *(index++);}
+    std::cout << lineNumber << " | " << line << '\n';
+    margin += 3 + std::to_string(lineNumber).length();
+    line = "";
+    while(margin > 1){line += " ";--margin;}
+    line += "^^^\n";
+    std::cout << "\e[31m" << line << "\e[0m";
 }

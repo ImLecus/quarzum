@@ -90,5 +90,7 @@ enum TokenType : unsigned char {
     // other
     identifier = 0xF0,
     comment = 0xF1,
+    p_optional = 0xF2,
+    p_type = 0xF3,
     token_error = 0xFF
 };

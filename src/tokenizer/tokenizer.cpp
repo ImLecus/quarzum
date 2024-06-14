@@ -152,7 +152,7 @@ TokenType bufferToKeyword(const std::string& buffer){
     return identifier;
 }
 
-void throwLexicalError(const char* message, const size_t lineNumber,auto index){
+void throwLexicalError(const char* message, const size_t lineNumber, std::string::const_iterator index){
     std::cout << "\e[31m" << "LexicalError" << "\e[0m" << ": " << message << " at line " << lineNumber << ".\n";
     std::string line;
     u_int16_t margin = 0;

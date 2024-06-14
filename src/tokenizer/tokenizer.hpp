@@ -22,7 +22,7 @@ TokenList tokenize(const std::string& content);
 /**
  * @brief Prints a lexical error message.
 */
-void throwLexicalError(const char* message, const size_t line,auto index);
+void throwLexicalError(const char* message, const size_t line, std::string::const_iterator index);
 
 const std::unordered_map<std::string, TokenType> symbols = {
     {";", semicolon},

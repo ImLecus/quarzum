@@ -1,5 +1,5 @@
 #include "src/tokenizer/tokenizer.cpp"
-#include "src/parser/parser.hpp"
+#include "src/parser/parser.cpp"
 #include "src/source.hpp"
 #include "src/semantics/semantics.hpp"
 

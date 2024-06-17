@@ -6,6 +6,7 @@
 #include "../ast/nodes.hpp"
 #include "../ast/declarations.hpp"
 #include "../ast/statements.hpp"
+#include "../ast/containers.hpp"
 #include "../error.hpp"
 #include "identation.hpp"
 #include <array>
@@ -18,22 +19,6 @@ Literal* getNullValue(Type* type);
 
 template<typename T, typename U>
 bool instanceOf(const U& object);
-
-struct Sequence {
-    std::vector<Type*> types;
-    std::vector<Identifier*> identifiers;
-    std::vector<ASTNode* /*expr*/> expressions;
-    std::vector<Argument*> args;
-    std::vector<bool> flags;
-
-    Sequence(){
-        types.reserve(1);
-        identifiers.reserve(1);
-        expressions.reserve(1);
-        args.reserve(1);
-        flags.reserve(1);
-    }
-};
 
 class Parser {
 public:
@@ -50,7 +35,7 @@ private:
     void expect(const TokenType t, const char* description);
 
     TokenList getExpressionTerms();
-    ASTNode* parseExpression(TokenList expressionTokens = TokenList());
+    Expression* parseExpression(TokenList expressionTokens = TokenList());
     void parseEnum();
     void parseImport();
     void parseIfStatement();
@@ -60,15 +45,7 @@ private:
     std::vector<ASTNode*> parseEnumElements();
     std::array<ASTNode*, 2> parseIdWithOptionalValue();
     std::vector<ASTNode*> parseAgumentsInCall();
-    void parseSimpleStatement(ASTNode* node);
+    void parseSimpleStatement(Statement* node);
     Symbol* parseTypeAndId();
 
-    /**
-     * @brief Parse a sequence of tokens.
-     * There are special tokens for some rules parsing:
-     * - p_type parses a type keyword
-     * - p_optional marks the next token as optional
-     * @return An ASTNode pointer, nullptr if the parsing goes wrong.
-    */
-    Sequence* parseSequence(std::vector<TokenType> sequence);
 };

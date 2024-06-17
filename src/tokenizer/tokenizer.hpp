@@ -97,5 +97,9 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"continue", continue_keyword},
     {"enum", enum_keyword},
     {"foreach", foreach_keyword},
-    {"in", in_keyword}
+    {"in", in_keyword},
+    {"public", public_keyword},
+    {"private", private_keyword},
+    {"protected", protected_keyword},
+    {"do", do_keyword}
 };

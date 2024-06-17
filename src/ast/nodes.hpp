@@ -29,7 +29,7 @@ struct Symbol : public ASTNode {
 };
 
 
-struct FunctionCall : public ASTNode {
+struct FunctionCall : public Statement {
     ASTNode* identifier;
     std::vector<ASTNode*> args;
     FunctionCall(ASTNode* identifier, std::vector<ASTNode*> args): identifier(identifier), args(args) {}

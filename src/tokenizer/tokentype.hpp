@@ -40,6 +40,10 @@ enum TokenType : unsigned char {
     enum_keyword = 0x1B,
     foreach_keyword = 0x1C,
     in_keyword = 0x1D,
+    public_keyword = 0x1E,
+    private_keyword = 0x1F,
+    protected_keyword = 0x20,
+    do_keyword = 0x21,
     // operators
     plus = 0x30,
     minus = 0x31,

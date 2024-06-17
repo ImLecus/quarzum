@@ -23,6 +23,15 @@ public:
     bool isOperator() const {
         return (u_int8_t)this->type >= 0x30 and (u_int8_t)this->type <= 0x5F;
     }
+
+    bool isAssignOperator() const {
+        return this->type == equal or this->type == greater_eq or this->type == lower_eq or (this->type >= 69 and this->type < 75);
+    }
+
+    bool isAccessKeyword() const {
+        return this->type == public_keyword or this->type == private_keyword or this->type == protected_keyword;
+    }
+
     bool isLiteral() const {
         return (u_int8_t)this->type >= 0x80 and (u_int8_t)this->type <= 0x9F;
     }

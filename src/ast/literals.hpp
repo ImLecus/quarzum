@@ -1,7 +1,7 @@
 #pragma once
 #include "astnode.hpp"
 
-struct Literal : public ASTNode {
+struct Literal : public Expression {
     std::string value;
     Literal(std::string value): value(value) {}
     std::string getValue(){

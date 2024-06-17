@@ -1,36 +1,7 @@
 #pragma once
 #include "astnode.hpp"
 
-struct Return : public ASTNode {
-    ASTNode* value;
-    Return(ASTNode* value): value(value) {}
-    void print() override  {
-        std::cout << "Return:\n\t";
-        value->print();
-    }
-};
-
-struct Continue : public ASTNode {
-    void print() override  {
-        std::cout << "Continue\n";
-    }
-};
-struct Break : public ASTNode {
-    void print() override  {
-        std::cout << "Break\n";
-    }
-};
-
-struct Exit : public ASTNode {
-    ASTNode* value;
-    Exit(ASTNode* value): value(value) {}
-    void print() override  {
-        std::cout << "Exit:\n\t";
-        value->print();
-    }
-};
-
-struct VariableDeclaration : public ASTNode {
+struct VariableDeclaration : public Statement {
     Symbol* symbol;
     ASTNode* expression;
 
@@ -60,7 +31,7 @@ struct VariableDeclaration : public ASTNode {
     }
 };
 
-struct ArrayDeclaration : public ASTNode {
+struct ArrayDeclaration : public Statement {
     ASTNode* type;
     ASTNode* identifier;
     std::vector<ASTNode*> elements;
@@ -96,7 +67,7 @@ struct ArrayDeclaration : public ASTNode {
     }
 };
 
-struct VariableRedeclaration : public ASTNode {
+struct VariableRedeclaration : public Statement {
     ASTNode* identifier;
     ASTNode* expression;
 

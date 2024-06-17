@@ -27,7 +27,7 @@ public:
         return identationLayer > 1;
     }
 
-    void addElement(ASTNode* object){
+    void addElement(Statement* object){
         getLastLayer()->add(object);
     }   
 

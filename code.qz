@@ -1,7 +1,3 @@
-import Math from "math.qz"
-module Program {
-    function main(int argc, string[] argv){
-        int8 v = 2;
-    }
+module class Program {
+    
 }
-

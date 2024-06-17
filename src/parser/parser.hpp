@@ -19,6 +19,22 @@ Literal* getNullValue(Type* type);
 template<typename T, typename U>
 bool instanceOf(const U& object);
 
+struct Sequence {
+    std::vector<Type*> types;
+    std::vector<Identifier*> identifiers;
+    std::vector<ASTNode* /*expr*/> expressions;
+    std::vector<Argument*> args;
+    std::vector<bool> flags;
+
+    Sequence(){
+        types.reserve(1);
+        identifiers.reserve(1);
+        expressions.reserve(1);
+        args.reserve(1);
+        flags.reserve(1);
+    }
+};
+
 class Parser {
 public:
     Parser(const TokenList& tokens);
@@ -54,5 +70,5 @@ private:
      * - p_optional marks the next token as optional
      * @return An ASTNode pointer, nullptr if the parsing goes wrong.
     */
-    ASTNode* parseSequence(std::vector<TokenType> sequence);
+    Sequence* parseSequence(std::vector<TokenType> sequence);
 };

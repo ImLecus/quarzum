@@ -1,4 +1,4 @@
-/usr/bin/cmake --build /home/marcos/code/quarzum/out/build/preset --parallel 6
+/usr/bin/cmake --build ./out/build/preset --parallel 6
 echo "Build finished. Press any key to continue..."
 read
 clear

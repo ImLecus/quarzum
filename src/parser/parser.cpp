@@ -40,6 +40,13 @@ const RootNode Parser::parse(){
     identation.open(&root);
 
     for(i = 0; i < tokens.size(); ++i){
+        
+        if(Sequence* s = parseSequence({p_type,identifier})){
+            
+            std::cout << "Sequence parsed: [type] [id]";
+            s->types[0]->print();
+        }
+
 
         if(auto dec = parseTypeAndId()){
             if(ask(semicolon)){
@@ -463,13 +470,37 @@ Symbol* Parser::parseTypeAndId(){
 }
 
 
-ASTNode* Parser::parseSequence(std::vector<TokenType> sequence){
-    for(TokenType t : sequence){
-        else if(t == p_type){
+Sequence* Parser::parseSequence(const std::vector<TokenType> sequence){
+    Sequence* result = new Sequence();
+    u_int8_t position = 0;
+    bool isOptional = false;
 
-        }
-        else if(t != get(i).getType()){
+    for(TokenType tok: sequence){
+        Token t = get(i + position++);
+        
+        // Special token types
+        if(p_type == tok){
+            if(t.isTypeKeyword()){
+                result->types.push_back( new Type(t.getValue()));
+                continue;
+            }
             return nullptr;
         }
+
+        if(p_optional == tok){
+            isOptional = true;
+            continue;
+        }
+
+        if(isOptional){
+            result->flags.push_back(t.getType() == tok);
+            isOptional = false;
+            continue;
+        }
+        // Normal token types
+        if(tok != t.getType()){
+           return nullptr;
+        }
     }
+    return result;
 }

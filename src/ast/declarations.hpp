@@ -2,32 +2,53 @@
 #include "astnode.hpp"
 
 struct VariableDeclaration : public Statement {
-    Symbol* symbol;
-    ASTNode* expression;
+    Type* type;
+    Identifier* id;
+    Expression* expression;
 
-    VariableDeclaration(Symbol* symbol, ASTNode* initValue): 
-        symbol(symbol), expression(initValue) {}
+    VariableDeclaration(Type* type, Identifier* id, Expression* initValue): 
+        type(type), id(id), expression(initValue) {}
 
     void print() override  {
         std::cout << "VariableDeclaration:\n\t";
-        symbol->type->print();
+        type->print();
         std::cout <<'\t';
-        symbol->id->print();
-        std::cout <<"\tconstant: " << symbol->constant << "\n\t";
+        id->print();
+        std::cout <<"\tconstant: " << type->constant << "\n\t";
         expression->print();
 
     }
 
     void generateIR(){
         if(Literal* l = dynamic_cast<Literal*>(expression)){
-            std::cout << symbol->id->getValue() << " = LOADI " << l->getValue() << '\n';
+            std::cout << id->getValue() << " = LOADI " << l->getValue() << '\n';
         }
         
     }
 
     ~VariableDeclaration() {
-        delete symbol;
+        delete type;
+        delete id;
         delete expression;
+    }
+};
+
+enum Access: u_int8_t {
+    PUBLIC = 0,
+    PRIVATE = 1,
+    PROTECTED = 2
+};
+struct AtributeDeclaration : public Statement {
+    Access access;
+    VariableDeclaration* var;
+    AtributeDeclaration(Access access, VariableDeclaration* var): access(access), var(var) {}
+    void print() override {
+        std::cout << "atribute:\n\t"<<
+        "access: " << std::to_string(access) << "\n\t";
+        var->id->print();
+        var->type->print();
+        var->expression->print();
+        std::cout << "constant: " << var->type->constant << "\n";
     }
 };
 
@@ -68,13 +89,13 @@ struct ArrayDeclaration : public Statement {
 };
 
 struct VariableRedeclaration : public Statement {
-    ASTNode* identifier;
-    ASTNode* expression;
+    Identifier* identifier;
+    Expression* expression;
 
-    VariableRedeclaration(ASTNode* varName, ASTNode* value): identifier(varName), expression(value) {}
+    VariableRedeclaration(Identifier* varName, Expression* value): identifier(varName), expression(value) {}
 
     void print() override  {
-        std::cout << "VariableRedeclaration:\n";
+        std::cout << "redec:\n";
         std::cout <<'\t';
         identifier->print();
         if (expression) {

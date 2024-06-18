@@ -28,6 +28,10 @@ public:
         return this->type == equal or this->type == greater_eq or this->type == lower_eq or (this->type >= 69 and this->type < 75);
     }
 
+    bool isUnaryOperator() const {
+        return this->type == plus_unary or this->type == minus_unary;
+    }
+
     bool isAccessKeyword() const {
         return this->type == public_keyword or this->type == private_keyword or this->type == protected_keyword;
     }

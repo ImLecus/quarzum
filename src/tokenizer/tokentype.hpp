@@ -44,6 +44,7 @@ enum TokenType : unsigned char {
     private_keyword = 0x1F,
     protected_keyword = 0x20,
     do_keyword = 0x21,
+    for_keyword = 0x22,
     // operators
     plus = 0x30,
     minus = 0x31,

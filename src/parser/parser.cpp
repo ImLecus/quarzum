@@ -32,7 +32,6 @@ Literal* getNullValue(Type* type){
     return nullptr;
 }
 
-
 Parser::Parser(const TokenList& tokens): tokens(tokens) {}
 
 const RootNode Parser::parse(){
@@ -40,48 +39,44 @@ const RootNode Parser::parse(){
     identation.open(&root);
 
     for(i = 0; i < tokens.size(); ++i){
+        if(auto decl = parseVar()){
+            identation.addElement(decl);
+            --i;
 
-        if(auto dec = parseTypeAndId()){
-            if(ask(semicolon)){
-                if(dec->array and dec->sizeDefined){
-                    identation.addElement(new ArrayDeclaration(dec->type, dec->id,{},dec->constant, dec->arrayLength));
-                    continue;
-                }
-                identation.addElement(new VariableDeclaration(dec, getNullValue(dec->type)));
-                continue;
+        }
+        else if(auto func = parseFunction()){
+            identation.open<FunctionContainer>(func);
+            --i;
+        }
+        else if(get(i).isAccessKeyword()){
+            Access access = Access(get(i).getType() - TokenType::public_keyword);
+            ++i;
+            if(auto decl = parseVar()){
+                identation.addElement(new AtributeDeclaration(access,decl));
+                --i;
             }
-            if(ask(equal)){
-                ++i;
-                if(dec->array and not dec->sizeDefined){
-                    expect(left_curly, "Expected array elements");
-                    vector<ASTNode*> elements = parseAgumentsInCall();
-                    expect(right_curly, "Expected array elements");
-                    identation.addElement(new ArrayDeclaration(dec->type, dec->id,elements,dec->constant, new IntegerLiteral(std::to_string(elements.size()))));
-                    continue;
-                }
-                identation.addElement(new VariableDeclaration(dec, parseExpression()));
-                expect(semicolon, "Expected semicolon");
-                continue;
-                    
+            else if(auto func = parseFunction()){
+                identation.open<MethodContainer>(new MethodContainer(access,func));
+                --i;
             }
-            if(ask(left_par)){
-                if(dec->array and dec->sizeDefined){
-                    throwSyntaxError("Array-type functions must not have defined size", tokens.getLine(i));
-                }
-                ++i;
-                vector<ASTNode*> args = parseArguments();
-                if(ask(right_par) and ask(left_curly, 1)){
-                    ++i;
-                    identation.open<FunctionContainer>(new FunctionContainer(dec->id,dec->type,args));
-                    continue;
-                }
-                throwSyntaxError("Expected arguments or function body", tokens.getLine(i));
-            }
-            throwSyntaxError("Expected semicolon or expression", tokens.getLine(i));
         }
 
+        else if(consume(for_keyword)){
+            expect(left_par, "Expected '('");
+            VariableDeclaration* decl;
+            if(not (decl = parseVar())){
+                expect(semicolon, "Expected variable declaration or semicolon");
+            }
+            Expression* condition = parseExpression();
+            expect(semicolon, "Expected condition or semicolon");
+            VariableRedeclaration* redec = parseRedec();
+            expect(right_par, "Expected ')'");
+            expect(left_curly, "Expected for body");
+            identation.open<ForContainer>(new ForContainer(decl,condition,redec));
+            --i;
+        }
 
-        else if(ask(import_keyword)){
+        else if(consume(import_keyword)){
             parseImport();
         }
 
@@ -89,76 +84,44 @@ const RootNode Parser::parse(){
             identation.close();
         }
 
-        else if(ask(return_keyword)){
-            ++i;
+        else if(consume(return_keyword)){
             parseSimpleStatement(new ReturnStatement(parseExpression()));
         }
 
-        else if(ask(exit_keyword)){
-            ++i;
+        else if(consume(exit_keyword)){
             parseSimpleStatement(new ExitStatement(parseExpression()));
         }
-        else if(ask(break_keyword)){
-            ++i;
+        else if(consume(break_keyword)){
             parseSimpleStatement(new BreakStatement());
         }
-        else if(ask(continue_keyword)){
-            ++i;
+        else if(consume(continue_keyword)){
             parseSimpleStatement(new ContinueStatement());
         }
 
-        else if(ask(foreach_keyword)){
-            ++i;
+        else if(consume(foreach_keyword)){
             expect(left_par, "Expected foreach statement");
-            Symbol* symbol = parseTypeAndId();
-            if(symbol == nullptr){
-                throwSyntaxError("Expected iterable declaration", tokens.getLine(i));
-            }
+            Type* type = parseType();
+            Identifier* id = getIdentifier();
             expect(in_keyword, "Expected 'in' keyword");
             Expression* expression = parseExpression();
             if(instanceOf<NullExpression>(expression)){
-                throwSyntaxError("Expected iterable expression", tokens.getLine(i));
+               throwSyntaxError("Expected iterable expression", tokens.getLine(i));
             }
             if(not ask(right_par) or get(++i).getType() != left_curly){
-                throwSyntaxError("Expected ')'", tokens.getLine(i));
+              throwSyntaxError("Expected ')'", tokens.getLine(i));
             }
-            identation.open<ForeachContainer>(new ForeachContainer(symbol->id, expression, symbol->type));
+            identation.open<ForeachContainer>(new ForeachContainer(id, expression, type));
         }
 
-        else if(ask(identifier)){
-            
-            Identifier* name = new Identifier(get(i).getValue());
-            if(ask(equal, 1)){
-                i += 2;
-                identation.addElement(new VariableRedeclaration(name, parseExpression()));
-                expect(semicolon, "Expected semicolon");
-                continue;
-            }
-            
-            if(ask(left_par, 1)){
-                i += 2;
-                vector<ASTNode*> args = parseAgumentsInCall();
-                expect(right_par, "Expected arguments or function call");
-                identation.addElement(new FunctionCall(name, args));
-                
-                expect(semicolon, "Expected semicolon");
-                continue;
-            }
-        }
-
-        else if(ask(module_keyword)){
-            bool moduleClass = false;
-            if(ask(class_keyword, 1)){
-                moduleClass = true;
-                ++i;
-            }
+        else if(consume(module_keyword)){
+            bool moduleClass = consume(class_keyword);
             Identifier* identifier = getIdentifier();
             expect(left_curly, "Expected module body");
             identation.open<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
             --i;
         }
 
-        else if(ask(class_keyword)){
+        else if(consume(class_keyword)){
             Identifier* id = getIdentifier();
             Type* type = parseInheritance();
             expect(left_curly, "Expected class body");
@@ -166,15 +129,13 @@ const RootNode Parser::parse(){
             --i;
         }
 
-        else if(ask(do_keyword)){
-            ++i;
+        else if(consume(do_keyword)){
             expect(left_curly, "Expected '{'");
             identation.open<DoContainer>(new DoContainer());
             --i;
         }
 
-        else if(ask(if_keyword)){
-            ++i;
+        else if(consume(if_keyword)){
             expect(left_par, "Expected condition");
             Expression* condition = parseExpression();
             expect(right_par, "Expected condition");
@@ -182,20 +143,46 @@ const RootNode Parser::parse(){
             identation.open<IfContainer>(new IfContainer(condition));
             --i;
         }
-        else if(ask(while_keyword)){
-            parseWhileStatement();
+        else if(consume(while_keyword)){
+            expect(left_par, "Expected condition");
+            Expression* condition = parseExpression();
+            expect(right_par, "Expected condition");
+            if(ask(semicolon)){
+                identation.addElement(new WhileStatement(condition));
+                continue;
+            }
+            expect(left_curly, "Expected while body");
+            identation.open<WhileContainer>(new WhileContainer(condition));
+            --i;
         }
 
-        else if(ask(enum_keyword)){
+        else if(consume(enum_keyword)){
             parseEnum();
+        }  
+
+        else if(auto redec = parseRedec()){
+            identation.addElement(redec);
+            expect(semicolon, "Expected semicolon");
+            --i;
         }
-        
+
+        else if(consume(identifier)){
+            
+            Identifier* name = new Identifier(get(i-1).getValue());
+            
+            if(consume(left_par)){
+                vector<ASTNode*> args = parseAgumentsInCall();
+                expect(right_par, "Expected arguments or function call");
+                identation.addElement(new FunctionCall(name, args));
+                expect(semicolon, "Expected semicolon");
+                --i;
+            }
+        }
     }
 
     root.print();
     return root;
 }
-
 
 Token Parser::get(const size_t& index){
     if(index <= tokens.size()){
@@ -207,12 +194,18 @@ bool Parser::ask(const TokenType type,const int8_t distance){
     return get(i + distance).getType() == type;
 }
 
-void Parser::expect(const TokenType t, const char* description){
-    if(not ask(t)){
-        throwSyntaxError(description, tokens.getLine(i));
-        return;
+bool Parser::consume(const TokenType type,const int8_t distance){
+    if(ask(type,distance)){
+        ++i;
+        return true;
     }
-    ++i;
+    return false;
+}
+
+void Parser::expect(const TokenType t, const char* description){
+    if(not consume(t)){
+        throwSyntaxError(description, tokens.getLine(i));
+    }  
 }
 
 Expression* Parser::parseExpression(TokenList expressionTokens){
@@ -277,7 +270,6 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
 }
 
 Identifier* Parser::getIdentifier(){
-    ++i; 
     expect(identifier, "Expected identifier");
     return new Identifier(get(i - 1).getValue());
 }
@@ -297,17 +289,12 @@ void Parser::parseEnum(){
 }
 
 void Parser::parseImport(){
-    ++i;
     bool valid = true;
     vector<Identifier*> imports;
     while(valid){
         if(ask(identifier)){
             imports.push_back(new Identifier(get(i++).getValue()));
-            if(ask(comma)){
-                ++i;
-                continue;
-            }
-            valid = false;
+            valid = consume(comma);
         }
         valid = false;
     }
@@ -323,52 +310,33 @@ void Parser::parseImport(){
 }
 
 Type* Parser::parseInheritance(){
-    if(ask(arrow)){
-        if(get(i + 1).isTypeKeyword()){
-            i += 2;
-            return new Type(get(i - 1).getValue());
+    if(consume(arrow)){
+        if(get(i).isTypeKeyword()){
+            return new Type(get(i++).getValue());
         }
         expect(identifier, "Expected inheritance");
     }
     return nullptr;
 }
 
-void Parser::parseWhileStatement(){
-    ++i;
-    expect(left_par, "Expected condition");
-    Expression* condition = parseExpression();
-    expect(right_par, "Expected condition");
-    if(ask(semicolon)){
-        identation.addElement(new WhileStatement(condition));
-        return;
-    }
-    expect(left_curly, "Expected while body");
-    identation.open<WhileContainer>(new WhileContainer(condition));
-    --i;
-}
-
 vector<ASTNode*> Parser::parseArguments(){
     vector<ASTNode*> arguments;
     bool valid = true;
     while(valid){
-        Symbol* symbol = parseTypeAndId();
-        if(symbol == nullptr){
-            valid = false;
-            continue;
-        }
-        ASTNode* value = parseExpression();
-        if(instanceOf<NullExpression>(value)){
-            arguments.push_back(new Argument(symbol));
+        if(not get(i).isTypeKeyword()){valid = false; continue;}
+        Type* type = parseType();
+        Identifier* id = getIdentifier();
+        if(consume(equal)){
+            Expression* value = parseExpression();
+            if(instanceOf<NullExpression>(value)){
+                throwSyntaxError("Expected expression", tokens.getLine(i));
+            }
+            arguments.push_back(new Argument(type,id, value));
         }
         else{
-            arguments.push_back(new Argument(symbol, value));
+            arguments.push_back(new Argument(type, id));
         }
-        
-        if(ask(comma)){
-            ++i;
-            continue;
-        }
-        valid = false;
+        valid = consume(comma);
     }
     return arguments;
 }
@@ -380,11 +348,8 @@ vector<Element*> Parser::parseEnumElements(){
         valid = ask(identifier);
         if(not valid){break;}
         elements.push_back(parseIdWithOptionalValue());
-        if(not ask(comma)){
-            valid = false;
-            continue;
-        }
-        ++i;
+
+        valid = consume(comma);
     }
     return elements;
 }
@@ -396,10 +361,9 @@ vector<Element*> Parser::parseEnumElements(){
 Element* Parser::parseIdWithOptionalValue(){
     Identifier* name;
     Expression* value = nullptr;
-    if(ask(identifier)){
-        name = new Identifier(get(i++).getValue());
-        if(ask(equal)){
-            ++i;
+    if(consume(identifier)){
+        name = new Identifier(get(i-1).getValue());
+        if(consume(equal)){
             value = parseExpression();
             if(instanceOf<NullExpression>(value)){
                 throwSyntaxError("Invalid default value assignation", tokens.getLine(i));
@@ -419,58 +383,94 @@ vector<ASTNode*> Parser::parseAgumentsInCall(){
             continue;
         }
         arguments.push_back(expression);
-        if(not ask(comma)){
-            valid = false;
-            continue;
-        }
-        ++i;
+        valid = consume(comma);
     }
     return arguments;
 }
 
-
-    
 void Parser::parseSimpleStatement(Statement* node){
     identation.addElement(node);
     expect(semicolon, "Expected semicolon");
     --i;
 }
 
-/*
-* Searches for the sequence [type] [arrayDefinition?] [name]
-*/
-Symbol* Parser::parseTypeAndId(){
-    Identifier* name;
-    Type* type;
-    bool isConst = ask(const_keyword, -1);
-    bool isArray = false;
-    bool sizeDefined = false;
-    ASTNode* length = nullptr;
+Type* Parser::parseType(){
+    Type* t = new Type(get(i).getValue(), ask(const_keyword, -1));
+    ++i;
+    if(consume(left_square,1)){
+        // ARRAY PARSING
+    }
+    return t;
+}
 
-    if(not get(i).isTypeKeyword()){
-        return nullptr;
-    }
-    type = new Type(get(i).getValue());
-    i++;
-    if(ask(left_square)){
-        i++;
-        isArray = true;
-        ASTNode* expression = parseExpression();
-        sizeDefined = not instanceOf<NullExpression>(expression);
-        if(sizeDefined and not ask(right_square)){
-            throwSyntaxError("Expected array initializer", tokens.getLine(i));
-        }
-        length = expression;
-        if(get(i++).getType() != right_square){
-            throwSyntaxError("Expected array initializer", tokens.getLine(i));
-        }
-        type->type += "[]";
-    }
+VariableDeclaration* Parser::parseVar(){
     
-    if(not ask(identifier)){
-        --i;
-        return nullptr;
+    size_t initialPos = i;
+    consume(const_keyword);
+    if(get(i).isTypeKeyword()){
+        Type* type = parseType();
+
+        if(not ask(identifier)){
+            i = initialPos;
+            return nullptr;
+        }
+
+        Identifier* id = getIdentifier();
+
+        if(consume(equal)){
+            Expression* expr = parseExpression();
+            expect(semicolon, "Expected semicolon");
+            return new VariableDeclaration(type,id,expr);
+        }
+        if(consume(left_par)){
+            i = initialPos;
+            return nullptr;
+        }
+        expect(semicolon, "Expected expression or semicolon");
+        return new VariableDeclaration(type, id, getNullValue(type));
     }
-    name = new Identifier(get(i++).getValue());
-    return new Symbol(type,name, isConst, isArray, sizeDefined, length);
+    return nullptr;
+}
+
+FunctionContainer* Parser::parseFunction(){
+    size_t initialPos = i;
+    if(consume(const_keyword)){}
+    if(get(i).isTypeKeyword()){
+        Type* type = parseType();
+        if(not ask(identifier)){
+            i = initialPos;
+            return nullptr;
+        }
+        Identifier* id = getIdentifier();
+        expect(left_par, "Expected function arguments");
+        std::vector<ASTNode*> args = parseArguments();
+        expect(right_par, "Expected end of arguments");
+        expect(left_curly, "Expected function body");
+        return new FunctionContainer(id, type, args);
+    }
+    return nullptr;
+}
+
+VariableRedeclaration* Parser::parseRedec(){
+
+    if(get(i).isUnaryOperator() and ask(identifier, 1) or ask(identifier) and get(i+1).isUnaryOperator()){
+        Identifier* id = new Identifier(ask(identifier)?get(i).getValue():get(i+1).getValue());
+        std::string op = ask(identifier)? get(i + 1).getValue() : get(i).getValue();
+        i += 2;
+        return new VariableRedeclaration(id, new UnaryExpression(op,id));
+    }
+    if(ask(identifier) and get(i + 1).isAssignOperator()){
+        Identifier* id = new Identifier(get(i).getValue());
+        Token op = get(i +1);
+        i += 2;
+        Expression* expr = parseExpression();
+        if(instanceOf<NullExpression>(expr)){
+            // err
+        }
+        if(op.getType() == equal){
+            return new VariableRedeclaration(id, expr);
+        }
+        return new VariableRedeclaration(id,new BinaryExpression(op.getValue().substr(0,1) ,id,expr));
+    }
+    return nullptr;
 }

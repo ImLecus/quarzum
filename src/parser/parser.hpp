@@ -31,13 +31,13 @@ private:
     IdentationManager identation;
 
     Token get(const size_t& index);
-    bool ask(const TokenType type,const int8_t distance = 0);
+    bool ask(const TokenType type, const int8_t distance = 0);
     void expect(const TokenType t, const char* description);
+    bool consume(const TokenType type, const int8_t distance = 0);
 
     Expression* parseExpression(TokenList expressionTokens = TokenList());
     void parseEnum();
     void parseImport();
-    void parseWhileStatement();
     Type* parseInheritance();
     Identifier* getIdentifier();
     std::vector<ASTNode*> parseArguments();
@@ -45,6 +45,10 @@ private:
     Element* parseIdWithOptionalValue();
     std::vector<ASTNode*> parseAgumentsInCall();
     void parseSimpleStatement(Statement* node);
-    Symbol* parseTypeAndId();
+
+    Type* parseType();
+    VariableDeclaration* parseVar();
+    FunctionContainer* parseFunction();
+    VariableRedeclaration* parseRedec();
 
 };

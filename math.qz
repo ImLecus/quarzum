@@ -1,6 +1,7 @@
 import Physics from "./physics.qz"
 module class Math {
     const num PI = 3.1415926535;
+    const num E = 2.718281;
 
     int sum(int a, int b){
         return a + b;
@@ -13,7 +14,7 @@ module class Math {
         return -a;
     }
 
-    byte max(num a, num b){
+    num max(num a, num b){
         if(a > b){
             return a;
         }
@@ -32,16 +33,5 @@ module class Math {
             return 0;
         }
         return a;
-    }
-
-    out("Hello world!");
-
-    enum colors {green, red, blue}
-
-
-    enum colorsDetailed => int {
-        green = 0,
-        red = 1,
-        blue = 2
     }
 }

@@ -74,6 +74,24 @@ struct FunctionContainer : public Container {
     }
 };
 
+struct MethodContainer : public Container {
+    Access access;
+    FunctionContainer* func;
+    MethodContainer(Access access, FunctionContainer* func): access(access), func(func){}
+    void print () override {
+        std::cout << "method:\n\taccess:" << std::to_string(access) << "\n\t";
+        func->type->print();
+        func->identifier->print();
+        for(auto& arg: func->args){
+            arg->print();
+        }
+        for(auto& node: nodes){
+            node->print();
+        }
+    }
+    
+};
+
 struct ClassContainer : public Container {
     Identifier* identifier;
     Type* inherits;
@@ -93,9 +111,15 @@ struct ForContainer : public Container {
     ForContainer(ASTNode* decl, ASTNode* condition, ASTNode* redec): decl(decl), condition(condition), redec(redec){}
     void print() override{
         std::cout << "for:\n";
-        decl->print();
-        condition->print();
-        redec->print();
+        if(decl){
+           decl->print(); 
+        }
+        if(condition){
+           condition->print();
+        }
+        if(redec){
+            redec->print();
+        }
         printChildren();
     }
 };

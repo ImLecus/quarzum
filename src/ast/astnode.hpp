@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include "../semantics/types.hpp"
 #include <vector>
 
 struct ASTNode {

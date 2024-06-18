@@ -24,6 +24,10 @@ int main(const int argc,const char** argv) {
     Semantics s = Semantics();
     //s.check(root);
 
+    UInteger a(8);
+    UInteger b(8);
+    UInteger u = a + &b;
+    std::cout << u.MAX_VALUE;
     //std::cout << s.rootToIR(root) << '\n';
 
 

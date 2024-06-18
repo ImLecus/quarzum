@@ -81,39 +81,33 @@ const RootNode Parser::parse(){
         }
 
 
-        if(ask(import_keyword)){
+        else if(ask(import_keyword)){
             parseImport();
-            continue;
         }
 
-        if(ask(right_curly) and identation.hasLayers()){
+        else if(ask(right_curly) and identation.hasLayers()){
             identation.close();
-            continue;
         }
 
-        if(ask(return_keyword)){
+        else if(ask(return_keyword)){
             ++i;
             parseSimpleStatement(new ReturnStatement(parseExpression()));
-            continue;
         }
 
-        if(ask(exit_keyword)){
+        else if(ask(exit_keyword)){
             ++i;
             parseSimpleStatement(new ExitStatement(parseExpression()));
-            continue;
         }
-        if(ask(break_keyword)){
+        else if(ask(break_keyword)){
             ++i;
             parseSimpleStatement(new BreakStatement());
-            continue;
         }
-        if(ask(continue_keyword)){
+        else if(ask(continue_keyword)){
             ++i;
             parseSimpleStatement(new ContinueStatement());
-            continue;
         }
 
-        if(ask(foreach_keyword)){
+        else if(ask(foreach_keyword)){
             ++i;
             expect(left_par, "Expected foreach statement");
             Symbol* symbol = parseTypeAndId();
@@ -129,10 +123,9 @@ const RootNode Parser::parse(){
                 throwSyntaxError("Expected ')'", tokens.getLine(i));
             }
             identation.open<ForeachContainer>(new ForeachContainer(symbol->id, expression, symbol->type));
-             continue;
         }
 
-        if(ask(identifier)){
+        else if(ask(identifier)){
             
             Identifier* name = new Identifier(get(i).getValue());
             if(ask(equal, 1)){
@@ -151,34 +144,50 @@ const RootNode Parser::parse(){
                 expect(semicolon, "Expected semicolon");
                 continue;
             }
-            continue;
         }
 
-        if(ask(module_keyword)){
-            parseModuleStatement();
-            continue;
+        else if(ask(module_keyword)){
+            bool moduleClass = false;
+            if(ask(class_keyword, 1)){
+                moduleClass = true;
+                ++i;
+            }
+            Identifier* identifier = getIdentifier();
+            expect(left_curly, "Expected module body");
+            identation.open<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
+            --i;
         }
 
-        if(ask(do_keyword)){
+        else if(ask(class_keyword)){
+            Identifier* id = getIdentifier();
+            Type* type = parseInheritance();
+            expect(left_curly, "Expected class body");
+            identation.open<ClassContainer>(new ClassContainer(id,type));
+            --i;
+        }
+
+        else if(ask(do_keyword)){
             ++i;
             expect(left_curly, "Expected '{'");
             identation.open<DoContainer>(new DoContainer());
             --i;
-            continue;
         }
 
-        if(ask(if_keyword)){
-            parseIfStatement();
-            continue;
+        else if(ask(if_keyword)){
+            ++i;
+            expect(left_par, "Expected condition");
+            Expression* condition = parseExpression();
+            expect(right_par, "Expected condition");
+            expect(left_curly, "Expected if body");
+            identation.open<IfContainer>(new IfContainer(condition));
+            --i;
         }
-        if(ask(while_keyword)){
+        else if(ask(while_keyword)){
             parseWhileStatement();
-            continue;
         }
 
-        if(ask(enum_keyword)){
+        else if(ask(enum_keyword)){
             parseEnum();
-            continue;
         }
         
     }
@@ -199,27 +208,22 @@ bool Parser::ask(const TokenType type,const int8_t distance){
 }
 
 void Parser::expect(const TokenType t, const char* description){
-    if(get(i).getType() != t){
+    if(not ask(t)){
         throwSyntaxError(description, tokens.getLine(i));
         return;
     }
     ++i;
 }
 
-TokenList Parser::getExpressionTerms(){
-    TokenList expressionTokens;
-    while(true){
-        if(get(i).isOperator() or get(i).isLiteral() or ask(identifier)){
-            expressionTokens.add(get(i++));
-            continue;
-        }
-        return expressionTokens;
-    }
-}
-
 Expression* Parser::parseExpression(TokenList expressionTokens){
     if(expressionTokens.isEmpty()) {
-        expressionTokens = getExpressionTerms();
+        while(true){
+            if(get(i).isOperator() or get(i).isLiteral() or ask(identifier)){
+                expressionTokens.add(get(i++));
+                continue;
+            }
+            break;
+        }
     }
     
     if(expressionTokens.size() == 0){
@@ -272,25 +276,24 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
     return nullptr;
 }
 
+Identifier* Parser::getIdentifier(){
+    ++i; 
+    expect(identifier, "Expected identifier");
+    return new Identifier(get(i - 1).getValue());
+}
+
 /*
 * STATEMENT PARSING
 */
 void Parser::parseEnum(){
-    ++i;
-    expect(identifier, "Expected identifier");
-    Identifier* name = new Identifier(get(i - 1).getValue());
-    Type* extend = nullptr;
-    
-    if(ask(arrow) and get(i + 1).isTypeKeyword()){
-        extend = new Type(get(i + 1).getValue());
-        i += 2;
-    }
-    // ERROR?
+    Identifier* name = getIdentifier();
+    Type* extend = parseInheritance();
     expect(left_curly, "Expected enumeration");
     if(extend == nullptr){extend = new Type("int");}    
-    vector<ASTNode*> elements = parseEnumElements();
+    vector<Element*> elements = parseEnumElements();
     expect(right_curly, "Expected end of enumeration");
     identation.addElement(new EnumStatement(elements, name, extend));
+    --i;
 }
 
 void Parser::parseImport(){
@@ -319,14 +322,15 @@ void Parser::parseImport(){
     identation.addElement(new ImportStatement(imports, location));
 }
 
-void Parser::parseIfStatement(){
-    ++i;
-    expect(left_par, "Expected condition");
-    Expression* condition = parseExpression();
-    expect(right_par, "Expected condition");
-    expect(left_curly, "Expected if body");
-    identation.open<IfContainer>(new IfContainer(condition));
-    --i;
+Type* Parser::parseInheritance(){
+    if(ask(arrow)){
+        if(get(i + 1).isTypeKeyword()){
+            i += 2;
+            return new Type(get(i - 1).getValue());
+        }
+        expect(identifier, "Expected inheritance");
+    }
+    return nullptr;
 }
 
 void Parser::parseWhileStatement(){
@@ -340,22 +344,6 @@ void Parser::parseWhileStatement(){
     }
     expect(left_curly, "Expected while body");
     identation.open<WhileContainer>(new WhileContainer(condition));
-    --i;
-}
-
-void Parser::parseModuleStatement(){
-    ++i;
-    bool moduleClass = false;
-    if(ask(class_keyword)){
-        moduleClass = true;
-        ++i;
-    }
-    expect(identifier, "Expected identifier");
-    Identifier* identifier = new Identifier(get(i - 1).getValue());
-    if(not ask(left_curly)){
-        throwSyntaxError("Expected module body", tokens.getLine(i));
-    }
-    identation.open<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
     --i;
 }
 
@@ -385,15 +373,13 @@ vector<ASTNode*> Parser::parseArguments(){
     return arguments;
 }
 
-vector<ASTNode*> Parser::parseEnumElements(){
-    vector<ASTNode*> elements;
+vector<Element*> Parser::parseEnumElements(){
+    vector<Element*> elements;
     bool valid = true;
     while(valid){
-        if(not ask(identifier)){
-            valid = false;
-        }
-        std::array<ASTNode*, 2> nameAndValue = parseIdWithOptionalValue();
-        elements.push_back(new EnumElement(nameAndValue[0], nameAndValue[1]));
+        valid = ask(identifier);
+        if(not valid){break;}
+        elements.push_back(parseIdWithOptionalValue());
         if(not ask(comma)){
             valid = false;
             continue;
@@ -407,9 +393,9 @@ vector<ASTNode*> Parser::parseEnumElements(){
 * Searches for the structure id = value |  id. 
 * Throws a syntax error if it can't be found.
 */
-std::array<ASTNode*, 2> Parser::parseIdWithOptionalValue(){
+Element* Parser::parseIdWithOptionalValue(){
     Identifier* name;
-    ASTNode* value = nullptr;
+    Expression* value = nullptr;
     if(ask(identifier)){
         name = new Identifier(get(i++).getValue());
         if(ask(equal)){
@@ -420,7 +406,7 @@ std::array<ASTNode*, 2> Parser::parseIdWithOptionalValue(){
             }
         }
     }
-    return {name,value};
+    return new Element(name,value);
 }
 
 vector<ASTNode*> Parser::parseAgumentsInCall(){

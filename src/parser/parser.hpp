@@ -34,16 +34,15 @@ private:
     bool ask(const TokenType type,const int8_t distance = 0);
     void expect(const TokenType t, const char* description);
 
-    TokenList getExpressionTerms();
     Expression* parseExpression(TokenList expressionTokens = TokenList());
     void parseEnum();
     void parseImport();
-    void parseIfStatement();
     void parseWhileStatement();
-    void parseModuleStatement();
+    Type* parseInheritance();
+    Identifier* getIdentifier();
     std::vector<ASTNode*> parseArguments();
-    std::vector<ASTNode*> parseEnumElements();
-    std::array<ASTNode*, 2> parseIdWithOptionalValue();
+    std::vector<Element*> parseEnumElements();
+    Element* parseIdWithOptionalValue();
     std::vector<ASTNode*> parseAgumentsInCall();
     void parseSimpleStatement(Statement* node);
     Symbol* parseTypeAndId();

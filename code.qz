@@ -1,11 +1,5 @@
 import Math from "math.qz"
 module class Program {
-    do{
-        exit 2;
-    }
-    while(1 > 0);
- 
-    foreach(int i in sr){
-        break;
-    }
+    
+    int8 i(uint x )   
 }

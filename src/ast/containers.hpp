@@ -81,7 +81,7 @@ struct ClassContainer : public Container {
     void print() override{
         std::cout << "class:\n";
         identifier->print();
-        inherits->print();
+        if(inherits){inherits->print();}
         printChildren();
     }
 };

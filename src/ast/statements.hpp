@@ -39,8 +39,8 @@ struct ContinueStatement: public Statement {
 struct EnumStatement : public Statement {
     Identifier* name;
     Type* extend;
-    std::vector<ASTNode*> children;
-    EnumStatement(std::vector<ASTNode*> children,Identifier* name, Type* extend) :children(children), name(name),extend(extend)  {}
+    std::vector<Element*> children;
+    EnumStatement(std::vector<Element*> children,Identifier* name, Type* extend) :children(children), name(name),extend(extend)  {}
     void print () override {
         std::cout << "enum:\n\t";
         name->print();

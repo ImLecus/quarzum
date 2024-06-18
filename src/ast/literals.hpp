@@ -17,6 +17,19 @@ struct Identifier : public Literal {
     }
 };
 
+struct Element : public ASTNode {
+    Identifier* id;
+    Expression* value;
+    Element(Identifier* id): id(id), value(nullptr){}
+    Element(Identifier* id, Expression* value): id(id), value(value){}
+    void print() override {
+        std::cout << "element:";
+        id->print();
+        if(value){value->print();}
+    }
+
+};
+
 struct IntegerLiteral : public Literal {
     IntegerLiteral(std::string value): Literal(value) {}
     void print() override{

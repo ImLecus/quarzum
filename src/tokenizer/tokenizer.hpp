@@ -56,7 +56,9 @@ const std::unordered_map<std::string, TokenType> symbols = {
     {"+=", plus_eq},
     {"-=", minus_eq},
     {"*=", prod_eq},
-    {"/=", div_eq}
+    {"/=", div_eq},
+    {"#", converge_sum},
+    {"#=", converge_eq}
 };
 const std::unordered_map<std::string, TokenType> keywords = {
     {"bool", b_keyword},

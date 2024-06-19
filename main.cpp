@@ -19,15 +19,14 @@ int main(const int argc,const char** argv) {
 
 
     Parser parser = Parser(tokenize(content));
-    RootNode root = parser.parse();
+    //RootNode root = parser.parse();
 
-    Semantics s = Semantics();
+    //Semantics s = Semantics();
     //s.check(root);
 
-    UInteger a(8);
-    UInteger b(8);
-    UInteger u = a + &b;
-    std::cout << u.MAX_VALUE;
+    String i;
+    String j;
+    GenericType* m = i.sum(&j);
     //std::cout << s.rootToIR(root) << '\n';
 
 

@@ -25,7 +25,7 @@ public:
     }
 
     bool isAssignOperator() const {
-        return this->type == equal or this->type == greater_eq or this->type == lower_eq or (this->type >= 69 and this->type < 75);
+        return this->type == equal or this->type == greater_eq or this->type == lower_eq or (this->type >= 70 and this->type < 77);
     }
 
     bool isUnaryOperator() const {

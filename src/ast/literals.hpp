@@ -3,9 +3,10 @@
 #include "../semantics/types.cpp"
 
 struct Literal : public Expression {
-    GenericType* type;
     std::string value;
-    Literal(GenericType* type,std::string value): type(type), value(value) {}
+    Literal(GenericType* type,std::string value): value(value) {
+        this->type = type;
+    }
     void print() override {
         std::cout << type->name << " (" << value << ")\n";
     }

@@ -2,7 +2,7 @@
 #include "types.hpp"
 
 nullptr_t throwOperatorError(std::string op, std::string a, std::string b){
-    throwTypeError("Operation " + op + " does not exist between types " + a + " and " + b);
+    throwTypeError("Operation '" + op + "' does not exist between types " + a + " and " + b);
     return nullptr;
 }
 u_int8_t converge(u_int8_t a, u_int8_t b){
@@ -49,9 +49,11 @@ struct Integer : public NumericType {
         MIN_VALUE = -std::pow(2, bits - 1);
         MAX_VALUE = std::pow(2, bits - 1) - 1;
     }
-    DEFAULT_RULES
 
-    Integer* sum(NumericType* type){PROMOTE(Integer);}   
+    GenericType* sum(GenericType* type){
+        if(type->isNumeric){return new Integer(promote(this->bits, type->bits));}
+        return throwOperatorError("+",this->name,type->name);
+    }   
     Integer* sub(NumericType* type){PROMOTE(Integer);}
     Integer* csum(NumericType* type){CONVERGE(Integer);}
     Integer* prod(NumericType* type){PROMOTE(Integer);}
@@ -90,7 +92,6 @@ struct String : public GenericType {
     String(){
         name = "string";
     }
-    DEFAULT_RULES
 
     String* sum(Character* type){return new String();}   
     String* sum(String* type){return new String();}  

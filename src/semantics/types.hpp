@@ -3,7 +3,6 @@
 #define PROMOTE(t) return new t(promote(this->bits, type->bits))
 #define DOUBLE_PROMOTE(t) return new t(promote(this->bits, type->bits, true))
 #define GENERIC(op) GenericType* op(GenericType* type){ return GenericType::sum(type); }
-#define DEFAULT_RULES GENERIC(sum); GENERIC(sub); GENERIC(csum); GENERIC(prod); GENERIC(div); GENERIC(mod); GENERIC(pow);
 #include <cmath>
 
 /**
@@ -31,6 +30,8 @@ u_int8_t getBits(std::string name);
 struct GenericType{
     std::string name;
     bool constant;
+    bool isNumeric = false;
+    u_int8_t bits;
     virtual GenericType* sum(GenericType* type){ return throwOperatorError("+",this->name,type->name); }
     virtual GenericType* sub(GenericType* type){ return throwOperatorError("-",this->name,type->name); }
     virtual GenericType* prod(GenericType* type){ return throwOperatorError("*",this->name,type->name); }
@@ -41,17 +42,20 @@ struct GenericType{
 };
 
 struct NumericType : public GenericType {
-    u_int8_t bits;
     long MIN_VALUE;
     long MAX_VALUE;  
-    NumericType(u_int8_t bits = 32): bits(bits){}
+    NumericType(u_int8_t bits = 32){
+        this->bits = bits;
+        isNumeric = true;
+    }
 };
 
 struct DecimalType : public GenericType {
-    u_int8_t bits;
     long double MIN_VALUE;
     long double MAX_VALUE;  
-    DecimalType(u_int8_t bits = 32) : bits(bits) {}
+    DecimalType(u_int8_t bits = 32){
+        this->bits = bits;
+    }
 };
 /**
  * @brief Represents a boolean type with values between 0 and 1.

@@ -42,13 +42,12 @@ struct Container : public Statement {
         }
     }
     void check() override {
-        
+        for(Statement* node : nodes){
+            node->check();
+        }
     }
 };
 
 struct RootNode : public Container {
     RootNode(): Container(){}
-    void check() override {
-        
-    }
 };

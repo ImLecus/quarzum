@@ -30,7 +30,6 @@ struct VariableDeclaration : public Statement {
         delete expression;
     }
     void check() override {
-        
     }
 };
 

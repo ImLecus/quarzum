@@ -3,11 +3,14 @@
 
 struct UnaryExpression : public Expression {
     std::string op; 
-    ASTNode* operand;
+    Expression* operand;
 
-    UnaryExpression(const std::string& oper, ASTNode* expr) : op(oper), operand(expr) {}
+    UnaryExpression(const std::string& oper, Expression* expr) : op(oper), operand(expr) {
+
+    }
 
     void print() override {
+        
         std::cout << "UnaryExpression: (" << op << ")\n\t";
         operand->print();
     }
@@ -19,10 +22,32 @@ struct UnaryExpression : public Expression {
 
 struct BinaryExpression : public Expression {
     std::string op;
-    ASTNode* left; 
-    ASTNode* right;
+    Expression* left; 
+    Expression* right;
 
-    BinaryExpression(const std::string& op, ASTNode* left, ASTNode* right): op(op), left(left), right(right) {}
+    BinaryExpression(const std::string& op, Expression* left, Expression* right): op(op), left(left), right(right) {
+        if(op == "+"){
+            this->type = left->type->sum(right->type);      
+        }
+        else if(op == "-"){
+            this->type = left->type->sub(right->type);        
+        }
+        else if(op == "#"){
+            this->type = left->type->csum(right->type);
+        }
+        else if(op == "*"){
+            this->type = left->type->prod(right->type);
+        }
+        else if(op == "/"){
+            this->type = left->type->div(right->type);
+        }
+        else if(op == "%"){
+            this->type = left->type->mod(right->type);
+        }
+        else if(op == "^"){
+            this->type = left->type->pow(right->type);
+        }
+    }
 
     void print() override{
         std::cout << "BinaryExpression: (" << op << ")\n";

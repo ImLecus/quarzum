@@ -10,7 +10,7 @@ struct IfContainer: public Container {
         printChildren();
     }
     void check() override {
-        
+        Container::check();
     }
 };
 
@@ -24,7 +24,7 @@ struct WhileContainer : public Container {
         printChildren();
     }
     void check() override {
-        
+        Container::check();
     }
 };
 
@@ -32,9 +32,6 @@ struct DoContainer : public Container {
     void print() override{
         std::cout << "do:\n\t";
         printChildren();
-    }
-    void check() override {
-        
     }
 };
 
@@ -49,7 +46,7 @@ struct ModuleContainer : public Container {
         printChildren();
     }
     void check() override {
-        
+        Container::check();
     }
 };
 
@@ -67,7 +64,7 @@ struct ForeachContainer : public Container {
         printChildren();
     }
     void check() override {
-        
+        Container::check();
     }
 };
 
@@ -87,6 +84,9 @@ struct FunctionContainer : public Container {
         }
         printChildren();
     }
+    void check() override {
+        Container::check();
+    }
 };
 
 struct MethodContainer : public Container {
@@ -104,7 +104,9 @@ struct MethodContainer : public Container {
             node->print();
         }
     }
-    
+    void check() override {
+        Container::check();
+    }
 };
 
 struct ClassContainer : public Container {
@@ -116,6 +118,9 @@ struct ClassContainer : public Container {
         identifier->print();
         if(inherits){std::cout << "Argument:\n\t"<<inherits->name<<"\n\t";}
         printChildren();
+    }
+    void check() override {
+        Container::check();
     }
 };
 
@@ -136,5 +141,8 @@ struct ForContainer : public Container {
             redec->print();
         }
         printChildren();
+    }
+    void check() override {
+        Container::check();
     }
 };

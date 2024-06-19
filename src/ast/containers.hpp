@@ -9,6 +9,9 @@ struct IfContainer: public Container {
         condition->print();
         printChildren();
     }
+    void check() override {
+        
+    }
 };
 
 struct WhileContainer : public Container {
@@ -20,12 +23,18 @@ struct WhileContainer : public Container {
         condition->print();
         printChildren();
     }
+    void check() override {
+        
+    }
 };
 
 struct DoContainer : public Container {
     void print() override{
         std::cout << "do:\n\t";
         printChildren();
+    }
+    void check() override {
+        
     }
 };
 
@@ -39,34 +48,40 @@ struct ModuleContainer : public Container {
         std::cout << "\tclass: " << isClass << '\n';
         printChildren();
     }
+    void check() override {
+        
+    }
 };
 
 struct ForeachContainer : public Container {
     Identifier* identifier;
     Expression* iterable;
-    Type* type;
+    GenericType* type;
 
-    ForeachContainer(Identifier* identifier, Expression* iterable, Type* type): Container(), identifier(identifier), iterable(iterable), type(type) {}
+    ForeachContainer(Identifier* identifier, Expression* iterable, GenericType* type): Container(), identifier(identifier), iterable(iterable), type(type) {}
     void print() override{
         std::cout << "foreach:\n\t";
         identifier->print();
-        type -> print();
+        std::cout << "Argument:\n\t"<<type->name<<"\n\t";
         iterable -> print();
         printChildren();
+    }
+    void check() override {
+        
     }
 };
 
 
 struct FunctionContainer : public Container {
     Identifier* identifier;
-    Type* type;
+    GenericType* type;
     std::vector<ASTNode*> args;
-    FunctionContainer(Identifier* identifier,Type* type, std::vector<ASTNode*> args): 
+    FunctionContainer(Identifier* identifier,GenericType* type, std::vector<ASTNode*> args): 
         Container(),identifier(identifier), type(type), args(args) {}
     void print() override{
         std::cout << "function:\n";
         identifier->print();
-        type->print();
+        std::cout << "Argument:\n\t"<<type->name<<"\n\t";
         for(auto& arg : args){
             arg->print();
         }
@@ -80,7 +95,7 @@ struct MethodContainer : public Container {
     MethodContainer(Access access, FunctionContainer* func): access(access), func(func){}
     void print () override {
         std::cout << "method:\n\taccess:" << std::to_string(access) << "\n\t";
-        func->type->print();
+        std::cout << "Argument:\n\t"<<func->type->name<<"\n\t";
         func->identifier->print();
         for(auto& arg: func->args){
             arg->print();
@@ -94,21 +109,21 @@ struct MethodContainer : public Container {
 
 struct ClassContainer : public Container {
     Identifier* identifier;
-    Type* inherits;
-    ClassContainer(Identifier* id, Type* inherits): identifier(id), inherits(inherits) {}
+    GenericType* inherits;
+    ClassContainer(Identifier* id, GenericType* inherits): identifier(id), inherits(inherits) {}
     void print() override{
         std::cout << "class:\n";
         identifier->print();
-        if(inherits){inherits->print();}
+        if(inherits){std::cout << "Argument:\n\t"<<inherits->name<<"\n\t";}
         printChildren();
     }
 };
 
 struct ForContainer : public Container {
-    ASTNode* decl;
-    ASTNode* condition;
-    ASTNode* redec;
-    ForContainer(ASTNode* decl, ASTNode* condition, ASTNode* redec): decl(decl), condition(condition), redec(redec){}
+    VariableDeclaration* decl;
+    Expression* condition;
+    VariableRedeclaration* redec;
+    ForContainer(VariableDeclaration* decl, Expression* condition, VariableRedeclaration* redec): decl(decl), condition(condition), redec(redec){}
     void print() override{
         std::cout << "for:\n";
         if(decl){

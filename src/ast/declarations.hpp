@@ -2,17 +2,15 @@
 #include "astnode.hpp"
 
 struct VariableDeclaration : public Statement {
-    Type* type;
+    GenericType* type;
     Identifier* id;
     Expression* expression;
 
-    VariableDeclaration(Type* type, Identifier* id, Expression* initValue): 
+    VariableDeclaration(GenericType* type, Identifier* id, Expression* initValue): 
         type(type), id(id), expression(initValue) {}
 
     void print() override  {
-        std::cout << "VariableDeclaration:\n\t";
-        type->print();
-        std::cout <<'\t';
+        std::cout << "VariableDeclaration:\n\t" << type->name << "\n\t";
         id->print();
         std::cout <<"\tconstant: " << type->constant << "\n\t";
         expression->print();
@@ -21,7 +19,7 @@ struct VariableDeclaration : public Statement {
 
     void generateIR(){
         if(Literal* l = dynamic_cast<Literal*>(expression)){
-            std::cout << id->getValue() << " = LOADI " << l->getValue() << '\n';
+            std::cout << id->value << " = LOADI " << l->value << '\n';
         }
         
     }
@@ -30,6 +28,9 @@ struct VariableDeclaration : public Statement {
         delete type;
         delete id;
         delete expression;
+    }
+    void check() override {
+        
     }
 };
 
@@ -46,9 +47,12 @@ struct AtributeDeclaration : public Statement {
         std::cout << "atribute:\n\t"<<
         "access: " << std::to_string(access) << "\n\t";
         var->id->print();
-        var->type->print();
+        std::cout << var->type->name << "\n\t";
         var->expression->print();
         std::cout << "constant: " << var->type->constant << "\n";
+    }
+    void check() override {
+        var->check();
     }
 };
 
@@ -61,7 +65,7 @@ struct ArrayDeclaration : public Statement {
 
     ArrayDeclaration(ASTNode* varType, ASTNode* varName, std::vector<ASTNode*> elements, bool constant): 
         type(varType), identifier(varName), elements(elements), constant(constant) {
-            size = new IntegerLiteral(std::to_string(elements.size()));
+            size = new Literal(new UInteger(),std::to_string(elements.size()));
         }
     ArrayDeclaration(ASTNode* varType, ASTNode* varName, std::vector<ASTNode*> elements, bool constant, ASTNode* size): 
         type(varType), identifier(varName), elements(elements), constant(constant), size(size) {}
@@ -86,6 +90,9 @@ struct ArrayDeclaration : public Statement {
         }
         delete size;
     }
+    void check() override {
+        
+    }
 };
 
 struct VariableRedeclaration : public Statement {
@@ -107,5 +114,8 @@ struct VariableRedeclaration : public Statement {
     ~VariableRedeclaration() {
         delete identifier;
         delete expression;
+    }
+    void check() override {
+        
     }
 };

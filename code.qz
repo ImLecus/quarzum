@@ -1,9 +1,4 @@
-import Math from "math.qz"
-module class Program {
-  
-  int i = 0;
-
-  for(int i = 0;i < 7;i=3){
-    return 2;
-  }
+function main(){
+  int a = 7;
+  exit a;
 }

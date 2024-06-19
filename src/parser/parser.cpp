@@ -9,26 +9,26 @@ bool instanceOf(const U& object){
     return false;
 }
 
-Literal* getNullValue(Type* type){
-    if(type->type.find("int") != std::string::npos ){
-        return new IntegerLiteral("0");
+Literal* getNullValue(GenericType* type){
+    if(type->name.find("int") != std::string::npos ){
+        return new Literal(new Integer(),"0");
     }
-    if(type->type == "num" or type -> type == "num64" or type -> type == "decimal"){
-        return new NumericLiteral("0");
+    if(type->name == "num" or type -> name == "num64" or type -> name == "decimal"){
+        return new Literal(new Number(),"0");
     }
-    if(type->type == "bool"){
-        return new BoolLiteral("false");
+    if(type->name == "bool"){
+        return new Literal(new Boolean(),"false");
     }
-    if(type->type == "var"){
-        return new NullLiteral();
+    if(type->name == "var"){
+        return new Literal(new NullType(), "");
     }
-    if(type->type == "char"){
-        return new CharLiteral("''");
+    if(type->name == "char"){
+        return new Literal(new Character(),"''");
     }
-    if(type->type == "string"){
-        return new StringLiteral("\"\"");
+    if(type->name == "string"){
+        return new Literal(new String(),"\"\"");
     }
-    throwTypeError("Unable to find null value for type " + type->type);
+    throwTypeError("Unable to find null value for type " + type->name);
     return nullptr;
 }
 
@@ -100,7 +100,7 @@ const RootNode Parser::parse(){
 
         else if(consume(foreach_keyword)){
             expect(left_par, "Expected foreach statement");
-            Type* type = parseType();
+            GenericType* type = parseType();
             Identifier* id = getIdentifier();
             expect(in_keyword, "Expected 'in' keyword");
             Expression* expression = parseExpression();
@@ -123,7 +123,7 @@ const RootNode Parser::parse(){
 
         else if(consume(class_keyword)){
             Identifier* id = getIdentifier();
-            Type* type = parseInheritance();
+            GenericType* type = parseInheritance();
             expect(left_curly, "Expected class body");
             identation.open<ClassContainer>(new ClassContainer(id,type));
             --i;
@@ -227,15 +227,15 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
         switch (expressionTokens[0].getType())
         {
         case int_literal:
-            return new IntegerLiteral(expressionTokens[0].getValue());
+            return new Literal(new Integer(), expressionTokens[0].getValue());
         case num_literal:
-            return new BoolLiteral(expressionTokens[0].getValue());
+            return new Literal(new Number(), expressionTokens[0].getValue());
         case char_literal:
-            return new CharLiteral(expressionTokens[0].getValue());
+            return new Literal(new Character(),expressionTokens[0].getValue());
         case string_literal:
-            return new StringLiteral(expressionTokens[0].getValue());
+            return new Literal(new String(),expressionTokens[0].getValue());
         case null_literal:
-            return new NullLiteral();
+            return new Literal(new NullType(), "");
         case identifier:
             return new Identifier(expressionTokens[0].getValue());
         default:
@@ -279,9 +279,9 @@ Identifier* Parser::getIdentifier(){
 */
 void Parser::parseEnum(){
     Identifier* name = getIdentifier();
-    Type* extend = parseInheritance();
+    GenericType* extend = parseInheritance();
     expect(left_curly, "Expected enumeration");
-    if(extend == nullptr){extend = new Type("int");}    
+    if(extend == nullptr){extend = new Integer();}    
     vector<Element*> elements = parseEnumElements();
     expect(right_curly, "Expected end of enumeration");
     identation.addElement(new EnumStatement(elements, name, extend));
@@ -309,10 +309,10 @@ void Parser::parseImport(){
     identation.addElement(new ImportStatement(imports, location));
 }
 
-Type* Parser::parseInheritance(){
+GenericType* Parser::parseInheritance(){
     if(consume(arrow)){
         if(get(i).isTypeKeyword()){
-            return new Type(get(i++).getValue());
+            return getTypeByName(get(i++).getValue());
         }
         expect(identifier, "Expected inheritance");
     }
@@ -324,7 +324,7 @@ vector<ASTNode*> Parser::parseArguments(){
     bool valid = true;
     while(valid){
         if(not get(i).isTypeKeyword()){valid = false; continue;}
-        Type* type = parseType();
+        GenericType* type = parseType();
         Identifier* id = getIdentifier();
         if(consume(equal)){
             Expression* value = parseExpression();
@@ -394,8 +394,8 @@ void Parser::parseSimpleStatement(Statement* node){
     --i;
 }
 
-Type* Parser::parseType(){
-    Type* t = new Type(get(i).getValue(), ask(const_keyword, -1));
+GenericType* Parser::parseType(){
+    GenericType* t = getTypeByName(get(i).getValue(), ask(const_keyword, -1));
     ++i;
     if(consume(left_square,1)){
         // ARRAY PARSING
@@ -408,7 +408,7 @@ VariableDeclaration* Parser::parseVar(){
     size_t initialPos = i;
     consume(const_keyword);
     if(get(i).isTypeKeyword()){
-        Type* type = parseType();
+        GenericType* type = parseType();
 
         if(not ask(identifier)){
             i = initialPos;
@@ -436,7 +436,7 @@ FunctionContainer* Parser::parseFunction(){
     size_t initialPos = i;
     if(consume(const_keyword)){}
     if(get(i).isTypeKeyword()){
-        Type* type = parseType();
+        GenericType* type = parseType();
         if(not ask(identifier)){
             i = initialPos;
             return nullptr;

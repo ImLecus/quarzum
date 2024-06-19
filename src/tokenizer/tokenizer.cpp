@@ -68,7 +68,7 @@ TokenList tokenize(const std::string& content){
         }
         // Identifiers and keywords
         if(isalpha(*index)){
-            while (isalnum(*index))
+            while (isalnum(*index) or *index == '_')
             {
                 buffer += *(index++);
             }

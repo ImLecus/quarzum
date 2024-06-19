@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "../semantics/types.hpp"
+#include "../semantics/types.cpp"
 #include <vector>
 
 struct ASTNode {
@@ -9,13 +9,14 @@ struct ASTNode {
 };
 
 struct Statement : public ASTNode {
-
+    virtual void check() = 0;
 };
 
 struct Expression : public ASTNode {
     void print() override {
         std::cout << "expr";
     }
+    GenericType* type;
 };
 
 /**
@@ -40,8 +41,14 @@ struct Container : public Statement {
             node->print();
         }
     }
+    void check() override {
+        
+    }
 };
 
 struct RootNode : public Container {
     RootNode(): Container(){}
+    void check() override {
+        
+    }
 };

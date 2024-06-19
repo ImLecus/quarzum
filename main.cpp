@@ -1,7 +1,6 @@
 #include "src/tokenizer/tokenizer.cpp"
 #include "src/parser/parser.cpp"
 #include "src/source.hpp"
-#include "src/semantics/semantics.hpp"
 
 int main(const int argc,const char** argv) {
 
@@ -16,19 +15,9 @@ int main(const int argc,const char** argv) {
     if(not format(filename, ".qz")){
         throwError("File format must be .qz or .quarzum.");
     }
-
-
     Parser parser = Parser(tokenize(content));
-    //RootNode root = parser.parse();
-
-    //Semantics s = Semantics();
-    //s.check(root);
-
-    String i;
-    String j;
-    GenericType* m = i.sum(&j);
-    //std::cout << s.rootToIR(root) << '\n';
-
+    RootNode root = parser.parse();
+    root.check();
 
     return 0;
 }

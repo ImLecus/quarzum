@@ -1,19 +1,20 @@
 #pragma once
 #include "astnode.hpp"
+#include "../semantics/types.cpp"
 
 struct Literal : public Expression {
+    GenericType* type;
     std::string value;
-    Literal(std::string value): value(value) {}
-    std::string getValue(){
-        return value;
+    Literal(GenericType* type,std::string value): type(type), value(value) {}
+    void print() override {
+        std::cout << type->name << " (" << value << ")\n";
     }
-    
 };
 
 struct Identifier : public Literal {
-    Identifier(std::string name) : Literal(name) {}
+    Identifier(std::string name) : Literal(new NullType(),name) {}
     void print() override{
-        std::cout << "Identifier: " << getValue() << '\n';
+        std::cout << "Identifier: " << value << '\n';
     }
 };
 
@@ -26,48 +27,5 @@ struct Element : public ASTNode {
         std::cout << "element:";
         id->print();
         if(value){value->print();}
-    }
-
-};
-
-struct IntegerLiteral : public Literal {
-    IntegerLiteral(std::string value): Literal(value) {}
-    void print() override{
-        std::cout << "IntegerLiteral: " << getValue() << '\n';
-    }
-};
-
-struct NumericLiteral : public Literal {
-    NumericLiteral(std::string value) : Literal(value) {}
-    void print() override{
-        std::cout << "NumericLiteral: " << getValue() << '\n';
-    }
-};
-
-struct CharLiteral : public Literal {
-    CharLiteral(std::string value) : Literal(value) {}
-    void print() override{
-        std::cout << "CharLiteral: " << getValue() << '\n';
-    }
-};
-
-struct StringLiteral : public Literal {
-    StringLiteral(std::string value) : Literal(value) {}
-    void print() override{
-        std::cout << "StringLiteral: " << getValue() << '\n';
-    }
-};
-
-struct BoolLiteral : public Literal {
-    BoolLiteral(std::string value) : Literal(value) {}
-    void print() override{
-        std::cout << "BoolLiteral: " << getValue() << '\n';
-    }
-};
-
-struct NullLiteral : public Literal {
-    NullLiteral() : Literal("null") {}
-    void print() override{
-        std::cout << "NullLiteral\n";
     }
 };

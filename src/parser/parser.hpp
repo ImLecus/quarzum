@@ -3,7 +3,6 @@
 #include "../tokenizer/tokenlist.hpp"
 #include "../ast/expressions.hpp"
 #include "../ast/literals.hpp"
-#include "../ast/nodes.hpp"
 #include "../ast/declarations.hpp"
 #include "../ast/statements.hpp"
 #include "../ast/containers.hpp"
@@ -15,7 +14,7 @@
 /**
  * @brief Returns a Literal that represents the NULL value depending on the type.
 */
-Literal* getNullValue(Type* type);
+Literal* getNullValue(GenericType* type);
 
 template<typename T, typename U>
 bool instanceOf(const U& object);
@@ -38,7 +37,7 @@ private:
     Expression* parseExpression(TokenList expressionTokens = TokenList());
     void parseEnum();
     void parseImport();
-    Type* parseInheritance();
+    GenericType* parseInheritance();
     Identifier* getIdentifier();
     std::vector<ASTNode*> parseArguments();
     std::vector<Element*> parseEnumElements();
@@ -46,7 +45,7 @@ private:
     std::vector<ASTNode*> parseAgumentsInCall();
     void parseSimpleStatement(Statement* node);
 
-    Type* parseType();
+    GenericType* parseType();
     VariableDeclaration* parseVar();
     FunctionContainer* parseFunction();
     VariableRedeclaration* parseRedec();

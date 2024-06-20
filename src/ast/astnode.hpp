@@ -1,11 +1,13 @@
 #pragma once
 #include <iostream>
 #include "../semantics/types.cpp"
+#include "../ir/irinstruction.hpp"
 #include <vector>
 
 struct ASTNode {
     virtual ~ASTNode() = default;
     virtual void print() = 0;
+    virtual void generateIR(){};
 };
 
 struct Statement : public ASTNode {
@@ -17,6 +19,7 @@ struct Expression : public ASTNode {
         std::cout << "expr";
     }
     GenericType* type;
+    std::string index; 
 };
 
 /**
@@ -46,8 +49,14 @@ struct Container : public Statement {
             node->check();
         }
     }
+
 };
 
 struct RootNode : public Container {
     RootNode(): Container(){}
+    void generateIR() override {
+        for(Statement* node : nodes){
+            node->generateIR();
+        }
+    }
 };

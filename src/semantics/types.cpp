@@ -165,6 +165,9 @@ GenericType* GenericType::prod(GenericType** types){
     if(types[0]->flag == INT and types[1]->flag == STRING){
         return new String();
     }
+    if(types[0]->isNumeric() and types[1]->isNumeric()){
+        return new Integer(promote(types[0]->bits, types[1]->bits));
+    }
     return throwOperatorError("*",types[0]->name,types[1]->name); 
 }
 GenericType* GenericType::csum(GenericType** types){ 

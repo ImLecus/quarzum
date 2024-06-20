@@ -180,7 +180,7 @@ const RootNode Parser::parse(){
         }
     }
 
-    root.print();
+    //root.print();
     return root;
 }
 

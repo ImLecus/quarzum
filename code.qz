@@ -1,3 +1,1 @@
-function main(string arg){
-  	int i = "hola" # true;
-}
+int i = 2 + 1 * 2;

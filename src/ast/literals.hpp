@@ -6,6 +6,7 @@ struct Literal : public Expression {
     std::string value;
     Literal(GenericType* type,std::string value): value(value) {
         this->type = type;
+        this->index = value;
     }
     void print() override {
         std::cout << type->name << " (" << value << ")\n";

@@ -19,9 +19,14 @@ struct VariableDeclaration : public Statement {
 
     void generateIR(){
         if(Literal* l = dynamic_cast<Literal*>(expression)){
-            std::cout << id->value << " = LOADI " << l->value << '\n';
+            std::cout << "assign " << id->value << ", " << l->value << "\n";
         }
-        
+        else{
+            expression->generateIR();
+            std::cout << "assign " << id->value << ", " << expression->index << "\n";
+            tIndex = 0;
+        }
+
     }
 
     ~VariableDeclaration() {

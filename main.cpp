@@ -1,6 +1,7 @@
 #include "src/tokenizer/tokenizer.cpp"
 #include "src/parser/parser.cpp"
 #include "src/source.hpp"
+#include "src/ir/irinstruction.hpp"
 
 int main(const int argc,const char** argv) {
 
@@ -18,6 +19,7 @@ int main(const int argc,const char** argv) {
     Parser parser = Parser(tokenize(content));
     RootNode root = parser.parse();
     root.check();
+    root.generateIR();
 
     return 0;
 }

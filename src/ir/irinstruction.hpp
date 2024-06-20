@@ -14,7 +14,9 @@ enum IRInstructionType : u_int8_t {
     LABEL,
     EXIT,
     PARAM,
-    RET
+    RET,
+    CALL,
+    PARAM_CALL
 };
 
 struct IRInstruction
@@ -36,6 +38,10 @@ IRInstructionType getInstructionType(std::string op){
 u_int8_t cIndex;
 u_int8_t lIndex;
 u_int8_t tIndex;
+u_int8_t vIndex;
+std::string getVIndex(){
+    return "v"+std::to_string(vIndex);
+}
 std::string getTIndex(){
     return "t"+std::to_string(tIndex);
 }

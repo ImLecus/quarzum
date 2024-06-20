@@ -1,10 +1,8 @@
 .data
-	i: .byte 0
+	v0: .string "Hello world!"
 .text
 .globl _start
 _start:
-	mov $4, %r8
-	movb $60, %al
-	xorq %rdi, %rdi
-	syscall
+	mov $v0, %rdi
+	call out
 _main:

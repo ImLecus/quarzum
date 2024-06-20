@@ -29,21 +29,38 @@ struct x86_64_Assembler : public Assembler {
         {"char", ".byte"},
         {"string", ".string"}
     };
+    uint8_t paramRegister;
+    std::string registers[6] = {"%rdi", "%rsi", "%rdx", "%rcx", "r8", "r9"};
+    std::string getParamRegister(){
+        
+        return registers[paramRegister];
+    }
     std::string assemble(){
         std::string dataSection = ".data\n";
         std::string textSection = ".text\n.globl _start\n";
         for(auto i : instructions){
             switch (i.type)
             {
+            case PARAM_CALL:
+                textSection += "\tmov $" + i.target + ", " + getParamRegister() + '\n';
+                break;
+            case CALL:
+                textSection += "\tcall " + i.target + '\n';
+                break;
             case LABEL:
                 if(i.target == "main"){textSection += "_start:\n";break;}
                 textSection += i.target + ":\n";
                 break;
             case ASSIGN:
-                dataSection += "\t" + i.target + ": "+ typeToAsm.at(i.varType) + " 0\n";
+                dataSection += "\t" + i.target + ": "+ typeToAsm.at(i.varType); 
+                if(i.origin2 == "literal"){
+                    dataSection += " " + i.origin1 + "\n";
+                    break;
+                }
+                dataSection += " 0\n";
                 break;
             case ADD:
-                textSection += "\tmov $" + i.origin1 + ", %r8\n";
+                //textSection += "\tmov $" + i.origin1 + ", %r8\n";
                 break;
             case EXIT:
                 textSection += "\tmovb $60, %al\n\txorq %rdi, %rdi\n\tsyscall\n";

@@ -1,5 +1,4 @@
-function main(string args){
-	int8 i = 4 + 1;
-	exit 2;
+function main(){
+	out("Hello world!");
 }
 

@@ -99,8 +99,8 @@ struct ImportStatement : public Statement {
 
 struct FunctionCall : public Statement {
     Identifier* identifier;
-    std::vector<ASTNode*> args;
-    FunctionCall(Identifier* identifier, std::vector<ASTNode*> args): identifier(identifier), args(args) {}
+    std::vector<Expression*> args;
+    FunctionCall(Identifier* identifier, std::vector<Expression*> args): identifier(identifier), args(args) {}
     void print() override{
         std::cout << "FunctionCall:\n";
         identifier->print();
@@ -110,6 +110,26 @@ struct FunctionCall : public Statement {
     }
     void check() override {
         
+    }
+    void generateIR() override {
+        for(Expression* arg : args){
+            arg->generateIR();
+            if(auto l = dynamic_cast<Literal*>(arg)){
+                std::cout << "ASSIGN " << getVIndex() << ", " << arg->index << '\n';
+                ir.push_back(IRInstruction{ASSIGN, getVIndex(), arg->index,"literal",arg->type->name});
+                std::cout << "PARAM_CALL " << getVIndex() << '\n';
+                ir.push_back(IRInstruction{PARAM_CALL, getVIndex()});
+                vIndex++;
+                tIndex = 0;
+                continue;
+            }
+            
+            std::cout << "PARAM_CALL " << arg->index << '\n';
+            ir.push_back(IRInstruction{PARAM_CALL, arg->index});
+            tIndex = 0;
+        }
+        std::cout << "CALL " << identifier->value << '\n';
+        ir.push_back(IRInstruction{CALL, identifier->value});
     }
 };
 

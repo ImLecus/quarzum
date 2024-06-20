@@ -171,7 +171,7 @@ const RootNode Parser::parse(){
             Identifier* name = new Identifier(get(i-1).getValue());
             
             if(consume(left_par)){
-                vector<ASTNode*> args = parseAgumentsInCall();
+                vector<Expression*> args = parseAgumentsInCall();
                 expect(right_par, "Expected arguments or function call");
                 identation.addElement(new FunctionCall(name, args));
                 expect(semicolon, "Expected semicolon");
@@ -376,11 +376,11 @@ Element* Parser::parseIdWithOptionalValue(){
     return new Element(name,value);
 }
 
-vector<ASTNode*> Parser::parseAgumentsInCall(){
-    vector<ASTNode*> arguments;
+vector<Expression*> Parser::parseAgumentsInCall(){
+    vector<Expression*> arguments;
     bool valid = true;
     while(valid){
-        ASTNode* expression = parseExpression();
+        Expression* expression = parseExpression();
         if(instanceOf<NullExpression>(expression)){
             valid = false;
             continue;

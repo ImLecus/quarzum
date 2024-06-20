@@ -42,7 +42,7 @@ private:
     std::vector<Argument*> parseArguments();
     std::vector<Element*> parseEnumElements();
     Element* parseIdWithOptionalValue();
-    std::vector<ASTNode*> parseAgumentsInCall();
+    std::vector<Expression*> parseAgumentsInCall();
     void parseSimpleStatement(Statement* node);
 
     GenericType* parseType();

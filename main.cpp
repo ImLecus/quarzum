@@ -2,6 +2,9 @@
 #include "src/parser/parser.cpp"
 #include "src/source.hpp"
 #include "src/ir/irinstruction.hpp"
+#include "src/backend/assembler.hpp"
+#include <memory>
+#include <fstream>
 
 int main(const int argc,const char** argv) {
 
@@ -20,6 +23,16 @@ int main(const int argc,const char** argv) {
     RootNode root = parser.parse();
     root.check();
     root.generateIR();
-
+    std::unique_ptr<Assembler> assembler = getAssembler(ir);
+    std::ofstream output("output.asm");
+    if(output.is_open()){
+        output << assembler->assemble();
+        output.close();
+        system("as output.asm -o output.o"); 
+        system("ld output.o ./builtins/x86_64.o -o output");
+        system("./output");
+        //system("rm output.asm");
+        system("rm output.o");
+    }
     return 0;
 }

@@ -142,8 +142,8 @@ struct FunctionContainer : public Container {
             ir.push_back(IRInstruction{PARAM, arg->id->value});
         }
         Container::generateIR();
-        std::cout << identifier->value << "~:\n";
-        ir.push_back(IRInstruction{LABEL, identifier->value + '~'});
+        std::cout << '_' << identifier->value << ":\n";
+        ir.push_back(IRInstruction{LABEL, '_' + identifier->value });
     }
 };
 

@@ -23,6 +23,7 @@ struct IRInstruction
     std::string target;
     std::string origin1;
     std::string origin2;
+    std::string varType;
 };
 
 IRInstructionType getInstructionType(std::string op){

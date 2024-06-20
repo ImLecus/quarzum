@@ -19,15 +19,17 @@ struct IfContainer: public Container {
         condition->generateIR();
         std::cout << "GOTO " << getLIndex() << " IF " << condition->index << '\n';
         ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
-        std::cout << getLIndex() << ":\n";
-        
+
+        std::cout << "GOTO " << getCIndex()<< '\n';
+        ir.push_back(IRInstruction{GOTO, getCIndex()});
+
         ir.push_back(IRInstruction{LABEL, getLIndex()});
         lIndex++;
+
         Container::generateIR();
         
-        
         lIndex = 0;
-        std::cout << getCIndex() << ":\n";
+
         ir.push_back(IRInstruction{LABEL, getCIndex()});
         cIndex++;
     }
@@ -135,14 +137,14 @@ struct FunctionContainer : public Container {
         Container::check();
     }
     void generateIR() override {
-        std::cout << identifier->value << ":\n";
+
         ir.push_back(IRInstruction{LABEL, identifier->value});
         for(Argument* arg: args){
-            std::cout << "PARAM " << arg->id->value << '\n';
+
             ir.push_back(IRInstruction{PARAM, arg->id->value});
         }
         Container::generateIR();
-        std::cout << '_' << identifier->value << ":\n";
+
         ir.push_back(IRInstruction{LABEL, '_' + identifier->value });
     }
 };

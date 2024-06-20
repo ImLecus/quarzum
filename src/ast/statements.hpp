@@ -31,7 +31,7 @@ struct ExitStatement: public Statement {
 
     }
     void generateIR() override {
-        std::cout << "EXIT " << expression->index << '\n';
+        expression ->generateIR();
         ir.push_back(IRInstruction{EXIT, expression->index});
     }
 };
@@ -115,20 +115,15 @@ struct FunctionCall : public Statement {
         for(Expression* arg : args){
             arg->generateIR();
             if(auto l = dynamic_cast<Literal*>(arg)){
-                std::cout << "ASSIGN " << getVIndex() << ", " << arg->index << '\n';
                 ir.push_back(IRInstruction{ASSIGN, getVIndex(), arg->index,"literal",arg->type->name});
-                std::cout << "PARAM_CALL " << getVIndex() << '\n';
                 ir.push_back(IRInstruction{PARAM_CALL, getVIndex()});
                 vIndex++;
                 tIndex = 0;
                 continue;
             }
-            
-            std::cout << "PARAM_CALL " << arg->index << '\n';
             ir.push_back(IRInstruction{PARAM_CALL, arg->index});
             tIndex = 0;
         }
-        std::cout << "CALL " << identifier->value << '\n';
         ir.push_back(IRInstruction{CALL, identifier->value});
     }
 };

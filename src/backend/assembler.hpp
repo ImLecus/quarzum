@@ -30,10 +30,14 @@ struct x86_64_Assembler : public Assembler {
         {"string", ".string"}
     };
     uint8_t paramRegister;
-    std::string registers[6] = {"%rdi", "%rsi", "%rdx", "%rcx", "r8", "r9"};
+    uint8_t temporalRegister;
+    std::string paramRegisters[6] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+    std::string tempRegisters[6] = {"%r10", "%r11", "%r12", "%r13", "%r14", "%r15"};
     std::string getParamRegister(){
-        
-        return registers[paramRegister];
+        return paramRegisters[paramRegister];
+    }
+    std::string getTRegister(){
+        return tempRegisters[temporalRegister];
     }
     std::string assemble(){
         std::string dataSection = ".data\n";
@@ -43,9 +47,11 @@ struct x86_64_Assembler : public Assembler {
             {
             case PARAM_CALL:
                 textSection += "\tmov $" + i.target + ", " + getParamRegister() + '\n';
+                paramRegister++;
                 break;
             case CALL:
                 textSection += "\tcall " + i.target + '\n';
+                paramRegister = 0;
                 break;
             case LABEL:
                 if(i.target == "main"){textSection += "_start:\n";break;}
@@ -58,12 +64,41 @@ struct x86_64_Assembler : public Assembler {
                     break;
                 }
                 dataSection += " 0\n";
+                textSection += "\tmov " + getTRegister() + ", " + i.target + "\n";
+                
+                break;
+            case GOTO:
+                textSection += "\tjmp " + i.target + "\n"; 
                 break;
             case ADD:
-                //textSection += "\tmov $" + i.origin1 + ", %r8\n";
+                if(i.origin2 == i.target){
+                    textSection += "\tadd $" + i.origin1 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1 == i.target){
+                    textSection += "\tadd $" + i.origin2 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1[0]=='t' or i.origin1[0]=='t'){temporalRegister++;}
+                textSection += "\tmov $" + i.origin1 + ", " + getTRegister() + "\n";
+                textSection += "\tadd $" + i.origin2 + ", " + getTRegister() + "\n";
+                //temporalRegister++;
+                break;
+            case SUB:
+                if(i.origin2 == i.target){
+                    textSection += "\tsub $" + i.origin1 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1 == i.target){
+                    textSection += "\tsub $" + i.origin2 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                textSection += "\tmov $" + i.origin1 + ", " + getTRegister() + "\n";
+                textSection += "\tsub $" + i.origin2 + ", " + getTRegister() + "\n";
+                //temporalRegister++;
                 break;
             case EXIT:
-                textSection += "\tmovb $60, %al\n\txorq %rdi, %rdi\n\tsyscall\n";
+                textSection += "\tmovq $60, %rax\n\tmovq " + i.target + ", %rdi\n\tsyscall\n";
                 break;
             default:
                 break;

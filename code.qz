@@ -1,4 +1,10 @@
 function main(){
-	out("Hello world!");
+
+	out("Quarzum works!!!");
+	int8 i;
+	input();
+	time();
+	createFile("newQuarzum.qz");
+	out("File created");
 }
 

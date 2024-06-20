@@ -1,7 +1,15 @@
 .data   
-    newline: .byte '\n'
+    _newline: .byte '\n'
     true = 1
     false = 0
+    O_RDONLY = 0x0000
+    O_WRONLY = 0x0001
+    O_RDWR = 0x0002
+    O_CREAT = 0x0040
+    O_TRUNC = 0x0200
+.bss
+    _input_buffer: .space 256
+    _timeval: .space 16
 .text
 #
 #   uint len(char* string)
@@ -40,12 +48,51 @@ out:
 
     movq $1, %rax
     movq $1, %rdi
-    leaq newline, %rsi
+    leaq _newline, %rsi
     movq $2, %rdx
     syscall
 
     pop %rsi
     pop %rdx
+    leave
+    ret
+
+#
+#   char[256] input();
+#   Reads the console and stores the content inside _input_buffer
+#
+.global input
+input:
+    enter $0, $0
+    push %rsi
+    push %rdx
+    push %rdi
+    xorq %rax, %rax
+    xorq %rdi, %rdi
+    leaq _input_buffer, %rsi
+    movq $256, %rdx
+    syscall
+    leaq _input_buffer, %rax
+    pop %rdx
+    pop %rsi
+    pop %rdi
+    leave
+    ret
+
+#
+# uint time();
+# Returns the number of seconds since 1/1/1970
+#
+.global time
+time:
+    enter $0, $0
+
+    movq $96, %rax
+    leaq _timeval, %rdi
+    xorq %rsi, %rsi
+    syscall
+    leaq _timeval, %rax
+
     leave
     ret
 

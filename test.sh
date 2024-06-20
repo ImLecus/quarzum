@@ -1,4 +1,4 @@
-/usr/bin/cmake --build ./out/build/preset --parallel 6
+/usr/bin/cmake --build ./out/build/preset
 echo "Build finished. Press any key to continue..."
 read
 clear

@@ -11,6 +11,9 @@ struct IfContainer: public Container {
     }
     void check() override {
         Container::check();
+        if(condition->type->name != "bool"){
+            throwTypeError("'if' condition must be a boolean");
+        }
     }
 };
 
@@ -25,6 +28,9 @@ struct WhileContainer : public Container {
     }
     void check() override {
         Container::check();
+        if(condition->type->name != "bool"){
+            throwTypeError("'if' condition must be a boolean");
+        }
     }
 };
 

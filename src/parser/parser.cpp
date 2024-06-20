@@ -238,6 +238,9 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
             return new Literal(new NullType(), "");
         case identifier:
             return new Identifier(expressionTokens[0].getValue());
+        case true_literal:
+        case false_literal:
+            return new Literal(new Boolean(), expressionTokens[0].getValue());
         default:
             throwSyntaxError("Invalid expression", tokens.getLine(i));
             break;

@@ -11,17 +11,17 @@ public:
     }
 
     bool isSymbol() const {
-        return (u_int8_t)this->type >= 0x60 and (u_int8_t)this->type <= 0x7F;
+        return this->type >= 0x60 and this->type <= 0x7F;
     }
 
     bool isKeyword() const {
-        return (u_int8_t)this->type <= 0x2F;
+        return this->type <= 0x2F;
     }
     bool isTypeKeyword() const {
-        return (u_int8_t)this->type <= 0x0F or this->type == identifier;
+        return this->type <= 0x0F or this->type == identifier;
     }
     bool isOperator() const {
-        return (u_int8_t)this->type >= 0x30 and (u_int8_t)this->type <= 0x5F;
+        return this->type >= 0x30 and this->type <= 0x5F;
     }
 
     bool isAssignOperator() const {
@@ -37,7 +37,7 @@ public:
     }
 
     bool isLiteral() const {
-        return (u_int8_t)this->type >= 0x80 and (u_int8_t)this->type <= 0x9F;
+        return this->type >= 0x80 and this->type <= 0x9F ;
     }
 
     u_int8_t getPriority() const {
@@ -62,6 +62,7 @@ public:
         case greater_eq:
             return 6;
         case plus:
+        case converge_sum:
         case minus:
             return 7;
         case prod:

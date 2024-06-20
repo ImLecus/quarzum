@@ -6,12 +6,14 @@ struct UnaryExpression : public Expression {
     Expression* operand;
 
     UnaryExpression(const std::string& oper, Expression* expr) : op(oper), operand(expr) {
+        if(op == "not"){
+            this->type = operand->type->notg();
+        }
 
     }
 
-    void print() override {
-        
-        std::cout << "UnaryExpression: (" << op << ")\n\t";
+    void print() {
+        std::cout << "unary expression: (" << op << ")\n\t";
         operand->print();
     }
 
@@ -27,16 +29,16 @@ struct BinaryExpression : public Expression {
 
     BinaryExpression(const std::string& op, Expression* left, Expression* right): op(op), left(left), right(right) {
         if(op == "+"){
-            this->type = left->type->sum(right->type);      
+            this->type = GenericType::sum(sortTypes(left->type, right->type));      
         }
         else if(op == "-"){
             this->type = left->type->sub(right->type);        
         }
         else if(op == "#"){
-            this->type = left->type->csum(right->type);
+            this->type = GenericType::csum(sortTypes(left->type, right->type)); 
         }
         else if(op == "*"){
-            this->type = left->type->prod(right->type);
+            this->type = GenericType::prod(sortTypes(left->type, right->type)); 
         }
         else if(op == "/"){
             this->type = left->type->div(right->type);
@@ -46,6 +48,15 @@ struct BinaryExpression : public Expression {
         }
         else if(op == "^"){
             this->type = left->type->pow(right->type);
+        }
+        else if(op == "and"){
+            this->type = GenericType::andg(left->type, right->type); 
+        }
+        else if(op == "or"){
+            this->type = GenericType::org(left->type, right->type); 
+        }
+        else if(op == "=="){
+            this->type = GenericType::equal(left->type, right->type); 
         }
     }
 

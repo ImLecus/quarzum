@@ -11,6 +11,11 @@ struct ReturnStatement: public Statement {
     void check() override {
         
     }
+    void generateIR() override {
+        expression->generateIR();
+        std::cout << "RET " << expression->index << '\n';
+        ir.push_back(IRInstruction{RET, expression->index});
+    }
 };
 struct ExitStatement: public Statement {
     Expression* expression;
@@ -23,6 +28,11 @@ struct ExitStatement: public Statement {
     //   if(not instanceOf<UInteger>(expression->type)){
     //     throwTypeError("Exit escape code should be an uint");
     //   }
+
+    }
+    void generateIR() override {
+        std::cout << "EXIT " << expression->index << '\n';
+        ir.push_back(IRInstruction{EXIT, expression->index});
     }
 };
 struct WhileStatement: public Statement {

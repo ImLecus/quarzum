@@ -322,8 +322,8 @@ GenericType* Parser::parseInheritance(){
     return nullptr;
 }
 
-vector<ASTNode*> Parser::parseArguments(){
-    vector<ASTNode*> arguments;
+vector<Argument*> Parser::parseArguments(){
+    vector<Argument*> arguments;
     bool valid = true;
     while(valid){
         if(not get(i).isTypeKeyword()){valid = false; continue;}
@@ -446,7 +446,7 @@ FunctionContainer* Parser::parseFunction(){
         }
         Identifier* id = getIdentifier();
         expect(left_par, "Expected function arguments");
-        std::vector<ASTNode*> args = parseArguments();
+        std::vector<Argument*> args = parseArguments();
         expect(right_par, "Expected end of arguments");
         expect(left_curly, "Expected function body");
         return new FunctionContainer(id, type, args);

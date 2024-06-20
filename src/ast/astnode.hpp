@@ -49,7 +49,11 @@ struct Container : public Statement {
             node->check();
         }
     }
-
+    void generateIR() override {
+        for(Statement* node : nodes){
+            node->generateIR();
+        }
+    }
 };
 
 struct RootNode : public Container {

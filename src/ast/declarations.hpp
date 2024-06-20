@@ -19,13 +19,14 @@ struct VariableDeclaration : public Statement {
 
     void generateIR(){
         if(Literal* l = dynamic_cast<Literal*>(expression)){
-            std::cout << "assign " << id->value << ", " << l->value << "\n";
+            std::cout << "ASSIGN " << id->value << ", " << l->value << "\n";
+            ir.push_back(IRInstruction{ASSIGN,id->value,l->value,""});
+            return;
         }
-        else{
-            expression->generateIR();
-            std::cout << "assign " << id->value << ", " << expression->index << "\n";
-            tIndex = 0;
-        }
+        expression->generateIR();
+        std::cout << "ASSIGN " << id->value << ", " << expression->index << "\n";
+        ir.push_back(IRInstruction{ASSIGN,id->value,expression->index,""});
+        tIndex = 0;
 
     }
 

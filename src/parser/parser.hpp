@@ -39,7 +39,7 @@ private:
     void parseImport();
     GenericType* parseInheritance();
     Identifier* getIdentifier();
-    std::vector<ASTNode*> parseArguments();
+    std::vector<Argument*> parseArguments();
     std::vector<Element*> parseEnumElements();
     Element* parseIdWithOptionalValue();
     std::vector<ASTNode*> parseAgumentsInCall();

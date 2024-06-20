@@ -10,9 +10,11 @@ enum IRInstructionType : u_int8_t {
     DIV,
     MOD,
     CSUM,
-    IF,
     GOTO,
-    LABEL
+    LABEL,
+    EXIT,
+    PARAM,
+    RET
 };
 
 struct IRInstruction
@@ -30,8 +32,16 @@ IRInstructionType getInstructionType(std::string op){
     return ADD;
 }
 
-u_int16_t tIndex;
+u_int8_t cIndex;
+u_int8_t lIndex;
+u_int8_t tIndex;
 std::string getTIndex(){
     return "t"+std::to_string(tIndex);
+}
+std::string getLIndex(){
+    return "l"+std::to_string(lIndex);
+}
+std::string getCIndex(){
+    return "c"+std::to_string(cIndex);
 }
 std::vector<IRInstruction> ir;

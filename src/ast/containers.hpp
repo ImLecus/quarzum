@@ -15,6 +15,22 @@ struct IfContainer: public Container {
             throwTypeError("'if' condition must be a boolean");
         }
     }
+    void generateIR() override {
+        condition->generateIR();
+        std::cout << "GOTO " << getLIndex() << " IF " << condition->index << '\n';
+        ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
+        std::cout << getLIndex() << ":\n";
+        
+        ir.push_back(IRInstruction{LABEL, getLIndex()});
+        lIndex++;
+        Container::generateIR();
+        
+        
+        lIndex = 0;
+        std::cout << getCIndex() << ":\n";
+        ir.push_back(IRInstruction{LABEL, getCIndex()});
+        cIndex++;
+    }
 };
 
 struct WhileContainer : public Container {
@@ -31,6 +47,31 @@ struct WhileContainer : public Container {
         if(condition->type->name != "bool"){
             throwTypeError("'if' condition must be a boolean");
         }
+    }
+    void generateIR() override {
+        std::string initialIndex = getLIndex();
+        std::cout << getLIndex() << ":\n";
+        ir.push_back(IRInstruction{LABEL, getLIndex()});
+        lIndex++;
+
+        std::cout << "GOTO " << getLIndex() << " IF " << condition->index << '\n';
+        ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
+        
+        std::cout << "GOTO " << getCIndex() << '\n';
+        ir.push_back(IRInstruction{GOTO, getCIndex()});
+
+        std::cout << getLIndex() << ":\n";
+        ir.push_back(IRInstruction{LABEL, getLIndex()});
+        lIndex++;
+        Container::generateIR();
+        
+        std::cout << "GOTO " << initialIndex << '\n';
+        ir.push_back(IRInstruction{GOTO, initialIndex});
+        
+        lIndex = 0;
+        std::cout << getCIndex() << ":\n";
+        ir.push_back(IRInstruction{LABEL, getCIndex()});
+        cIndex++;
     }
 };
 
@@ -78,8 +119,8 @@ struct ForeachContainer : public Container {
 struct FunctionContainer : public Container {
     Identifier* identifier;
     GenericType* type;
-    std::vector<ASTNode*> args;
-    FunctionContainer(Identifier* identifier,GenericType* type, std::vector<ASTNode*> args): 
+    std::vector<Argument*> args;
+    FunctionContainer(Identifier* identifier,GenericType* type, std::vector<Argument*> args): 
         Container(),identifier(identifier), type(type), args(args) {}
     void print() override{
         std::cout << "function:\n";
@@ -92,6 +133,17 @@ struct FunctionContainer : public Container {
     }
     void check() override {
         Container::check();
+    }
+    void generateIR() override {
+        std::cout << identifier->value << ":\n";
+        ir.push_back(IRInstruction{LABEL, identifier->value});
+        for(Argument* arg: args){
+            std::cout << "PARAM " << arg->id->value << '\n';
+            ir.push_back(IRInstruction{PARAM, arg->id->value});
+        }
+        Container::generateIR();
+        std::cout << identifier->value << "~:\n";
+        ir.push_back(IRInstruction{LABEL, identifier->value + '~'});
     }
 };
 

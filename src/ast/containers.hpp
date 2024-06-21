@@ -21,7 +21,6 @@ struct IfContainer: public Container {
     }
     void generateIR() override {
         condition->generateIR();
-        std::cout << "GOTO " << getLIndex() << " IF " << condition->index << '\n';
         if(auto l = dynamic_cast<Literal*>(condition)){
             ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal"});
         }
@@ -33,7 +32,6 @@ struct IfContainer: public Container {
             elseContainer->generateIR();
         }
         
-        std::cout << "GOTO " << getCIndex()<< '\n';
         ir.push_back(IRInstruction{GOTO, getCIndex()});
 
         ir.push_back(IRInstruction{LABEL, getLIndex()});
@@ -65,26 +63,26 @@ struct WhileContainer : public Container {
     }
     void generateIR() override {
         std::string initialIndex = getLIndex();
-        std::cout << getLIndex() << ":\n";
         ir.push_back(IRInstruction{LABEL, getLIndex()});
         lIndex++;
 
-        std::cout << "GOTO " << getLIndex() << " IF " << condition->index << '\n';
-        ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
+        if(auto l = dynamic_cast<Literal*>(condition)){
+            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal"});
+        }
+        else {
+           ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index}); 
+        }
         
-        std::cout << "GOTO " << getCIndex() << '\n';
+        
         ir.push_back(IRInstruction{GOTO, getCIndex()});
 
-        std::cout << getLIndex() << ":\n";
         ir.push_back(IRInstruction{LABEL, getLIndex()});
         lIndex++;
         Container::generateIR();
         
-        std::cout << "GOTO " << initialIndex << '\n';
         ir.push_back(IRInstruction{GOTO, initialIndex});
         
         lIndex = 0;
-        std::cout << getCIndex() << ":\n";
         ir.push_back(IRInstruction{LABEL, getCIndex()});
         cIndex++;
     }

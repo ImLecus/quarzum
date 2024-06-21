@@ -1,11 +1,8 @@
 function main(){
-	
-	if(false){
-		out("Hello world!");
+	while(false){
+		out("Hello");
+		
 	}
-	else {
-		out("Goodbye world");
-	}
-
+	input();
 }
 

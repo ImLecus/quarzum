@@ -71,9 +71,9 @@ struct BinaryExpression : public Expression {
     void generateIR() override {
         left->generateIR();
         right->generateIR();
-        
+         
         index = getTIndex();
-        std::cout << op << " " << index << ", " << left->index << ", " << right->index << "\n";
+        //std::cout << op << " " << index << ", " << left->index << ", " << right->index << "\n";
         ir.push_back(IRInstruction{getInstructionType(op),index,left->index,right->index});
         //tIndex++;
     }

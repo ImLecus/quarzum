@@ -1,16 +1,16 @@
 .data
-	.v0: .string "Goodbye world"
-	.v1: .string "Hello world!"
+	.v0: .string "Hello"
 .text
 .globl _start
 _start:
+.l0:
 	cmpq $1, false
-	je .l0
+	je .l1
+	jmp .c0
+.l1:
 	mov $.v0, %rdi
 	call out
-	jmp .c0
-.l0:
-	mov $.v1, %rdi
-	call out
+	jmp .l0
 .c0:
+	call input
 _main:

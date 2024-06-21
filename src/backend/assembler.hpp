@@ -67,9 +67,7 @@ struct x86_64_Assembler : public Assembler {
                 textSection += "\tmov " + getTRegister() + ", " + i.target + "\n";
                 break;
             case GOTO:
-                // IF condition
                 if(not i.origin1.empty()){
-
                     textSection += "\tcmpq $1, " + (i.origin2=="literal"? i.origin1 : getTRegister()) + "\n";
                     textSection += "\tje " + i.target + "\n";
                     break;

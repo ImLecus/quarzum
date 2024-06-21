@@ -1,7 +1,9 @@
 .data   
     _newline: .byte '\n'
-    true = 1
-    false = 0
+    .global true
+    true: .byte 1
+    .global false
+    false: .byte 0
     O_RDONLY = 0x0000
     O_WRONLY = 0x0001
     O_RDWR = 0x0002

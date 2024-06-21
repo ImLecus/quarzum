@@ -65,10 +65,42 @@ struct x86_64_Assembler : public Assembler {
                 }
                 dataSection += " 0\n";
                 textSection += "\tmov " + getTRegister() + ", " + i.target + "\n";
-                
                 break;
             case GOTO:
+                // IF condition
+                if(not i.origin1.empty()){
+
+                    textSection += "\tcmpq $1, " + (i.origin2=="literal"? i.origin1 : getTRegister()) + "\n";
+                    textSection += "\tje " + i.target + "\n";
+                    break;
+                }
                 textSection += "\tjmp " + i.target + "\n"; 
+                break;
+            case AND:
+                if(i.origin2 == i.target){
+                    textSection += "\tand " + i.origin1 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1 == i.target){
+                    textSection += "\tand " + i.origin2 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1[0]=='t' or i.origin2[0]=='t'){temporalRegister++;}
+                textSection += "\tmov " + i.origin1 + ", " + getTRegister() + "\n";
+                textSection += "\tand " + i.origin2 + ", " + getTRegister() + "\n";
+                break;
+             case OR:
+                if(i.origin2 == i.target){
+                    textSection += "\tor " + i.origin1 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1 == i.target){
+                    textSection += "\tor " + i.origin2 + ", " + getTRegister() + "\n";
+                    break;
+                }
+                if(i.origin1[0]=='t' or i.origin2[0]=='t'){temporalRegister++;}
+                textSection += "\tmov " + i.origin1 + ", " + getTRegister() + "\n";
+                textSection += "\tor " + i.origin2 + ", " + getTRegister() + "\n";
                 break;
             case ADD:
                 if(i.origin2 == i.target){
@@ -79,7 +111,7 @@ struct x86_64_Assembler : public Assembler {
                     textSection += "\tadd $" + i.origin2 + ", " + getTRegister() + "\n";
                     break;
                 }
-                if(i.origin1[0]=='t' or i.origin1[0]=='t'){temporalRegister++;}
+                if(i.origin1[0]=='t' or i.origin2[0]=='t'){temporalRegister++;}
                 textSection += "\tmov $" + i.origin1 + ", " + getTRegister() + "\n";
                 textSection += "\tadd $" + i.origin2 + ", " + getTRegister() + "\n";
                 //temporalRegister++;

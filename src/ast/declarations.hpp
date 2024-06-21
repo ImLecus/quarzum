@@ -19,7 +19,8 @@ struct VariableDeclaration : public Statement {
 
     void generateIR(){
         if(Literal* l = dynamic_cast<Literal*>(expression)){
-            ir.push_back(IRInstruction{ASSIGN,id->value,l->value,"",type->name});
+
+            ir.push_back(IRInstruction{ASSIGN,id->value,l->value,"literal",type->name});
             return;
         }
         expression->generateIR();

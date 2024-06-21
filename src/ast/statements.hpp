@@ -114,6 +114,11 @@ struct FunctionCall : public Statement {
     void generateIR() override {
         for(Expression* arg : args){
             arg->generateIR();
+            if(auto i = dynamic_cast<Identifier*>(arg)){
+                ir.push_back(IRInstruction{PARAM_CALL, arg->index});
+                tIndex = 0;
+                continue;
+            }
             if(auto l = dynamic_cast<Literal*>(arg)){
                 ir.push_back(IRInstruction{ASSIGN, getVIndex(), arg->index,"literal",arg->type->name});
                 ir.push_back(IRInstruction{PARAM_CALL, getVIndex()});

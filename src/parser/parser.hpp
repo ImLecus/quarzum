@@ -28,6 +28,7 @@ private:
     size_t i;
     std::string lastType;
     IdentationManager identation;
+    bool exitedIf = false;
 
     Token get(const size_t& index);
     bool ask(const TokenType type, const int8_t distance = 0);

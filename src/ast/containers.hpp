@@ -1,8 +1,12 @@
 #pragma once
 #include "astnode.hpp"
 
+struct ElseContainer : public Container {};
 struct IfContainer: public Container {
     Expression* condition;
+    ElseContainer* elseContainer;
+    IfContainer(Expression* condition, ElseContainer* elseContainer): 
+    Container(), condition(condition), elseContainer(elseContainer) {}
     IfContainer(Expression* condition): Container(), condition(condition) {}
     void print() override{
         std::cout << "if:\n\t";
@@ -18,8 +22,17 @@ struct IfContainer: public Container {
     void generateIR() override {
         condition->generateIR();
         std::cout << "GOTO " << getLIndex() << " IF " << condition->index << '\n';
-        ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
+        if(auto l = dynamic_cast<Literal*>(condition)){
+            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal"});
+        }
+        else{
+            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
+        }
 
+        if(elseContainer != nullptr){
+            elseContainer->generateIR();
+        }
+        
         std::cout << "GOTO " << getCIndex()<< '\n';
         ir.push_back(IRInstruction{GOTO, getCIndex()});
 

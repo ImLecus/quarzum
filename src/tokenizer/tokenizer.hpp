@@ -104,5 +104,6 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"private", private_keyword},
     {"protected", protected_keyword},
     {"do", do_keyword},
-    {"for", for_keyword}
+    {"for", for_keyword},
+    {"else", else_keyword}
 };

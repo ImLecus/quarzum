@@ -82,6 +82,14 @@ const RootNode Parser::parse(){
 
         else if(ask(right_curly) and identation.hasLayers()){
             identation.close();
+            if(auto e =  dynamic_cast<ElseContainer*>(identation.getLastLayer()->getLastObject())){
+                identation.getLastLayer()->deleteLastObject();
+                if(auto ic = dynamic_cast<IfContainer*>(identation.getLastLayer()->getLastObject())){
+                    ic->elseContainer = e;
+                    continue;
+                }
+                throwSyntaxError("Expected 'if' statement before 'else'",tokens.getLine(i));
+            }
         }
 
         else if(consume(return_keyword)){
@@ -159,6 +167,12 @@ const RootNode Parser::parse(){
         else if(consume(enum_keyword)){
             parseEnum();
         }  
+
+        else if(consume(else_keyword)){
+            expect(left_curly, "Expected '{'");
+            identation.open<ElseContainer>(new ElseContainer());
+            --i;
+        }
 
         else if(auto redec = parseRedec()){
             identation.addElement(redec);

@@ -45,13 +45,21 @@ struct Container : public Statement {
         }
     }
     void check() override {
-        for(Statement* node : nodes){
+        for(Statement* node : nodes){            
             node->check();
         }
     }
     void generateIR() override {
         for(Statement* node : nodes){
             node->generateIR();
+        }
+    }
+    Statement* getLastObject(){
+        return nodes.back();
+    }
+    void deleteLastObject(){
+        if(nodes.size() >= 1){
+            nodes.pop_back();
         }
     }
 };

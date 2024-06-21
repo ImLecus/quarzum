@@ -1,21 +1,16 @@
 .data
-	v0: .string "Quarzum works!!!"
-	i: .byte 0
-	v1: .string "newQuarzum.qz"
-	v2: .string "File created"
+	.v0: .string "Goodbye world"
+	.v1: .string "Hello world!"
 .text
 .globl _start
 _start:
-	mov $v0, %rdi
+	cmpq $1, false
+	je .l0
+	mov $.v0, %rdi
 	call out
-	mov %r10, i
-	call input
-	call time
-	mov $v1, %rdi
-	call createFile
-	mov $v2, %rdi
+	jmp .c0
+.l0:
+	mov $.v1, %rdi
 	call out
-	mov %rax, %rdi
-	mov $60, %rax
-	syscall
+.c0:
 _main:

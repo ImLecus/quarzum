@@ -1,10 +1,11 @@
 function main(){
+	
+	if(false){
+		out("Hello world!");
+	}
+	else {
+		out("Goodbye world");
+	}
 
-	out("Quarzum works!!!");
-	int8 i;
-	input();
-	time();
-	createFile("newQuarzum.qz");
-	out("File created");
 }
 

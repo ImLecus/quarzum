@@ -45,6 +45,7 @@ enum TokenType : unsigned char {
     protected_keyword = 0x20,
     do_keyword = 0x21,
     for_keyword = 0x22,
+    else_keyword = 0x23,
     // operators
     plus = 0x30,
     converge_sum = 0x31,

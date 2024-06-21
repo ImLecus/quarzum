@@ -16,7 +16,9 @@ enum IRInstructionType : u_int8_t {
     PARAM,
     RET,
     CALL,
-    PARAM_CALL
+    PARAM_CALL,
+    AND,
+    OR
 };
 
 struct IRInstruction
@@ -32,6 +34,8 @@ IRInstructionType getInstructionType(std::string op){
     if(op == "+"){return ADD;}
     if(op == "-"){return SUB;}
     if(op == "*"){return PROD;}
+    if(op == "and"){return AND;}
+    if(op == "or"){return OR;}
     return ADD;
 }
 
@@ -40,15 +44,15 @@ u_int8_t lIndex;
 u_int8_t tIndex;
 u_int8_t vIndex;
 std::string getVIndex(){
-    return "v"+std::to_string(vIndex);
+    return ".v"+std::to_string(vIndex);
 }
 std::string getTIndex(){
-    return "t"+std::to_string(tIndex);
+    return ".t"+std::to_string(tIndex);
 }
 std::string getLIndex(){
-    return "l"+std::to_string(lIndex);
+    return ".l"+std::to_string(lIndex);
 }
 std::string getCIndex(){
-    return "c"+std::to_string(cIndex);
+    return ".c"+std::to_string(cIndex);
 }
 std::vector<IRInstruction> ir;

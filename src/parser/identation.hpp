@@ -3,7 +3,7 @@
 
 class IdentationManager {
 public:
-    Container* getLastLayer(){
+    inline Container* getLastLayer() const{
         return layers.at(layers.size() - 1);
     }
     /*
@@ -23,7 +23,7 @@ public:
         getLastLayer()->add(lastLayer);
     }
 
-    bool hasLayers(){
+    inline bool hasLayers() const{
         return identationLayer > 1;
     }
 

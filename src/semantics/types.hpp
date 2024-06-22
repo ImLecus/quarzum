@@ -7,21 +7,21 @@
 /**
  * @brief Throws a TypeError due to incompatibility between two types.
 */
-nullptr_t throwOperatorError(const std::string op, const std::string a, const std::string b);
-nullptr_t throwUnaryOperatorError(const std::string op, const std::string a);
+nullptr_t throwOperatorError(const std::string& op, const std::string& a, const std::string& b);
+nullptr_t throwUnaryOperatorError(const std::string& op, const std::string& a);
 /**
  * @brief Returns the max number of bits between two types.
 */
-u_int8_t converge(const u_int8_t a, const u_int8_t b);
+u_int8_t converge(const u_int8_t& a, const u_int8_t& b);
 /**
  * @brief Promotes a type into the next two power capacity in bits.
  * @param doublePromote Promotes two times in a row (example: int8 -> int32)
 */
-u_int8_t promote(const u_int8_t a, const u_int8_t b, bool doublePromote = false);
+u_int8_t promote(const u_int8_t& a, const u_int8_t& b,const bool& doublePromote = false);
 /**
  * @brief Returns the number of bits detailed at the end of the name.
 */
-u_int8_t getBits(const std::string name);
+u_int8_t getBits(const std::string& name);
 
 
 
@@ -45,10 +45,10 @@ struct GenericType{
     bool constant;
     TypeFlags flag;
     u_int8_t bits;
-    bool isNumeric(){
+    inline bool isNumeric() const {
         return flag >= 2 and flag <= 4;
     }
-    bool isText(){
+    inline bool isText() const {
         return flag == CHAR or flag == STRING;
     }
     // Unary operators

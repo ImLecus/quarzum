@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <stack>
+#include <unordered_map>
 
 enum IRInstructionType : u_int8_t {
     ASSIGN,
@@ -39,20 +39,27 @@ struct IRInstruction
     std::string varType;
 };
 
-IRInstructionType getInstructionType(std::string op){
-    if(op == "+"){return ADD;}
-    if(op == "-"){return SUB;}
-    if(op == "*"){return PROD;}
-    if(op == "and"){return AND;}
-    if(op == "or"){return OR;}
-    if(op == "=="){return EQ;}
-    if(op == "<"){return LOW;}
-    if(op == "<="){return LOWEQ;}
-    if(op == ">"){return GRT;}
-    if(op == ">="){return GRTEQ;}
-    if(op == "!="){return NEQ;}
-    if(op == "not"){return NOT;}
-    if(op == "++"){return INC;}
+const std::unordered_map<std::string, IRInstructionType> operatorToType = {
+    {"+", ADD},
+    {"-", SUB},
+    {"*", PROD},
+    {"and", AND},
+    {"or", OR},
+    {"==", EQ},
+    {"<", LOW},
+    {"<=", LOWEQ},
+    {">", GRT},
+    {">=", GRTEQ},
+    {"!=", NEQ},
+    {"not", NOT},
+    {"++", INC}
+};
+
+IRInstructionType getInstructionType(const std::string& op){
+    auto it = operatorToType.find(op);
+    if(it != operatorToType.end()){
+        return it->second;
+    }
     return ADD;
 }
 
@@ -60,16 +67,16 @@ u_int8_t cIndex;
 u_int8_t lIndex;
 u_int8_t tIndex;
 u_int8_t vIndex;
-std::string getVIndex(){
+inline const std::string getVIndex() noexcept{
     return ".v"+std::to_string(vIndex);
 }
-std::string getTIndex(){
+inline const std::string getTIndex() noexcept{
     return ".t"+std::to_string(tIndex);
 }
-std::string getLIndex(){
+inline const std::string getLIndex() noexcept{
     return ".l"+std::to_string(lIndex);
 }
-std::string getCIndex(){
+inline const std::string getCIndex() noexcept{
     return ".c"+std::to_string(cIndex);
 }
 std::vector<IRInstruction> ir;

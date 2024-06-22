@@ -1,23 +1,23 @@
 #pragma once
 #include "types.hpp"
 
-nullptr_t throwOperatorError(const std::string op, const std::string a, const std::string b){
+nullptr_t throwOperatorError(const std::string& op, const std::string& a, const std::string& b){
     throwTypeError("Operation '" + op + "' does not exist between types " + a + " and " + b);
     return nullptr;
 }
-nullptr_t throwUnaryOperatorError(const std::string op, const std::string a){
+nullptr_t throwUnaryOperatorError(const std::string& op, const std::string& a){
     throwTypeError("Operation '" + op + "' does not exist for type " + a );
     return nullptr;
 }
-u_int8_t converge(const u_int8_t a, const u_int8_t b){
+u_int8_t converge(const u_int8_t& a, const u_int8_t& b){
     return std::max(a,b);
 }
 
-u_int8_t promote(const u_int8_t a, const u_int8_t b, bool doublePromote){
+u_int8_t promote(const u_int8_t& a, const u_int8_t& b,const bool& doublePromote){
     return converge(a,b) * (a>=32 or b>=32? 1: 2 * (1+doublePromote));
 }
 
-u_int8_t getBits(const std::string name){
+u_int8_t getBits(const std::string& name){
     u_int8_t result;
     if(name == "int" or name == "uint" or name == "number"){
         return 32;

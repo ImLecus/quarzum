@@ -6,16 +6,8 @@ struct VariableDeclaration : public Statement {
     Identifier* id;
     Expression* expression;
 
-    VariableDeclaration(GenericType* type, Identifier* id, Expression* initValue): 
+    VariableDeclaration(GenericType*& type, Identifier*& id, Expression* initValue): 
         type(type), id(id), expression(initValue) {}
-
-    void print() override  {
-        std::cout << "VariableDeclaration:\n\t" << type->name << "\n\t";
-        id->print();
-        std::cout <<"\tconstant: " << type->constant << "\n\t";
-        expression->print();
-
-    }
 
     void check() override {
         expression->check();
@@ -54,15 +46,7 @@ enum Access: u_int8_t {
 struct AtributeDeclaration : public Statement {
     Access access;
     VariableDeclaration* var;
-    AtributeDeclaration(Access access, VariableDeclaration* var): access(access), var(var) {}
-    void print() override {
-        std::cout << "atribute:\n\t"<<
-        "access: " << std::to_string(access) << "\n\t";
-        var->id->print();
-        std::cout << var->type->name << "\n\t";
-        var->expression->print();
-        std::cout << "constant: " << var->type->constant << "\n";
-    }
+    AtributeDeclaration(const Access& access, VariableDeclaration*& var): access(access), var(var) {}
     void check() override {
         var->check();
     }
@@ -82,18 +66,6 @@ struct ArrayDeclaration : public Statement {
     ArrayDeclaration(ASTNode* varType, ASTNode* varName, std::vector<ASTNode*> elements, bool constant, ASTNode* size): 
         type(varType), identifier(varName), elements(elements), constant(constant), size(size) {}
 
-    void print() override  {
-        std::cout << "ArrayDeclaration:\n\t";
-        type->print();
-        std::cout <<'\t';
-        identifier->print();
-        std::cout <<"\tconstant: " << constant << "\n\t";
-        size->print();
-        for(auto& element : elements){
-            element->print();
-        }
-    }
-
     ~ArrayDeclaration() {
         delete type;
         delete identifier;
@@ -111,18 +83,8 @@ struct VariableRedeclaration : public Statement {
     Identifier* identifier;
     Expression* expression;
 
-    VariableRedeclaration(Identifier* varName, Expression* value): identifier(varName), expression(value) {
+    VariableRedeclaration(Identifier*& varName, Expression* value): identifier(varName), expression(value) {
         
-    }
-
-    void print() override  {
-        std::cout << "redec:\n";
-        std::cout <<'\t';
-        identifier->print();
-        if (expression) {
-            std::cout <<'\t';
-            expression->print();
-        }
     }
 
     ~VariableRedeclaration() {

@@ -4,23 +4,21 @@
 
 class TokenList {
 public:
-    TokenList(){}
-
     void add(const Token token){
-        this -> tokens.push_back(token);
-        this -> length += 1;
+        tokens.push_back(token);
+        ++length;
     }
 
-    std::vector<Token> getItems(){
-        return this -> tokens;
+    inline std::vector<Token> getItems() const noexcept{
+        return tokens;
     }
 
-    size_t size(){
-        return this->tokens.size();
+    inline size_t size() noexcept{
+        return tokens.size();
     }
 
-    Token operator[](const size_t index){
-        return this->tokens.at(index);
+    inline const Token operator[](const size_t index){
+        return tokens.at(index);
     }
 
     TokenList split(unsigned int from, const unsigned int to){
@@ -31,16 +29,17 @@ public:
         return newList;
     }
 
-    bool isEmpty(){
-        return this->tokens.empty();
+    inline bool isEmpty() const noexcept{
+        return tokens.empty();
     }
 
-    void addLine(size_t index){
+    inline void addLine(const size_t& index){
         lineJumps.push_back(index);
     }
 
-    size_t getLine(size_t index){
-        for(u_int32_t i = 0; i < lineJumps.size(); ++i){
+    size_t getLine(const size_t& index) const{
+        const u_int32_t size = lineJumps.size();
+        for(u_int32_t i = 0; i < size; ++i){
             if(lineJumps[i] > index){
                 return i + 1;
             }
@@ -52,5 +51,4 @@ public:
 private:
     std::vector<Token> tokens;
     std::vector<size_t> lineJumps;
-    
 };

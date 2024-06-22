@@ -1,17 +1,11 @@
 #pragma once
 #include "astnode.hpp"
 
-struct ElseContainer : public Container {
-};
+struct ElseContainer : public Container {};
 struct IfContainer: public Container {
     Expression* condition;
     ElseContainer* elseContainer = nullptr;
     IfContainer(Expression* condition): Container(), condition(condition) {}
-    void print() override{
-        std::cout << "if:\n\t";
-        condition->print();
-        printChildren();
-    }
     void check() override {
         Container::check();
         condition->check();
@@ -49,11 +43,6 @@ struct WhileContainer : public Container {
     Expression* condition;
 
     WhileContainer(Expression* condition): Container(), condition(condition) {}
-    void print() override{
-        std::cout << "while:\n\t";
-        condition->print();
-        printChildren();
-    }
     void check() override {
         condition->check();
         Container::check();
@@ -88,21 +77,11 @@ struct WhileContainer : public Container {
     }
 };
 
-struct DoContainer : public Container {
-    void print() override{
-        std::cout << "do:\n\t";
-        printChildren();
-    }
-};
+struct DoContainer : public Container {};
 
 struct ModuleContainer : public Container {
     Identifier* identifier;
     ModuleContainer(Identifier* identifier): Container(), identifier(identifier) {}
-    void print() override{
-        std::cout << "module:\n\t";
-        identifier->print();
-        printChildren();
-    }
 };
 
 struct ForeachContainer : public Container {
@@ -111,13 +90,6 @@ struct ForeachContainer : public Container {
     GenericType* type;
 
     ForeachContainer(Identifier* identifier, Expression* iterable, GenericType* type): Container(), identifier(identifier), iterable(iterable), type(type) {}
-    void print() override{
-        std::cout << "foreach:\n\t";
-        identifier->print();
-        std::cout << "Argument:\n\t"<<type->name<<"\n\t";
-        iterable -> print();
-        printChildren();
-    }
 };
 
 
@@ -125,17 +97,9 @@ struct FunctionContainer : public Container {
     Identifier* identifier;
     GenericType* type;
     std::vector<Argument*> args;
-    FunctionContainer(Identifier* identifier,GenericType* type, std::vector<Argument*> args): 
+    FunctionContainer(Identifier*& identifier,GenericType*& type, std::vector<Argument*>& args): 
         Container(),identifier(identifier), type(type), args(args) {}
-    void print() override{
-        std::cout << "function:\n";
-        identifier->print();
-        std::cout << "Argument:\n\t"<<type->name<<"\n\t";
-        for(auto& arg : args){
-            arg->print();
-        }
-        printChildren();
-    }
+
     void check() override {
         Container::check();
         symbolTable.insert(identifier->value, {'f',identifier->value,type->name,"global"});
@@ -157,50 +121,20 @@ struct FunctionContainer : public Container {
 struct MethodContainer : public Container {
     Access access;
     FunctionContainer* func;
-    MethodContainer(Access access, FunctionContainer* func): access(access), func(func){}
-    void print () override {
-        std::cout << "method:\n\taccess:" << std::to_string(access) << "\n\t";
-        std::cout << "Argument:\n\t"<<func->type->name<<"\n\t";
-        func->identifier->print();
-        for(auto& arg: func->args){
-            arg->print();
-        }
-        for(auto& node: nodes){
-            node->print();
-        }
-    }
+    MethodContainer(Access access, FunctionContainer*& func): access(access), func(func){}
 };
 
 struct ClassContainer : public Container {
     Identifier* identifier;
     GenericType* inherits;
-    ClassContainer(Identifier* id, GenericType* inherits): identifier(id), inherits(inherits) {}
-    void print() override{
-        std::cout << "class:\n";
-        identifier->print();
-        if(inherits){std::cout << "Argument:\n\t"<<inherits->name<<"\n\t";}
-        printChildren();
-    }
+    ClassContainer(Identifier*& id, GenericType*& inherits): identifier(id), inherits(inherits) {}
 };
 
 struct ForContainer : public Container {
     VariableDeclaration* decl;
     Expression* condition;
     VariableRedeclaration* redec;
-    ForContainer(VariableDeclaration* decl, Expression* condition, VariableRedeclaration* redec): decl(decl), condition(condition), redec(redec){}
-    void print() override{
-        std::cout << "for:\n";
-        if(decl){
-           decl->print(); 
-        }
-        if(condition){
-           condition->print();
-        }
-        if(redec){
-            redec->print();
-        }
-        printChildren();
-    }
+    ForContainer(VariableDeclaration*& decl, Expression* condition, VariableRedeclaration*& redec): decl(decl), condition(condition), redec(redec){}
     void check() override {
         if(decl){
            decl->check(); 

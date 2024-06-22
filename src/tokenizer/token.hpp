@@ -5,42 +5,39 @@
 
 class Token {
 public:
-    explicit Token(const TokenType type, const std::string& value){
-        this->type = type;
-        this->value = value;
-    }
+    explicit Token(const TokenType& type, const std::string& value): type(type), value(value){}
 
-    bool isSymbol() const {
+    inline bool isSymbol() const noexcept {
         return this->type >= 0x60 and this->type <= 0x7F;
     }
 
-    bool isKeyword() const {
+    inline bool isKeyword() const noexcept {
         return this->type <= 0x2F;
     }
-    bool isTypeKeyword() const {
+    inline bool isTypeKeyword() const noexcept {
         return this->type <= 0x0F or this->type == identifier;
     }
-    bool isOperator() const {
+    inline bool isOperator() const noexcept {
         return this->type >= 0x30 and this->type <= 0x5F;
     }
 
-    bool isAssignOperator() const {
+    inline bool isAssignOperator() const noexcept {
         return this->type == equal or this->type == greater_eq or this->type == lower_eq or (this->type >= 70 and this->type < 77);
     }
 
-    bool isUnaryOperator() const {
+    inline bool isUnaryOperator() const noexcept {
         return this->type == plus_unary or this->type == minus_unary;
     }
 
-    bool isAccessKeyword() const {
+    inline bool isAccessKeyword() const noexcept {
         return this->type == public_keyword or this->type == private_keyword or this->type == protected_keyword;
     }
 
-    bool isLiteral() const {
+    inline bool isLiteral() const noexcept {
         return this->type >= 0x80 and this->type <= 0x9F ;
     }
 
-    u_int8_t getPriority() const {
+    u_int8_t getPriority() const noexcept {
         switch (this->type)
         {
         case or_op:
@@ -80,17 +77,17 @@ public:
     }
     static const u_int8_t MAX_PRIORITY = 9;
 
-    std::string getValue() const{
+    inline std::string getValue() const noexcept {
         return this -> value;
     }
 
-    TokenType getType() const{
+    inline TokenType getType() const noexcept {
         return this -> type;
     }
 
 private:
-    TokenType type;
-    std::string value;
+    const TokenType type;
+    const std::string value;
 };
 
 const Token ERROR_TOKEN = Token(token_error, "");

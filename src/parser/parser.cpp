@@ -9,7 +9,7 @@ bool instanceOf(const U& object){
     return false;
 }
 
-Literal* getNullValue(GenericType* type){
+Literal* getNullValue(GenericType*& type){
     if(type->name.find("int") != std::string::npos ){
         return new Literal(new Integer(),"0");
     }
@@ -37,8 +37,8 @@ Parser::Parser(const TokenList& tokens): tokens(tokens) {}
 const RootNode Parser::parse(){
     RootNode root = RootNode();
     identation.open(&root);
-
-    for(i = 0; i < tokens.size(); ++i){
+    const size_t size = tokens.size();
+    for(i = 0; i < size; ++i){
         if(auto decl = parseVar()){
             identation.addElement(decl);
             --i;
@@ -201,17 +201,17 @@ FunctionCall* Parser::parseFunctionCall() {
     return nullptr;
 }
 
-Token Parser::get(const size_t& index){
+inline Token Parser::get(const size_t& index){
     if(index <= tokens.size()){
         return tokens[index];
     }
     return ERROR_TOKEN;
 }
-bool Parser::ask(const TokenType type,const int8_t distance){
+inline bool Parser::ask(const TokenType& type,const int8_t& distance){
     return get(i + distance).getType() == type;
 }
 
-bool Parser::consume(const TokenType type,const int8_t distance){
+bool Parser::consume(const TokenType& type,const int8_t& distance){
     if(ask(type,distance)){
         ++i;
         return true;
@@ -219,7 +219,7 @@ bool Parser::consume(const TokenType type,const int8_t distance){
     return false;
 }
 
-void Parser::expect(const TokenType t, const char* description){
+void Parser::expect(const TokenType& t, const char* description){
     if(not consume(t)){
         throwSyntaxError(description, tokens.getLine(i));
     }  
@@ -278,7 +278,8 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
     }
     // Parsing composite expressions, in reverse priority order
     for(u_int8_t priority = 0; priority < Token::MAX_PRIORITY; ++priority){
-        for(u_int16_t i = 0; i < expressionTokens.size(); ++i){
+        u_int16_t size = expressionTokens.size();
+        for(u_int16_t i = 0; i < size; ++i){
             if(expressionTokens[i].getPriority() == priority){
                 return new BinaryExpression(
                     expressionTokens[i].getValue(),
@@ -293,7 +294,7 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
     return nullptr;
 }
 
-Identifier* Parser::getIdentifier(bool noScope){
+Identifier* Parser::getIdentifier(const bool& noScope){
     expect(identifier, "Expected identifier");
     Identifier* id = new Identifier(get(i -1).getValue());
     while(ask(point) and ask(identifier,1)){

@@ -7,19 +7,15 @@
 
 struct ASTNode {
     virtual ~ASTNode() = default;
-    virtual void print() = 0;
     virtual void generateIR(){};
 };
 
 struct Statement : public ASTNode {
-    virtual void check() = 0;
+    virtual inline void check() = 0;
 };
 
 struct Expression : public ASTNode {
-    void print() override {
-        std::cout << "expr";
-    }
-    virtual void check() = 0;
+    virtual inline void check() = 0;
     GenericType* type;
     std::string index; 
 };
@@ -35,31 +31,23 @@ struct Container : public Statement {
             delete node;
         }
     }
-    void print() override {
-        printChildren();
-    }
-    void add(Statement* node) {
+    inline void add(Statement* node) {
         nodes.push_back(node);
     }
-    void printChildren(){
-        for(auto& node : nodes){
-            node->print();
-        }
-    }
-    void check() override {
+    inline void check() override {
         for(Statement* node : nodes){            
             node->check();
         }
     }
-    void generateIR() override {
+    inline void generateIR() override {
         for(Statement* node : nodes){
             node->generateIR();
         }
     }
-    Statement* getLastObject(){
+    inline Statement* getLastObject() const noexcept{
         return nodes.back();
     }
-    void deleteLastObject(){
+    inline void deleteLastObject(){
         if(nodes.size() >= 1){
             nodes.pop_back();
         }
@@ -68,9 +56,4 @@ struct Container : public Statement {
 
 struct RootNode : public Container {
     RootNode(): Container(){}
-    void generateIR() override {
-        for(Statement* node : nodes){
-            node->generateIR();
-        }
-    }
 };

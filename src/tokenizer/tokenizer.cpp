@@ -7,10 +7,9 @@
 #pragma once
 #include "tokenizer.hpp"
 
-TokenList tokenize(const std::string& content){
-
+const TokenList tokenize(const std::vector<char>& content) noexcept{
     TokenList tokens;
-    size_t lineNumber = 1;
+    unsigned long lineNumber = 1;
     std::string buffer;
     bool isComment = false;
     bool isMultiComment = false;
@@ -136,7 +135,7 @@ TokenList tokenize(const std::string& content){
     return tokens;
 }
 
-TokenType bufferToSymbol(const std::string& buffer){  
+const TokenType bufferToSymbol(const std::string& buffer){  
     auto it = symbols.find(buffer);
     if (it != symbols.end()) {
         return it->second;
@@ -144,7 +143,7 @@ TokenType bufferToSymbol(const std::string& buffer){
     return token_error;
 }
 
-TokenType bufferToKeyword(const std::string& buffer){ 
+const TokenType bufferToKeyword(const std::string& buffer){ 
     auto it = keywords.find(buffer);
     if (it != keywords.end()) {
         return it->second;
@@ -152,7 +151,7 @@ TokenType bufferToKeyword(const std::string& buffer){
     return identifier;
 }
 
-void throwLexicalError(const char* message, const size_t lineNumber, std::string::const_iterator index){
+void throwLexicalError(const char* message, const unsigned long& lineNumber,std::vector<char>::const_iterator index){
     std::cout << "\e[31m" << "LexicalError" << "\e[0m" << ": " << message << " at line " << lineNumber << ".\n";
     std::string line;
     u_int16_t margin = 0;

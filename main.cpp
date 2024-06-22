@@ -3,22 +3,23 @@
 #include "src/source.hpp"
 #include "src/ir/irinstruction.hpp"
 #include "src/backend/assembler.hpp"
-#include <memory>
 #include <fstream>
+#include <chrono>
 
 int main(const int argc,const char** argv) {
-
+    
     if(argc < 2){
         throwError("No file specified.");
     }
     const char* filename = argv[1];
-    const std::string content = getSource(filename);
-    if(not content[0]){
+    const std::vector<char> content = getSource(filename);
+    if(content.empty()){
         throwError("File not found.");
     }
     if(not format(filename, ".qz")){
         throwError("File format must be .qz or .quarzum.");
     }
+    auto start = std::chrono::high_resolution_clock::now();
     Parser parser = Parser(tokenize(content));
     symbolTable.enterScope();
     symbolTable.insert("out", {'f', "out", "function", "global"});
@@ -30,11 +31,14 @@ int main(const int argc,const char** argv) {
     root.check();
     root.generateIR();
     ir.push_back(IRInstruction{EXIT, "0"});
-    std::unique_ptr<Assembler> assembler = getAssembler(ir);
+    Assembler* assembler = getAssembler(ir);
     std::ofstream output("output.asm");
     if(output.is_open()){
         output << assembler->assemble();
         output.close();
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration = (end - start);
+        std::cout << "Compilation time: " << duration.count() << " seconds" << std::endl;
         system("as output.asm -o output.o"); 
         system("ld output.o ./builtins/x86_64.o -o output");
         system("./output");

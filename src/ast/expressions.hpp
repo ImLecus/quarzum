@@ -17,11 +17,6 @@ struct UnaryExpression : public Expression {
 
     UnaryExpression(const std::string& oper, Expression* expr) : op(oper), operand(expr) {}
 
-    void print() {
-        std::cout << "unary expression: (" << op << ")\n\t";
-        operand->print();
-    }
-
     ~UnaryExpression() {
         delete operand;
     }
@@ -91,14 +86,6 @@ struct BinaryExpression : public Expression {
 
     }
 
-    void print() override{
-        std::cout << "BinaryExpression: (" << op << ")\n";
-        std::cout << '\t';
-        left->print();
-        std::cout << '\t';
-        right->print();
-    }
-
     void generateIR() override {
         index = getTIndex();
         left->generateIR();
@@ -115,8 +102,5 @@ struct BinaryExpression : public Expression {
 
 struct NullExpression : public Expression {
     NullExpression(){}
-    void print() override{
-        std::cout << "NullExpression\n";
-    }
     void check() override{}
 };

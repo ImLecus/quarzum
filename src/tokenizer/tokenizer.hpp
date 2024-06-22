@@ -6,23 +6,23 @@
  * @brief Search if the buffer is a symbol. Otherwise, returns
  * the TokenType error_token.
 */
-TokenType bufferToSymbol(const std::string& buffer);
+const TokenType bufferToSymbol(const std::string& buffer);
 /**
  * @brief Search if the buffer is a keyword. Otherwise, returns
  * the TokenType identifier.
 */
-TokenType bufferToKeyword(const std::string& buffer);
+const TokenType bufferToKeyword(const std::string& buffer);
 /**
  * @brief Reads a string with the source code and creates a TokenList.
  * If some unexpected token appears, the function throws an 
  * error.
  * @param content The source code.
 */
-TokenList tokenize(const std::string& content);
+const TokenList tokenize(const std::vector<char>& content) noexcept;
 /**
  * @brief Prints a lexical error message.
 */
-void throwLexicalError(const char* message, const size_t line, std::string::const_iterator index);
+void throwLexicalError(const char* message, const unsigned long& line, std::vector<char>::const_iterator index);
 
 const std::unordered_map<std::string, TokenType> symbols = {
     {";", semicolon},

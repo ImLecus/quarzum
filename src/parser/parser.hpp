@@ -14,7 +14,7 @@
 /**
  * @brief Returns a Literal that represents the NULL value depending on the type.
 */
-Literal* getNullValue(GenericType* type);
+Literal* getNullValue(GenericType*& type);
 
 template<typename T, typename U>
 bool instanceOf(const U& object);
@@ -30,17 +30,17 @@ private:
     IdentationManager identation;
     bool exitedIf = false;
 
-    Token get(const size_t& index);
-    bool ask(const TokenType type, const int8_t distance = 0);
-    void expect(const TokenType t, const char* description);
-    bool consume(const TokenType type, const int8_t distance = 0);
+    inline Token get(const size_t& index);
+    inline bool ask(const TokenType& type, const int8_t& distance = 0);
+    void expect(const TokenType& t, const char* description);
+    bool consume(const TokenType& type, const int8_t& distance = 0);
 
     FunctionCall* parseFunctionCall();
     Expression* parseExpression(TokenList expressionTokens = TokenList());
     void parseEnum();
     void parseImport();
     GenericType* parseInheritance();
-    Identifier* getIdentifier(bool noScope = false);
+    Identifier* getIdentifier(const bool& noScope = false);
     std::vector<Argument*> parseArguments();
     std::vector<Element*> parseEnumElements();
     Element* parseIdWithOptionalValue();

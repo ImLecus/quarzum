@@ -11,13 +11,13 @@ struct SymbolInfo {
 };
 
 struct SymbolTable {
-    void insert(std::string name, SymbolInfo info){
+    inline void insert(const std::string& name, SymbolInfo info){
         table[name] = info;
     }
-    void remove(std::string name){
+    inline void remove(const std::string& name){
         table.erase(name);
     }
-    SymbolInfo* find(std::string name){
+    SymbolInfo* find(const std::string& name){
         auto it = table.find(name);
         if(it != table.end()){
             return &(it->second);
@@ -28,20 +28,20 @@ struct SymbolTable {
 };
 
 struct ScopedSymbolTable {
-    void enterScope(){
+    inline void enterScope(){
         scopes.push_back(SymbolTable());
     }
-    void leaveScope(){
+    inline void leaveScope(){
         if(not scopes.empty()){
             scopes.pop_back();
         }
     }
-    void insert(std::string name, SymbolInfo info){
+    inline void insert(const std::string& name, SymbolInfo info){
         if(not scopes.empty()){
             scopes.back().insert(name, info);
         }
     }
-    SymbolInfo* find(std::string name){
+    SymbolInfo* find(const std::string& name){
         for(auto it = scopes.rbegin(); it != scopes.rend(); ++it){
             if(it->find(name) != nullptr){
                 return it->find(name);

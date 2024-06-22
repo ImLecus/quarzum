@@ -1,9 +1,9 @@
-#include <string>
 #include <fstream>
+#include <vector>
 #include "string.h"
 
-bool format(const char* filename, const char* format){
-    for(u_int16_t i = 0; i < strlen(filename) && i < strlen(format); ++i){
+bool format(const char*& filename, const char* format){
+    for(u_int16_t i = 0; i < strlen(filename) and i < strlen(format); ++i){
         if(filename[strlen(filename) - i] != format[strlen(format) - i]){
             return false;
         }
@@ -11,20 +11,16 @@ bool format(const char* filename, const char* format){
     return true;
 }
 
-std::string getSource(const char* filename){
+const std::vector<char> getSource(const char*& filename){
     std::ifstream inputFile(filename);
-
-    if (!inputFile.is_open()) {
-        return "";
+    std::vector<char> content;
+    char c;
+    if (not inputFile.is_open()) {
+        return content;
     }
-
-    std::string content;
-    std::string line;
-    while (std::getline(inputFile, line)) {
-        content.append(line);
-        content += '\n';
+    while (inputFile.get(c)) {
+        content.push_back(c);
     }
     inputFile.close();
     return content;
-
 }  

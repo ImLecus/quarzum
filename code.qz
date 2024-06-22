@@ -1,7 +1,7 @@
 function main(){
 	out("..hello?");
-	int i = 44;
-	if(1 == 1){
-		out("...world!");
+	int i = 2;
+	if(i != 2 + 1){
+		out("..world!");
 	}
 }

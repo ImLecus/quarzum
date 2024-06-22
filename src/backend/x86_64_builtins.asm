@@ -1,5 +1,5 @@
 .data   
-    _newline: .byte '\n'
+    _newline: .byte 0x0A
     .global true
     true: .byte 1
     .global false
@@ -51,7 +51,7 @@ out:
     movq $1, %rax
     movq $1, %rdi
     leaq _newline, %rsi
-    movq $2, %rdx
+    movq $1, %rdx
     syscall
 
     pop %rsi

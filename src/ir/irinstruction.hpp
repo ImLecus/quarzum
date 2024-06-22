@@ -21,7 +21,8 @@ enum IRInstructionType : u_int8_t {
     OR,
     REASSIGN,
     EQ,
-    LOW
+    LOW,
+    NEQ
 };
 
 struct IRInstruction
@@ -41,6 +42,7 @@ IRInstructionType getInstructionType(std::string op){
     if(op == "or"){return OR;}
     if(op == "=="){return EQ;}
     if(op == "<"){return LOW;}
+    if(op == "!="){return NEQ;}
     return ADD;
 }
 

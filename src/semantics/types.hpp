@@ -61,6 +61,7 @@ struct GenericType{
     static GenericType* andg(GenericType* a, GenericType* b);
     static GenericType* org(GenericType* a, GenericType* b);
     static GenericType* equal(GenericType* a, GenericType* b);
+    static GenericType* nequal(GenericType* a, GenericType* b);
     static GenericType* greater(GenericType** types);
     static GenericType* greatereq(GenericType** types);
 

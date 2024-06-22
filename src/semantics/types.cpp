@@ -203,3 +203,10 @@ GenericType* GenericType::equal(GenericType* a, GenericType* b){
     }
     return throwOperatorError("==",a->name,b->name); 
 }
+GenericType* GenericType::nequal(GenericType* a, GenericType* b){ 
+    if(a->flag == b->flag){
+        return new Boolean();
+    }
+    return throwOperatorError("!=",a->name,b->name); 
+}
+

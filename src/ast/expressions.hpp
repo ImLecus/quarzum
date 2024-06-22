@@ -61,6 +61,9 @@ struct BinaryExpression : public Expression {
         else if(op == "=="){
             this->type = GenericType::equal(left->type, right->type); 
         }
+        else if(op == "!="){
+            this->type = GenericType::nequal(left->type, right->type); 
+        }
     }
 
     BinaryExpression(const std::string& op, Expression* left, Expression* right): op(op), left(left), right(right) {
@@ -76,12 +79,11 @@ struct BinaryExpression : public Expression {
     }
 
     void generateIR() override {
+        index = getTIndex();
         left->generateIR();
         right->generateIR();
-         
-        index = getTIndex();
-        ir.push_back(IRInstruction{getInstructionType(op),index,left->index,right->index});
-        //tIndex++;
+        tIndex++;
+        ir.push_back(IRInstruction{getInstructionType(op),index,left->index,right->index,type->name});
     }
 
     ~BinaryExpression() {

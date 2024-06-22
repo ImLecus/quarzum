@@ -27,6 +27,7 @@ struct IfContainer: public Container {
         else{
             ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index});
         }
+        tIndex = 0;
 
         if(elseContainer != nullptr){
             elseContainer->generateIR();
@@ -66,11 +67,17 @@ struct WhileContainer : public Container {
         lIndex++;
 
         if(auto l = dynamic_cast<Literal*>(condition)){
-            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal"});
+            if(auto id = dynamic_cast<Identifier*>(condition)){
+                ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal", id->type->name});
+            }
+            else{
+                ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal"});
+            }
         }
         else {
            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index}); 
         }
+        tIndex = 0;
         
         
         ir.push_back(IRInstruction{GOTO, getCIndex()});

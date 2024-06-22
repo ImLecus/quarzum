@@ -1,20 +1,21 @@
 .data
 	.v0: .string "..hello?"
-	i: .long 44
-	.v1: .string "...world!"
+	i: .long 2
+	.v1: .string "..world!"
 .text
 .globl _start
 _start:
-	mov $.v0, %rdi
+	movq $.v0, %rdi
 	call out
-	mov $1, %r10
-	cmp $1, %r10
-	setz %r10b
+	mov $2, %r10d
+	add $1, %r10d
+	cmp i, %r10b
+	setnz %r10b
 	cmpb $1, %r10b
 	je .l0
 	jmp .c0
 .l0:
-	mov $.v1, %rdi
+	movq $.v1, %rdi
 	call out
 .c0:
 _main:

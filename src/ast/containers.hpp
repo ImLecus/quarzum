@@ -65,14 +65,9 @@ struct WhileContainer : public Container {
         std::string initialIndex = getLIndex();
         ir.push_back(IRInstruction{LABEL, getLIndex()});
         lIndex++;
-
+        condition->generateIR();
         if(auto l = dynamic_cast<Literal*>(condition)){
-            if(auto id = dynamic_cast<Identifier*>(condition)){
-                ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal", id->type->name});
-            }
-            else{
-                ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal"});
-            }
+            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index, "literal", l->type->name});
         }
         else {
            ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index}); 
@@ -205,5 +200,39 @@ struct ForContainer : public Container {
             redec->print();
         }
         printChildren();
+    }
+    void check() override {
+        if(decl){
+           decl->check(); 
+        }
+        if(condition){
+           condition->check();
+        }
+        if(redec){
+            redec->check();
+        }
+        Container::check();
+    }
+    void generateIR() override {
+        if(decl){
+            decl->generateIR();
+        }
+        std::string initialIndex = getLIndex();
+        ir.push_back(IRInstruction{LABEL, getLIndex()});
+        lIndex++;
+        if(condition){
+           condition->generateIR();
+           ir.push_back(IRInstruction{GOTO, getLIndex(), condition->index}); 
+        }
+        ir.push_back(IRInstruction{GOTO, getCIndex()}); 
+        ir.push_back(IRInstruction{LABEL, getLIndex()}); //AQUI
+        lIndex++;
+        Container::generateIR();
+        if(redec){
+            redec->generateIR();
+        }
+        ir.push_back(IRInstruction{GOTO, initialIndex}); 
+        ir.push_back(IRInstruction{LABEL, getCIndex()});
+        cIndex++;
     }
 };

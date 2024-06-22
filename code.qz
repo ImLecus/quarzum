@@ -1,7 +1,9 @@
 function main(){
-	out("..hello?");
-	int i = 2;
-	if(i != 2 + 1){
-		out("..world!");
+
+	int i = 0;
+	while(i < 5){
+		out("i");
+		i = i + 1;
 	}
+
 }

@@ -130,21 +130,28 @@ struct VariableRedeclaration : public Statement {
         delete expression;
     }
     void check() override {
+       
+        identifier->check();
         expression->check();
         if(symbolTable.find(identifier->value) == nullptr){
             throwError("Variable " + identifier->value + " was not defined");
         }
+        if(expression->type->flag != identifier->type->flag){
+            throwTypeError("Value of type " + expression->type->name + " can not be applied to variable " + identifier->type->name);
+        }
+        
     }
 
     void generateIR() override {
+        
         if(Literal* l = dynamic_cast<Literal*>(expression)){
             if(l->value == "true"){l->value="1";}
             if(l->value == "false" or l->value == "null"){l->value = "0";}
-            ir.push_back(IRInstruction{REASSIGN,identifier->value,l->value,"literal"});
+            ir.push_back(IRInstruction{REASSIGN,identifier->value,l->index,"literal",identifier->type->name});
             return;
         }
         expression->generateIR();
-        ir.push_back(IRInstruction{REASSIGN,identifier->value,expression->index,""});
+        ir.push_back(IRInstruction{REASSIGN,identifier->value,expression->index,"", identifier->type->name});
         tIndex = 0;
     }
 };

@@ -23,7 +23,9 @@ int main(const int argc,const char** argv) {
     symbolTable.enterScope();
     symbolTable.insert("out", {'f', "out", "function", "global"});
     symbolTable.insert("input", {'f', "input", "string", "global"});
+    
     RootNode root = parser.parse();
+
     root.check();
     root.generateIR();
     ir.push_back(IRInstruction{EXIT, "0"});

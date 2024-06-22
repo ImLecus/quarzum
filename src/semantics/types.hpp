@@ -53,6 +53,7 @@ struct GenericType{
     }
     // Unary operators
     virtual GenericType* notg(){ return throwUnaryOperatorError("not",this->name); }
+    virtual GenericType* inc(){ return throwUnaryOperatorError("++",this->name); }
 
     // Commutative operators
     static GenericType* sum(GenericType** types);
@@ -62,8 +63,10 @@ struct GenericType{
     static GenericType* org(GenericType* a, GenericType* b);
     static GenericType* equal(GenericType* a, GenericType* b);
     static GenericType* nequal(GenericType* a, GenericType* b);
-    static GenericType* greater(GenericType** types);
-    static GenericType* greatereq(GenericType** types);
+    static GenericType* lower(GenericType* a, GenericType* b);
+    static GenericType* lowereq(GenericType* a, GenericType* b);
+    static GenericType* greater(GenericType* a, GenericType* b);
+    static GenericType* greatereq(GenericType* a, GenericType* b);
 
 
     //  Non-commutative operators

@@ -6,8 +6,12 @@ struct UnaryExpression : public Expression {
     Expression* operand;
 
     void check() override {
+        operand->check();
         if(op == "not"){
             this->type = operand->type->notg();
+        }
+        if(op == "++"){
+            this->type = operand->type->inc();
         }
     }
 
@@ -20,6 +24,11 @@ struct UnaryExpression : public Expression {
 
     ~UnaryExpression() {
         delete operand;
+    }
+
+    void generateIR() override {
+        operand->generateIR();
+        ir.push_back(IRInstruction{getInstructionType(op),operand->index});  
     }
 };
 
@@ -63,6 +72,18 @@ struct BinaryExpression : public Expression {
         }
         else if(op == "!="){
             this->type = GenericType::nequal(left->type, right->type); 
+        }
+        else if(op == "<"){
+            this->type = GenericType::lower(left->type, right->type); 
+        }
+        else if(op == "<="){
+            this->type = GenericType::lowereq(left->type, right->type); 
+        }
+        else if(op == ">"){
+            this->type = GenericType::greater(left->type, right->type); 
+        }
+        else if(op == ">="){
+            this->type = GenericType::greatereq(left->type, right->type); 
         }
     }
 

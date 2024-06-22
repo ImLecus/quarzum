@@ -62,6 +62,24 @@ struct x86_64_Assembler : public Assembler {
         if(bits == 8 or var == "bool"){return "b";}
         return "d";
     }
+    void create_logical_operation(std::string& textSection,IRInstruction i, const std::string& op){
+        if(i.origin2 == i.target){
+            i.target = getValue(i.target,i.varType);
+            textSection += create_operation("cmp",getValue(i.origin1,i.varType),i.target);
+            textSection += create_operation(op, i.target);
+            return;
+        }
+        if(i.origin1 == i.target){
+            i.target = getValue(i.target,i.varType);
+            textSection +=  create_operation("cmp") + getValue(i.origin2,i.varType) + ", " + i.target  + "\n";
+            textSection += create_operation(op, i.target);
+            return;
+        }
+        i.target = getValue(i.target,i.varType);
+        textSection += create_operation("mov",getValue(i.origin1,i.varType),i.target);
+        textSection += create_operation("cmp",getValue(i.origin2,i.varType),i.target);
+        textSection += create_operation(op, i.target);
+    }
     std::string assemble(){
         std::string dataSection = ".data\n";
         std::string textSection = ".text\n.globl _start\n";
@@ -90,11 +108,8 @@ struct x86_64_Assembler : public Assembler {
                 textSection += create_operation("mov",getValue(i.origin1,i.varType),i.target);
                 break;
             case REASSIGN:
-                if(i.origin2 == "literal"){
-                    textSection += "\tmovb $" + i.origin1 + ", " + i.target + "\n"; 
-                    break;
-                }
-                textSection += create_operation("mov",getTRegister(),i.target);
+                
+                textSection += create_operation("mov",getValue(i.origin1, i.varType),i.target);
                 break;
             case GOTO:
                 if(not i.origin1.empty()){
@@ -104,41 +119,31 @@ struct x86_64_Assembler : public Assembler {
                 }
                 textSection += create_operation("jmp", i.target);
                 break;
+            case INC:
+                textSection += create_operation("inc",i.target);
+                break;
             case EQ:
-                if(i.origin2 == i.target){
-                    i.target = getValue(i.target,i.varType);
-                    textSection += create_operation("cmp",getValue(i.origin1,i.varType),i.target);
-                    textSection += create_operation("setz", i.target);
-                    break;
-                }
-                if(i.origin1 == i.target){
-                    i.target = getValue(i.target,i.varType);
-                    textSection +=  create_operation("cmp") + getValue(i.origin2,i.varType) + ", " + i.target  + "\n";
-                    textSection += create_operation("setz", i.target);
-                    break;
-                }
-                i.target = getValue(i.target,i.varType);
-                textSection += create_operation("mov",getValue(i.origin1,i.varType),i.target);
-                textSection += create_operation("cmp",getValue(i.origin2,i.varType),i.target);
-                textSection += create_operation("setz", i.target);
+                create_logical_operation(textSection, i,"setz");
                 break;
             case NEQ:
-                if(i.origin2 == i.target){
-                    i.target = getValue(i.target,i.varType);
-                    textSection += create_operation("cmp",getValue(i.origin1,i.varType),i.target);
-                    textSection += create_operation("setnz", i.target);
-                    break;
-                }
-                if(i.origin1 == i.target){
-                    i.target = getValue(i.target,i.varType);
-                    textSection +=  create_operation("cmp") + getValue(i.origin2,i.varType) + ", " + i.target  + "\n";
-                    textSection += create_operation("setnz", i.target);
-                    break;
-                }
-                i.target = getValue(i.target,i.varType);
-                textSection += create_operation("mov",getValue(i.origin1,i.varType),i.target);
-                textSection += create_operation("cmp",getValue(i.origin2,i.varType),i.target);
-                textSection += create_operation("setnz", i.target);
+                create_logical_operation(textSection, i, "setnz");
+                break;
+            case LOW:
+                create_logical_operation(textSection, i, "setl");
+                break;
+            case LOWEQ:
+                create_logical_operation(textSection, i, "setle");
+                break;
+            case GRT:
+                create_logical_operation(textSection, i, "setg");
+                break;
+            case GRTEQ:
+                create_logical_operation(textSection, i, "setge");
+                break;
+            case NOT:
+                textSection += create_operation("mov", i.target, getTRegister());
+                textSection += create_operation("not",getTRegister());
+
                 break;
             case AND:
                 if(i.origin2 == i.target){

@@ -22,7 +22,12 @@ enum IRInstructionType : u_int8_t {
     REASSIGN,
     EQ,
     LOW,
-    NEQ
+    NEQ,
+    GRT,
+    GRTEQ,
+    LOWEQ,
+    NOT,
+    INC
 };
 
 struct IRInstruction
@@ -42,7 +47,12 @@ IRInstructionType getInstructionType(std::string op){
     if(op == "or"){return OR;}
     if(op == "=="){return EQ;}
     if(op == "<"){return LOW;}
+    if(op == "<="){return LOWEQ;}
+    if(op == ">"){return GRT;}
+    if(op == ">="){return GRTEQ;}
     if(op == "!="){return NEQ;}
+    if(op == "not"){return NOT;}
+    if(op == "++"){return INC;}
     return ADD;
 }
 

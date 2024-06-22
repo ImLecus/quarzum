@@ -48,12 +48,18 @@ struct UInteger : public NumericType {
         name = "uint" + std::to_string(bits);
         flag = UINT;
     }
+    GenericType* inc(){
+        return new UInteger(bits);
+    }
 };
 
 struct Integer : public NumericType {
     Integer(u_int8_t bits = 32): NumericType(bits,-std::pow(2, bits - 1), std::pow(2, bits - 1) - 1){
         name = "int" + std::to_string(bits);
         flag = INT;
+    }
+    GenericType* inc(){
+        return new Integer(bits);
     }
 
     GenericType* sub(GenericType* type) override {
@@ -203,10 +209,35 @@ GenericType* GenericType::equal(GenericType* a, GenericType* b){
     }
     return throwOperatorError("==",a->name,b->name); 
 }
+
 GenericType* GenericType::nequal(GenericType* a, GenericType* b){ 
     if(a->flag == b->flag){
         return new Boolean();
     }
     return throwOperatorError("!=",a->name,b->name); 
+}
+GenericType* GenericType::lower(GenericType* a, GenericType* b){ 
+    if(a->flag == b->flag){
+        return new Boolean();
+    }
+    return throwOperatorError("<",a->name,b->name); 
+}
+GenericType* GenericType::lowereq(GenericType* a, GenericType* b){ 
+    if(a->flag == b->flag){
+        return new Boolean();
+    }
+    return throwOperatorError("<=",a->name,b->name); 
+}
+GenericType* GenericType::greater(GenericType* a, GenericType* b){ 
+    if(a->flag == b->flag){
+        return new Boolean();
+    }
+    return throwOperatorError(">",a->name,b->name); 
+}
+GenericType* GenericType::greatereq(GenericType* a, GenericType* b){ 
+    if(a->flag == b->flag){
+        return new Boolean();
+    }
+    return throwOperatorError("<=",a->name,b->name); 
 }
 

@@ -1,9 +1,4 @@
 function main(){
-
-	int i = 0;
-	while(i < 5){
-		out("i");
-		i = i + 1;
-	}
-
+	string name = "Quarzum";
+	out(name);
 }

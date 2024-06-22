@@ -1,5 +1,5 @@
 .data   
-    _newline: .byte 0x0A
+    _newline: .byte '\n'
     .global true
     true: .byte 1
     .global false
@@ -97,4 +97,25 @@ time:
 
     leave
     ret
-
+#
+# function strcat(string str1, string str2);
+# Modifies the first string, adding the second.
+#
+.global strcat
+strcat:
+    enter $0, $0
+    push %rcx
+    call len
+    addq %rax, %rdi
+    strcat.add:
+    movb (%rsi), %cl
+    movb %cl, (%rdi)
+    cmpb $0, %cl
+    je strcat.end
+    incq %rdi
+    incq %rsi
+    jmp strcat.add
+    strcat.end:
+    pop %rcx
+    leave
+    ret

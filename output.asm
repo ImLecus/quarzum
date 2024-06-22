@@ -1,24 +1,17 @@
 .data
-	i: .long 0
-	.v0: .string "i"
+	name: .string "hola"
+	.v0: .string "caracola"
+	.v1: .long 5
 .text
 .globl _start
 _start:
-.l0:
-	mov i, %r10b
-	cmp $5, %r10b
-	setl %r10b
-	cmpb $1, %r10b
-	je .l1
-	jmp .c0
-.l1:
-	movq $.v0, %rdi
+	movq $name, %rdi
+	movq $.v0, %rsi
+	call strcat
+	movq $name, %rdi
 	call out
-	mov i, %r10d
-	add $1, %r10d
-	mov %r10d, i
-	jmp .l0
-.c0:
+	movq $.v1, %rdi
+	call wait
 _main:
 	movq $60, %rax
 	movq $0, %rdi

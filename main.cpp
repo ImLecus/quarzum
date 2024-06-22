@@ -23,7 +23,8 @@ int main(const int argc,const char** argv) {
     symbolTable.enterScope();
     symbolTable.insert("out", {'f', "out", "function", "global"});
     symbolTable.insert("input", {'f', "input", "string", "global"});
-    
+    symbolTable.insert("strcat", {'f', "strcat", "function", "global"});
+    symbolTable.insert("wait", {'f', "wait", "function", "global"});
     RootNode root = parser.parse();
 
     root.check();

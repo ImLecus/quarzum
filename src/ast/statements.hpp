@@ -100,7 +100,9 @@ struct ImportStatement : public Statement {
 struct FunctionCall : public Statement {
     Identifier* identifier;
     std::vector<Expression*> args;
-    FunctionCall(Identifier* identifier, std::vector<Expression*> args): identifier(identifier), args(args) {}
+    FunctionCall(Identifier* identifier, std::vector<Expression*> args): identifier(identifier), args(args) {
+
+    }
     void print() override{
         std::cout << "FunctionCall:\n";
         identifier->print();
@@ -109,7 +111,9 @@ struct FunctionCall : public Statement {
         }
     }
     void check() override {
-        
+        if(symbolTable.find(identifier->value) == nullptr){
+            throwError("Symbol " + identifier->value + " was not defined");
+        }
     }
     void generateIR() override {
         for(Expression* arg : args){

@@ -120,6 +120,7 @@ struct Function : public GenericType {
     }
 };
 
+
 GenericType* getTypeByName(std::string name, bool constant = false){
     if(name.find("uint") != std::string::npos){
         return new UInteger(getBits(name));

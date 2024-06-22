@@ -29,8 +29,8 @@ struct x86_64_Assembler : public Assembler {
         {"char", ".byte"},
         {"string", ".string"}
     };
-    uint8_t paramRegister;
-    uint8_t temporalRegister;
+    uint8_t paramRegister = 0;
+    uint8_t temporalRegister = 0;
     std::string paramRegisters[6] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
     std::string tempRegisters[6] = {"%r10", "%r11", "%r12", "%r13", "%r14", "%r15"};
     std::string getParamRegister(){
@@ -66,39 +66,63 @@ struct x86_64_Assembler : public Assembler {
                 dataSection += " 0\n";
                 textSection += "\tmov " + getTRegister() + ", " + i.target + "\n";
                 break;
+            case REASSIGN:
+                if(i.origin2 == "literal"){
+                    textSection += "\tmovb $" + i.origin1 + ", " + i.target + "\n"; 
+                    break;
+                }
+                textSection += "\tmov " + getTRegister() + ", " + i.target + "\n"; 
+                break;
             case GOTO:
                 if(not i.origin1.empty()){
-                    textSection += "\tcmpq $1, " + (i.origin2=="literal"? i.origin1 : getTRegister()) + "\n";
+                    textSection += "\tcmpb $1, " + (i.origin2=="literal"? i.origin1 : getTRegister()+"b") + "\n";
                     textSection += "\tje " + i.target + "\n";
                     break;
                 }
                 textSection += "\tjmp " + i.target + "\n"; 
                 break;
+            case EQ:
+
+                if(i.origin2 == i.target){
+                    textSection += "\tcmp $" + i.origin1 + ", " + getTRegister() + "\n";
+                    textSection += "\tsetz " + getTRegister() + "b\n";
+                    break;
+                }
+                if(i.origin1 == i.target){
+                    textSection += "\tcmp $" + i.origin2 + ", " + getTRegister() + "\n";
+                    textSection += "\tsetz " + getTRegister() + "b\n";
+                    break;
+                }
+                if(i.origin1[0]=='t' or i.origin2[0]=='t'){temporalRegister++;}
+                textSection += "\tmov $" + i.origin1 + ", " + getTRegister() + "\n";
+                textSection += "\tcmp $" + i.origin2 + ", " + getTRegister() + "\n";
+                textSection += "\tsetz " + getTRegister() + "b\n";
+                break;
             case AND:
                 if(i.origin2 == i.target){
-                    textSection += "\tand " + i.origin1 + ", " + getTRegister() + "\n";
+                    textSection += "\tandb " + i.origin1 + ", " + getTRegister() + "b\n";
                     break;
                 }
                 if(i.origin1 == i.target){
-                    textSection += "\tand " + i.origin2 + ", " + getTRegister() + "\n";
+                    textSection += "\tandb " + i.origin2 + ", " + getTRegister() + "b\n";
                     break;
                 }
                 if(i.origin1[0]=='t' or i.origin2[0]=='t'){temporalRegister++;}
-                textSection += "\tmov " + i.origin1 + ", " + getTRegister() + "\n";
-                textSection += "\tand " + i.origin2 + ", " + getTRegister() + "\n";
+                textSection += "\tmovb " + i.origin1 + ", " + getTRegister() + "b\n";
+                textSection += "\tandb " + i.origin2 + ", " + getTRegister() + "b\n";
                 break;
-             case OR:
+            case OR:
                 if(i.origin2 == i.target){
-                    textSection += "\tor " + i.origin1 + ", " + getTRegister() + "\n";
+                    textSection += "\torb " + i.origin1 + ", " + getTRegister() + "b\n";
                     break;
                 }
                 if(i.origin1 == i.target){
-                    textSection += "\tor " + i.origin2 + ", " + getTRegister() + "\n";
+                    textSection += "\torb " + i.origin2 + ", " + getTRegister() + "b\n";
                     break;
                 }
                 if(i.origin1[0]=='t' or i.origin2[0]=='t'){temporalRegister++;}
-                textSection += "\tmov " + i.origin1 + ", " + getTRegister() + "\n";
-                textSection += "\tor " + i.origin2 + ", " + getTRegister() + "\n";
+                textSection += "\tmovb " + i.origin1 + ", " + getTRegister() + "b\n";
+                textSection += "\torb " + i.origin2 + ", " + getTRegister() + "b\n";
                 break;
             case ADD:
                 if(i.origin2 == i.target){
@@ -128,7 +152,7 @@ struct x86_64_Assembler : public Assembler {
                 //temporalRegister++;
                 break;
             case EXIT:
-                textSection += "\tmovq $60, %rax\n\tmovq " + i.target + ", %rdi\n\tsyscall\n";
+                textSection += "\tmovq $60, %rax\n\tmovq $" + i.target + ", %rdi\n\tsyscall\n";
                 break;
             default:
                 break;

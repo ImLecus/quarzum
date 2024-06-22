@@ -1,8 +1,7 @@
 function main(){
-	while(false){
-		out("Hello");
-		
+	out("..hello?");
+	int i = 44;
+	if(1 == 1){
+		out("...world!");
 	}
-	input();
 }
-

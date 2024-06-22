@@ -18,7 +18,10 @@ enum IRInstructionType : u_int8_t {
     CALL,
     PARAM_CALL,
     AND,
-    OR
+    OR,
+    REASSIGN,
+    EQ,
+    LOW
 };
 
 struct IRInstruction
@@ -36,6 +39,8 @@ IRInstructionType getInstructionType(std::string op){
     if(op == "*"){return PROD;}
     if(op == "and"){return AND;}
     if(op == "or"){return OR;}
+    if(op == "=="){return EQ;}
+    if(op == "<"){return LOW;}
     return ADD;
 }
 

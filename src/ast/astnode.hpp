@@ -2,6 +2,7 @@
 #include <iostream>
 #include "../semantics/types.cpp"
 #include "../ir/irinstruction.hpp"
+#include "../symbols/symboltable.hpp"
 #include <vector>
 
 struct ASTNode {
@@ -18,6 +19,7 @@ struct Expression : public ASTNode {
     void print() override {
         std::cout << "expr";
     }
+    virtual void check() = 0;
     GenericType* type;
     std::string index; 
 };

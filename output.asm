@@ -1,16 +1,23 @@
 .data
-	.v0: .string "Hello"
+	.v0: .string "..hello?"
+	i: .long 44
+	.v1: .string "...world!"
 .text
 .globl _start
 _start:
-.l0:
-	cmpq $1, false
-	je .l1
-	jmp .c0
-.l1:
 	mov $.v0, %rdi
 	call out
-	jmp .l0
+	mov $1, %r10
+	cmp $1, %r10
+	setz %r10b
+	cmpb $1, %r10b
+	je .l0
+	jmp .c0
+.l0:
+	mov $.v1, %rdi
+	call out
 .c0:
-	call input
 _main:
+	movq $60, %rax
+	movq $0, %rdi
+	syscall

@@ -35,11 +35,12 @@ private:
     void expect(const TokenType t, const char* description);
     bool consume(const TokenType type, const int8_t distance = 0);
 
+    FunctionCall* parseFunctionCall();
     Expression* parseExpression(TokenList expressionTokens = TokenList());
     void parseEnum();
     void parseImport();
     GenericType* parseInheritance();
-    Identifier* getIdentifier();
+    Identifier* getIdentifier(bool noScope = false);
     std::vector<Argument*> parseArguments();
     std::vector<Element*> parseEnumElements();
     Element* parseIdWithOptionalValue();

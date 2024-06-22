@@ -11,12 +11,19 @@ struct Literal : public Expression {
     void print() override {
         std::cout << type->name << " (" << value << ")\n";
     }
+    void check() override {
+
+    }
 };
 
 struct Identifier : public Literal {
+    bool withScope = false;
     Identifier(std::string name) : Literal(new NullType(),name) {}
-    void print() override{
+    void print() override {
         std::cout << "Identifier: " << value << '\n';
+    }
+    void check() override {
+        type = getTypeByName(symbolTable.find(value)->dataType);
     }
 };
 

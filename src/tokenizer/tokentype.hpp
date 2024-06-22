@@ -89,6 +89,7 @@ enum TokenType : unsigned char {
     right_square = 0x67,
     comma = 0x68,
     arrow = 0x69,
+    point = 0x6A,
     // literals
     int_literal = 0x80,
     num_literal = 0x81,

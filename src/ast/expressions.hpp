@@ -5,12 +5,13 @@ struct UnaryExpression : public Expression {
     std::string op; 
     Expression* operand;
 
-    UnaryExpression(const std::string& oper, Expression* expr) : op(oper), operand(expr) {
+    void check() override {
         if(op == "not"){
             this->type = operand->type->notg();
         }
-
     }
+
+    UnaryExpression(const std::string& oper, Expression* expr) : op(oper), operand(expr) {}
 
     void print() {
         std::cout << "unary expression: (" << op << ")\n\t";
@@ -27,7 +28,9 @@ struct BinaryExpression : public Expression {
     Expression* left; 
     Expression* right;
 
-    BinaryExpression(const std::string& op, Expression* left, Expression* right): op(op), left(left), right(right) {
+    void check() override {
+        left->check();
+        right->check();
         if(op == "+"){
             this->type = GenericType::sum(sortTypes(left->type, right->type));      
         }
@@ -60,6 +63,10 @@ struct BinaryExpression : public Expression {
         }
     }
 
+    BinaryExpression(const std::string& op, Expression* left, Expression* right): op(op), left(left), right(right) {
+
+    }
+
     void print() override{
         std::cout << "BinaryExpression: (" << op << ")\n";
         std::cout << '\t';
@@ -73,7 +80,6 @@ struct BinaryExpression : public Expression {
         right->generateIR();
          
         index = getTIndex();
-        //std::cout << op << " " << index << ", " << left->index << ", " << right->index << "\n";
         ir.push_back(IRInstruction{getInstructionType(op),index,left->index,right->index});
         //tIndex++;
     }
@@ -89,4 +95,5 @@ struct NullExpression : public Expression {
     void print() override{
         std::cout << "NullExpression\n";
     }
+    void check() override{}
 };

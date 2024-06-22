@@ -1,12 +1,11 @@
 #pragma once
 #include "astnode.hpp"
 
-struct ElseContainer : public Container {};
+struct ElseContainer : public Container {
+};
 struct IfContainer: public Container {
     Expression* condition;
-    ElseContainer* elseContainer;
-    IfContainer(Expression* condition, ElseContainer* elseContainer): 
-    Container(), condition(condition), elseContainer(elseContainer) {}
+    ElseContainer* elseContainer = nullptr;
     IfContainer(Expression* condition): Container(), condition(condition) {}
     void print() override{
         std::cout << "if:\n\t";
@@ -15,6 +14,7 @@ struct IfContainer: public Container {
     }
     void check() override {
         Container::check();
+        condition->check();
         if(condition->type->name != "bool"){
             throwTypeError("'if' condition must be a boolean");
         }
@@ -38,8 +38,6 @@ struct IfContainer: public Container {
         lIndex++;
 
         Container::generateIR();
-        
-        lIndex = 0;
 
         ir.push_back(IRInstruction{LABEL, getCIndex()});
         cIndex++;
@@ -56,6 +54,7 @@ struct WhileContainer : public Container {
         printChildren();
     }
     void check() override {
+        condition->check();
         Container::check();
         if(condition->type->name != "bool"){
             throwTypeError("'if' condition must be a boolean");
@@ -82,7 +81,6 @@ struct WhileContainer : public Container {
         
         ir.push_back(IRInstruction{GOTO, initialIndex});
         
-        lIndex = 0;
         ir.push_back(IRInstruction{LABEL, getCIndex()});
         cIndex++;
     }
@@ -97,16 +95,11 @@ struct DoContainer : public Container {
 
 struct ModuleContainer : public Container {
     Identifier* identifier;
-    bool isClass;
-    ModuleContainer(Identifier* identifier, bool isClass): Container(), identifier(identifier), isClass(isClass) {}
+    ModuleContainer(Identifier* identifier): Container(), identifier(identifier) {}
     void print() override{
         std::cout << "module:\n\t";
         identifier->print();
-        std::cout << "\tclass: " << isClass << '\n';
         printChildren();
-    }
-    void check() override {
-        Container::check();
     }
 };
 
@@ -122,9 +115,6 @@ struct ForeachContainer : public Container {
         std::cout << "Argument:\n\t"<<type->name<<"\n\t";
         iterable -> print();
         printChildren();
-    }
-    void check() override {
-        Container::check();
     }
 };
 
@@ -146,6 +136,8 @@ struct FunctionContainer : public Container {
     }
     void check() override {
         Container::check();
+        symbolTable.insert(identifier->value, {'f',identifier->value,type->name,"global"});
+        symbolTable.enterScope();
     }
     void generateIR() override {
 
@@ -175,9 +167,6 @@ struct MethodContainer : public Container {
             node->print();
         }
     }
-    void check() override {
-        Container::check();
-    }
 };
 
 struct ClassContainer : public Container {
@@ -189,9 +178,6 @@ struct ClassContainer : public Container {
         identifier->print();
         if(inherits){std::cout << "Argument:\n\t"<<inherits->name<<"\n\t";}
         printChildren();
-    }
-    void check() override {
-        Container::check();
     }
 };
 
@@ -212,8 +198,5 @@ struct ForContainer : public Container {
             redec->print();
         }
         printChildren();
-    }
-    void check() override {
-        Container::check();
     }
 };

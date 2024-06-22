@@ -82,7 +82,7 @@ const RootNode Parser::parse(){
 
         else if(ask(right_curly) and identation.hasLayers()){
             identation.close();
-            if(auto e =  dynamic_cast<ElseContainer*>(identation.getLastLayer()->getLastObject())){
+            if(auto e = dynamic_cast<ElseContainer*>(identation.getLastLayer()->getLastObject())){
                 identation.getLastLayer()->deleteLastObject();
                 if(auto ic = dynamic_cast<IfContainer*>(identation.getLastLayer()->getLastObject())){
                     ic->elseContainer = e;
@@ -109,7 +109,7 @@ const RootNode Parser::parse(){
         else if(consume(foreach_keyword)){
             expect(left_par, "Expected foreach statement");
             GenericType* type = parseType();
-            Identifier* id = getIdentifier();
+            Identifier* id = getIdentifier(true);
             expect(in_keyword, "Expected 'in' keyword");
             Expression* expression = parseExpression();
             if(instanceOf<NullExpression>(expression)){
@@ -122,15 +122,14 @@ const RootNode Parser::parse(){
         }
 
         else if(consume(module_keyword)){
-            bool moduleClass = consume(class_keyword);
-            Identifier* identifier = getIdentifier();
+            Identifier* identifier = getIdentifier(true);
             expect(left_curly, "Expected module body");
-            identation.open<ModuleContainer>(new ModuleContainer(identifier, moduleClass));
+            identation.open<ModuleContainer>(new ModuleContainer(identifier));
             --i;
         }
 
         else if(consume(class_keyword)){
-            Identifier* id = getIdentifier();
+            Identifier* id = getIdentifier(true);
             GenericType* type = parseInheritance();
             expect(left_curly, "Expected class body");
             identation.open<ClassContainer>(new ClassContainer(id,type));
@@ -180,22 +179,26 @@ const RootNode Parser::parse(){
             --i;
         }
 
-        else if(consume(identifier)){
-            
-            Identifier* name = new Identifier(get(i-1).getValue());
-            
-            if(consume(left_par)){
-                vector<Expression*> args = parseAgumentsInCall();
-                expect(right_par, "Expected arguments or function call");
-                identation.addElement(new FunctionCall(name, args));
-                expect(semicolon, "Expected semicolon");
-                --i;
-            }
+        else if(auto call = parseFunctionCall()){
+            identation.addElement(call);
+            expect(semicolon, "Expected semicolon");
+            --i;
         }
     }
 
-    //root.print();
     return root;
+}
+
+FunctionCall* Parser::parseFunctionCall() {
+    size_t firstIndex = i;
+    Identifier* name = getIdentifier();    
+    if(consume(left_par)){
+        vector<Expression*> args = parseAgumentsInCall();
+        expect(right_par, "Expected arguments or function call");
+        return new FunctionCall(name, args);
+    }
+    i = firstIndex;
+    return nullptr;
 }
 
 Token Parser::get(const size_t& index){
@@ -225,10 +228,14 @@ void Parser::expect(const TokenType t, const char* description){
 Expression* Parser::parseExpression(TokenList expressionTokens){
     if(expressionTokens.isEmpty()) {
         while(true){
+            // TO-DO: Change this function to accept function calls
             if(get(i).isOperator() or get(i).isLiteral() or ask(identifier)){
                 expressionTokens.add(get(i++));
                 continue;
             }
+            // if(auto call = parseFunctionCall()){
+                
+            // }
             break;
         }
     }
@@ -286,16 +293,25 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
     return nullptr;
 }
 
-Identifier* Parser::getIdentifier(){
+Identifier* Parser::getIdentifier(bool noScope){
     expect(identifier, "Expected identifier");
-    return new Identifier(get(i - 1).getValue());
+    Identifier* id = new Identifier(get(i -1).getValue());
+    while(ask(point) and ask(identifier,1)){
+        if(noScope){
+            throwSyntaxError("Invalid scope declaration", tokens.getLine(i));
+        }
+        id->withScope = true;
+        id->value += "." + get(i + 1).getValue();
+        i += 2;
+    }
+    return id;
 }
 
 /*
 * STATEMENT PARSING
 */
 void Parser::parseEnum(){
-    Identifier* name = getIdentifier();
+    Identifier* name = getIdentifier(true);
     GenericType* extend = parseInheritance();
     expect(left_curly, "Expected enumeration");
     if(extend == nullptr){extend = new Integer();}    
@@ -310,7 +326,8 @@ void Parser::parseImport(){
     vector<Identifier*> imports;
     while(valid){
         if(ask(identifier)){
-            imports.push_back(new Identifier(get(i++).getValue()));
+
+            imports.push_back(getIdentifier());
             valid = consume(comma);
         }
         valid = false;
@@ -342,7 +359,7 @@ vector<Argument*> Parser::parseArguments(){
     while(valid){
         if(not get(i).isTypeKeyword()){valid = false; continue;}
         GenericType* type = parseType();
-        Identifier* id = getIdentifier();
+        Identifier* id = getIdentifier(true);
         if(consume(equal)){
             Expression* value = parseExpression();
             if(instanceOf<NullExpression>(value)){
@@ -432,7 +449,7 @@ VariableDeclaration* Parser::parseVar(){
             return nullptr;
         }
 
-        Identifier* id = getIdentifier();
+        Identifier* id = getIdentifier(true);
 
         if(consume(equal)){
             Expression* expr = parseExpression();
@@ -458,7 +475,7 @@ FunctionContainer* Parser::parseFunction(){
             i = initialPos;
             return nullptr;
         }
-        Identifier* id = getIdentifier();
+        Identifier* id = getIdentifier(true);
         expect(left_par, "Expected function arguments");
         std::vector<Argument*> args = parseArguments();
         expect(right_par, "Expected end of arguments");

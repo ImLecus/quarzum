@@ -20,9 +20,13 @@ int main(const int argc,const char** argv) {
         throwError("File format must be .qz or .quarzum.");
     }
     Parser parser = Parser(tokenize(content));
+    symbolTable.enterScope();
+    symbolTable.insert("out", {'f', "out", "function", "global"});
+    symbolTable.insert("input", {'f', "input", "string", "global"});
     RootNode root = parser.parse();
     root.check();
     root.generateIR();
+    ir.push_back(IRInstruction{EXIT, "0"});
     std::unique_ptr<Assembler> assembler = getAssembler(ir);
     std::ofstream output("output.asm");
     if(output.is_open()){

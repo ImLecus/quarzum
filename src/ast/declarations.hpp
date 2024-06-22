@@ -17,9 +17,18 @@ struct VariableDeclaration : public Statement {
 
     }
 
+    void check() override {
+        expression->check();
+        if(symbolTable.find(id->value) != nullptr){
+            throwError("Symbol " + id->value + " has been already declared");
+        }
+        symbolTable.insert(id->value, {'v',id->value,type->name,"global"});
+    }
+
     void generateIR(){
         if(Literal* l = dynamic_cast<Literal*>(expression)){
-
+            if(l->value == "true"){l->value="1";}
+            if(l->value == "false" or l->value == "null"){l->value = "0";}
             ir.push_back(IRInstruction{ASSIGN,id->value,l->value,"literal",type->name});
             return;
         }
@@ -34,8 +43,7 @@ struct VariableDeclaration : public Statement {
         delete id;
         delete expression;
     }
-    void check() override {
-    }
+
 };
 
 enum Access: u_int8_t {
@@ -103,7 +111,9 @@ struct VariableRedeclaration : public Statement {
     Identifier* identifier;
     Expression* expression;
 
-    VariableRedeclaration(Identifier* varName, Expression* value): identifier(varName), expression(value) {}
+    VariableRedeclaration(Identifier* varName, Expression* value): identifier(varName), expression(value) {
+        
+    }
 
     void print() override  {
         std::cout << "redec:\n";
@@ -120,6 +130,21 @@ struct VariableRedeclaration : public Statement {
         delete expression;
     }
     void check() override {
-        
+        expression->check();
+        if(symbolTable.find(identifier->value) == nullptr){
+            throwError("Variable " + identifier->value + " was not defined");
+        }
+    }
+
+    void generateIR() override {
+        if(Literal* l = dynamic_cast<Literal*>(expression)){
+            if(l->value == "true"){l->value="1";}
+            if(l->value == "false" or l->value == "null"){l->value = "0";}
+            ir.push_back(IRInstruction{REASSIGN,identifier->value,l->value,"literal"});
+            return;
+        }
+        expression->generateIR();
+        ir.push_back(IRInstruction{REASSIGN,identifier->value,expression->index,""});
+        tIndex = 0;
     }
 };

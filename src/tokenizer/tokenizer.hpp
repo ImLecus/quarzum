@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "../error.hpp"
 
+namespace quarzum::lexer {
 /**
  * @brief Search if the buffer is a symbol. Otherwise, returns
  * the TokenType error_token.
@@ -22,8 +23,15 @@ const TokenType bufferToKeyword(const std::string& buffer);
 const TokenList tokenize(const std::vector<char>& content) noexcept;
 /**
  * @brief Prints a lexical error message.
+ * @deprecated
 */
 void throwLexicalError(const char* message, const unsigned long& line, std::vector<char>::const_iterator index);
+
+enum class CommentType : uint8_t {
+    kNone,
+    kSingle,
+    kMultiple
+};
 
 const std::unordered_map<std::string, TokenType> symbols = {
     {";", semicolon},
@@ -54,32 +62,32 @@ const std::unordered_map<std::string, TokenType> symbols = {
     {"|", bit_or},
     {"^", bit_xor},
     {"~", bit_not},
-    {"+=", plus_eq},
-    {"-=", minus_eq},
-    {"*=", prod_eq},
-    {"/=", div_eq},
+    {"+=", ASSIGN_OPERATOR},
+    {"-=", ASSIGN_OPERATOR},
+    {"*=", ASSIGN_OPERATOR},
+    {"/=", ASSIGN_OPERATOR},
     {"#", converge_sum},
-    {"#=", converge_eq},
+    {"#=", ASSIGN_OPERATOR},
     {".", point}
 };
 const std::unordered_map<std::string, TokenType> keywords = {
-    {"bool", b_keyword},
-    {"int8", i8_keyword},
-    {"int16", i16_keyword},
-    {"int", i32_keyword},
-    {"int32", i32_keyword},
-    {"int64", i64_keyword},
-    {"uint8", u8_keyword},
-    {"uint16", u16_keyword},
-    {"uint", u32_keyword},
-    {"uint32", u32_keyword},
-    {"uint64", u64_keyword},
-    {"num", num_keyword},
-    {"num64", num64_keyword},
-    {"decimal", decimal_keyword},
-    {"char", char_keyword},
-    {"string", string_keyword},
-    {"var", var_keyword},
+    {"bool", TYPE_KEYWORD},
+    {"int8", TYPE_KEYWORD},
+    {"int16", TYPE_KEYWORD},
+    {"int", TYPE_KEYWORD},
+    {"int32", TYPE_KEYWORD},
+    {"int64", TYPE_KEYWORD},
+    {"uint8", TYPE_KEYWORD},
+    {"uint16", TYPE_KEYWORD},
+    {"uint", TYPE_KEYWORD},
+    {"uint32", TYPE_KEYWORD},
+    {"uint64", TYPE_KEYWORD},
+    {"num", TYPE_KEYWORD},
+    {"num64", TYPE_KEYWORD},
+    {"decimal", TYPE_KEYWORD},
+    {"char", TYPE_KEYWORD},
+    {"string", TYPE_KEYWORD},
+    {"var", TYPE_KEYWORD},
     {"null",null_literal},
     {"true",true_literal},
     {"false",false_literal},
@@ -87,7 +95,7 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"and", and_op},
     {"xor", xor_op},
     {"not", not_op},
-    {"function", function_keyword},
+    {"function", TYPE_KEYWORD},
     {"module", module_keyword},
     {"class", class_keyword},
     {"return", return_keyword},
@@ -109,3 +117,4 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"for", for_keyword},
     {"else", else_keyword}
 };
+}

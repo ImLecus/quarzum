@@ -1,37 +1,32 @@
-/**
- * @file tokenizer.cpp
- * This module contains all the related functions
- * for the lexer.
- * 
-*/
 #pragma once
 #include "tokenizer.hpp"
 
+namespace quarzum::lexer {
+
 const TokenList tokenize(const std::vector<char>& content) noexcept{
     TokenList tokens;
-    unsigned long lineNumber = 1;
+    uint64_t lineNumber = 1;
     std::string buffer;
-    bool isComment = false;
-    bool isMultiComment = false;
+    CommentType commentType = CommentType::kNone;
     bool err = false;
 
     for(auto index = content.begin(); index != content.end(); ++index){
         if(*index == '\n'){
-            isComment = false;
+            commentType = CommentType::kNone;
             tokens.addLine(tokens.length);
             ++lineNumber;
             continue;
         }
         if(*index == '/' and (index + 1 != content.end()) and *(index + 1) == '*'){
-            isMultiComment = true;
+            commentType = CommentType::kMultiple;
             continue;
         }
         if(*index == '*' and (index + 1 != content.end()) and *(index + 1) == '/'){
-            isMultiComment = false;
+            commentType = CommentType::kNone;
             ++index;
             continue;
         }
-        if(isComment or isMultiComment){
+        if(commentType != CommentType::kNone){
             continue;
         }
         if(*index == '\''){
@@ -100,7 +95,7 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
 
                 if(type == comment){
                     buffer.clear();
-                    isComment = true;
+                    commentType = CommentType::kSingle;
                     continue;
                 }
                 if(type != token_error){ 
@@ -112,12 +107,11 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
                 buffer.pop_back();
             }
             TokenType type = bufferToSymbol(buffer);
+            tokens.add(Token(type, buffer));
             if(type == token_error){
-                throwLexicalError("Unexpected token", lineNumber, index);
+                debug::throwLexicalError("Unexpected token", tokens.getItems().back());
                 err = true;
             }
-
-            tokens.add(Token(type, buffer));
             buffer.clear();
             continue;
         }
@@ -126,13 +120,17 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
             continue;
         }
         else{
-            throwLexicalError("Unexpected token", lineNumber, index);
+            tokens.add(ERROR_TOKEN);
+            debug::throwLexicalError("Unexpected token", tokens.getItems().back());
             err = true;
             ++index;
         }
     }
-    if(err){return TokenList();}
-    return tokens;
+    if(err){
+        debug::err("Lex phase finished with errors. Terminating execution...");
+        std::exit(1);
+    }
+    return std::move(tokens);
 }
 
 const TokenType bufferToSymbol(const std::string& buffer){  
@@ -150,11 +148,11 @@ const TokenType bufferToKeyword(const std::string& buffer){
     }
     return identifier;
 }
-
-void throwLexicalError(const char* message, const unsigned long& lineNumber,std::vector<char>::const_iterator index){
+// @deprecated
+void throwLexicalError(const char* message, const uint64_t& lineNumber,std::vector<char>::const_iterator index){
     std::cout << "\e[31m" << "LexicalError" << "\e[0m" << ": " << message << " at line " << lineNumber << ".\n";
     std::string line;
-    u_int16_t margin = 0;
+    uint16_t margin = 0;
     while(*(index-1) != '\n'){--index;++margin;}
     while(*index != '\n'){line += *(index++);}
     std::cout << lineNumber << " | " << line << '\n';
@@ -163,4 +161,6 @@ void throwLexicalError(const char* message, const unsigned long& lineNumber,std:
     while(margin > 1){line += " ";--margin;}
     line += "^^^\n";
     std::cout << "\e[31m" << line << "\e[0m";
+}
+
 }

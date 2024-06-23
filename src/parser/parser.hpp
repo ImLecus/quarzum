@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../Quarzum.h"
 #include "../tokenizer/tokenlist.hpp"
 #include "../ast/expressions.hpp"
 #include "../ast/literals.hpp"
@@ -11,6 +11,8 @@
 #include <array>
 #include <stack>
 
+
+using namespace quarzum::lexer;
 /**
  * @brief Returns a Literal that represents the NULL value depending on the type.
 */
@@ -21,7 +23,7 @@ bool instanceOf(const U& object);
 
 class Parser {
 public:
-    Parser(const TokenList& tokens);
+    Parser(TokenList& tokens);
     const RootNode parse();
 private:
     TokenList tokens;

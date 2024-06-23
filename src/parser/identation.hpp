@@ -32,6 +32,6 @@ public:
     }   
 
 private:
-    u_int8_t identationLayer; 
+    uint8_t identationLayer; 
     std::vector<Container*> layers;
 };

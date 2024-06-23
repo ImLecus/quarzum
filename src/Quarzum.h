@@ -14,18 +14,15 @@
  * - Assembly: Related to the IR=>ASM translation.
 */
 #pragma once
-
+#define Q_VERSION "0.1.0" 
 #include "./debug/debug.cpp"
 #include "./tokenizer/tokenizer.cpp"
 #include "./parser/parser.cpp"
 #include "source.hpp"
 #include "./ir/irinstruction.hpp"
 #include "./backend/assembler.hpp"
-
-
-#define Q_VERSION "0.1.0" 
-
 namespace quarzum {
     constexpr bool debugMode = false;
     namespace debug = quarzum::debug;
+    namespace lexer = quarzum::lexer;
 }

@@ -2,9 +2,10 @@
 #include "tokentype.hpp"
 #include <string>
 
-class Token {
-public:
-    explicit Token(const TokenType& type, const std::string& value): type(type), value(value){}
+namespace quarzum::lexer {
+
+struct Token {
+    Token(const TokenType& type, const std::string& value): type(type), value(value), line(0){}
 
     inline bool isSymbol() const noexcept {
         return this->type >= 0x60 and this->type <= 0x7F;
@@ -13,15 +14,9 @@ public:
     inline bool isKeyword() const noexcept {
         return this->type <= 0x2F;
     }
-    inline bool isTypeKeyword() const noexcept {
-        return this->type <= 0x0F or this->type == identifier;
-    }
+
     inline bool isOperator() const noexcept {
         return this->type >= 0x30 and this->type <= 0x5F;
-    }
-
-    inline bool isAssignOperator() const noexcept {
-        return this->type == equal or this->type == greater_eq or this->type == lower_eq or (this->type >= 70 and this->type < 77);
     }
 
     inline bool isUnaryOperator() const noexcept {
@@ -32,7 +27,7 @@ public:
         return this->type >= 0x80 and this->type <= 0x9F ;
     }
 
-    u_int8_t getPriority() const noexcept {
+    uint8_t getPriority() const noexcept {
         switch (this->type)
         {
         case or_op:
@@ -70,19 +65,13 @@ public:
             return __UINT8_MAX__;
         }
     }
-    static const u_int8_t MAX_PRIORITY = 9;
+    static const uint8_t MAX_PRIORITY = 9;
 
-    inline std::string getValue() const noexcept {
-        return this -> value;
-    }
-
-    inline TokenType getType() const noexcept {
-        return this -> type;
-    }
-
-private:
     const TokenType type;
     const std::string value;
+    const uint32_t line;
 };
 
 const Token ERROR_TOKEN = Token(token_error, "");
+
+}

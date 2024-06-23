@@ -32,7 +32,7 @@ Literal* getNullValue(GenericType*& type){
     return nullptr;
 }
 
-Parser::Parser(const TokenList& tokens): tokens(tokens) {}
+Parser::Parser(TokenList& tokens): tokens(tokens) {}
 
 const RootNode Parser::parse(){
     RootNode root = RootNode();
@@ -49,7 +49,7 @@ const RootNode Parser::parse(){
             --i;
         }
         else if(ask(ACCESS_SPECIFIER)){
-            Access access = Access(get(i).getValue() == "public"? 0: get(i).getValue() == "private"? 1: 2);
+            Access access = Access(get(i).value == "public"? 0: get(i).value == "private"? 1: 2);
             ++i;
             if(auto decl = parseVar()){
                 identation.addElement(new AtributeDeclaration(access,decl));
@@ -115,7 +115,7 @@ const RootNode Parser::parse(){
             if(instanceOf<NullExpression>(expression)){
                throwSyntaxError("Expected iterable expression", tokens.getLine(i));
             }
-            if(not ask(right_par) or get(++i).getType() != left_curly){
+            if(not ask(right_par) or get(++i).type != left_curly){
               throwSyntaxError("Expected ')'", tokens.getLine(i));
             }
             identation.open<ForeachContainer>(new ForeachContainer(id, expression, type));
@@ -208,7 +208,7 @@ inline Token Parser::get(const size_t& index){
     return ERROR_TOKEN;
 }
 inline bool Parser::ask(const TokenType& type,const int8_t& distance){
-    return get(i + distance).getType() == type;
+    return get(i + distance).type == type;
 }
 
 bool Parser::consume(const TokenType& type,const int8_t& distance){
@@ -245,23 +245,23 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
     }
     // Parsing literals
     if(expressionTokens.size() == 1){
-        switch (expressionTokens[0].getType())
+        switch (expressionTokens[0].type)
         {
         case int_literal:
-            return new Literal(new Integer(), expressionTokens[0].getValue());
+            return new Literal(new Integer(), expressionTokens[0].value);
         case num_literal:
-            return new Literal(new Number(), expressionTokens[0].getValue());
+            return new Literal(new Number(), expressionTokens[0].value);
         case char_literal:
-            return new Literal(new Character(),expressionTokens[0].getValue());
+            return new Literal(new Character(),expressionTokens[0].value);
         case string_literal:
-            return new Literal(new String(),expressionTokens[0].getValue());
+            return new Literal(new String(),expressionTokens[0].value);
         case null_literal:
             return new Literal(new NullType(), "");
         case identifier:
-            return new Identifier(expressionTokens[0].getValue());
+            return new Identifier(expressionTokens[0].value);
         case true_literal:
         case false_literal:
-            return new Literal(new Boolean(), expressionTokens[0].getValue());
+            return new Literal(new Boolean(), expressionTokens[0].value);
         default:
             throwSyntaxError("Invalid expression", tokens.getLine(i));
             break;
@@ -269,10 +269,10 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
     }
     // Parsing unary expressions
     if(expressionTokens.size() == 2){
-        if(expressionTokens[0].getType() == not_op and expressionTokens[1].isLiteral()){
+        if(expressionTokens[0].type == not_op and expressionTokens[1].isLiteral()){
             return new UnaryExpression("not", parseExpression(expressionTokens.split(1,expressionTokens.size())));
         }
-        if(expressionTokens[0].getType() == minus and expressionTokens[1].isLiteral()){
+        if(expressionTokens[0].type == minus and expressionTokens[1].isLiteral()){
             return new UnaryExpression("-", parseExpression(expressionTokens.split(1,expressionTokens.size())));
         }
     }
@@ -282,7 +282,7 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
         for(u_int16_t i = 0; i < size; ++i){
             if(expressionTokens[i].getPriority() == priority){
                 return new BinaryExpression(
-                    expressionTokens[i].getValue(),
+                    expressionTokens[i].value,
                     parseExpression(expressionTokens.split(0,i)),
                     parseExpression(expressionTokens.split(i + 1, expressionTokens.size()))
                 );
@@ -296,13 +296,13 @@ Expression* Parser::parseExpression(TokenList expressionTokens){
 
 Identifier* Parser::getIdentifier(const bool& noScope){
     expect(identifier, "Expected identifier");
-    Identifier* id = new Identifier(get(i -1).getValue());
+    Identifier* id = new Identifier(get(i -1).value);
     while(ask(point) and ask(identifier,1)){
         if(noScope){
             throwSyntaxError("Invalid scope declaration", tokens.getLine(i));
         }
         id->withScope = true;
-        id->value += "." + get(i + 1).getValue();
+        id->value += "." + get(i + 1).value;
         i += 2;
     }
     return id;
@@ -340,14 +340,14 @@ void Parser::parseImport(){
     if(not ask(from_keyword) or not ask(string_literal, 1)){
         throwSyntaxError("Missing import path", tokens.getLine(i));
     }
-    location = get(++i).getValue();
+    location = get(++i).value;
     identation.addElement(new ImportStatement(imports, location));
 }
 
 GenericType* Parser::parseInheritance(){
     if(consume(arrow)){
-        if(get(i).isTypeKeyword()){
-            return getTypeByName(get(i++).getValue());
+        if(get(i).type == TYPE_KEYWORD){
+            return getTypeByName(get(i++).value);
         }
         expect(identifier, "Expected inheritance");
     }
@@ -358,7 +358,7 @@ vector<Argument*> Parser::parseArguments(){
     vector<Argument*> arguments;
     bool valid = true;
     while(valid){
-        if(not get(i).isTypeKeyword()){valid = false; continue;}
+        if(not get(i).type == TYPE_KEYWORD){valid = false; continue;}
         GenericType* type = parseType();
         Identifier* id = getIdentifier(true);
         if(consume(equal)){
@@ -397,7 +397,7 @@ Element* Parser::parseIdWithOptionalValue(){
     Identifier* name;
     Expression* value = nullptr;
     if(consume(identifier)){
-        name = new Identifier(get(i-1).getValue());
+        name = new Identifier(get(i-1).value);
         if(consume(equal)){
             value = parseExpression();
             if(instanceOf<NullExpression>(value)){
@@ -430,7 +430,7 @@ void Parser::parseSimpleStatement(Statement* node){
 }
 
 GenericType* Parser::parseType(){
-    GenericType* t = getTypeByName(get(i).getValue(), ask(const_keyword, -1));
+    GenericType* t = getTypeByName(get(i).value, ask(const_keyword, -1));
     ++i;
     if(consume(left_square,1)){
         // ARRAY PARSING
@@ -442,7 +442,7 @@ VariableDeclaration* Parser::parseVar(){
     
     size_t initialPos = i;
     consume(const_keyword);
-    if(get(i).isTypeKeyword()){
+    if(get(i).type == TYPE_KEYWORD){
         GenericType* type = parseType();
 
         if(not ask(identifier)){
@@ -470,7 +470,7 @@ VariableDeclaration* Parser::parseVar(){
 FunctionContainer* Parser::parseFunction(){
     size_t initialPos = i;
     if(consume(const_keyword)){}
-    if(get(i).isTypeKeyword()){
+    if(get(i).type == TYPE_KEYWORD){
         GenericType* type = parseType();
         if(not ask(identifier)){
             i = initialPos;
@@ -489,23 +489,23 @@ FunctionContainer* Parser::parseFunction(){
 VariableRedeclaration* Parser::parseRedec(){
 
     if(get(i).isUnaryOperator() and ask(identifier, 1) or ask(identifier) and get(i+1).isUnaryOperator()){
-        Identifier* id = new Identifier(ask(identifier)?get(i).getValue():get(i+1).getValue());
-        std::string op = ask(identifier)? get(i + 1).getValue() : get(i).getValue();
+        Identifier* id = new Identifier(ask(identifier)?get(i).value:get(i+1).value);
+        std::string op = ask(identifier)? get(i + 1).value : get(i).value;
         i += 2;
         return new VariableRedeclaration(id, new UnaryExpression(op,id));
     }
-    if(ask(identifier) and get(i + 1).isAssignOperator()){
-        Identifier* id = new Identifier(get(i).getValue());
+    if(ask(identifier) and get(i + 1).type == ASSIGN_OPERATOR or get(i +1).type == equal){
+        Identifier* id = new Identifier(get(i).value);
         Token op = get(i +1);
         i += 2;
         Expression* expr = parseExpression();
         if(instanceOf<NullExpression>(expr)){
             // err
         }
-        if(op.getType() == equal){
+        if(op.type == equal){
             return new VariableRedeclaration(id, expr);
         }
-        return new VariableRedeclaration(id,new BinaryExpression(op.getValue().substr(0,1) ,id,expr));
+        return new VariableRedeclaration(id,new BinaryExpression(op.value.substr(0,1) ,id,expr));
     }
     return nullptr;
 }

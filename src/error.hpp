@@ -17,7 +17,3 @@ inline void throwTypeError(const std::string& message){
     std::cout << RED << "TypeError" << NOCOLOR << ": " << message << '\n';
     exit(EXIT_FAILURE);
 }
-
-inline void throwWarning(const std::string& message){
-    std::cout << YELLOW << "Warning" << NOCOLOR << ": " << message << '\n';
-}

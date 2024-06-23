@@ -1,4 +1,5 @@
 #pragma once
+namespace quarzum::lexer {
 /**
  * TokenType values:
  * 0x00 - 0x2F : keywords
@@ -7,24 +8,8 @@
  * 0x80 - 0x9F : literals
  * 0xF0 - 0xFF : other
 */
-enum TokenType : unsigned char {
-    // type keywords
-    b_keyword = 0x00,
-    i8_keyword = 0x01,
-    i16_keyword = 0x02,
-    i32_keyword = 0x03,
-    i64_keyword = 0x04,
-    u8_keyword = 0x05,
-    u16_keyword = 0x06,
-    u32_keyword = 0x07,
-    u64_keyword = 0x08,
-    num_keyword = 0x09,
-    num64_keyword = 0x0A,
-    decimal_keyword = 0x0B,
-    char_keyword = 0x0C,
-    string_keyword = 0x0D,
-    var_keyword = 0x0E,
-    function_keyword = 0x0F,
+enum TokenType : uint8_t {
+    TYPE_KEYWORD = 0x00,
     // keywords
     const_keyword = 0x10,
     return_keyword = 0x11,
@@ -69,13 +54,7 @@ enum TokenType : unsigned char {
     bit_xor = 0x44,
     bit_not = 0x45,
 
-    plus_eq = 0x46,
-    minus_eq = 047,
-    prod_eq = 0x48,
-    div_eq = 0x49,
-    mod_eq = 0x4A,
-    pow_eq = 0x4B,
-    converge_eq = 0x4C,
+    ASSIGN_OPERATOR = 0x46,
 
     // symbols
     equal = 0x60,
@@ -102,3 +81,4 @@ enum TokenType : unsigned char {
     comment = 0xF1,
     token_error = 0xFF
 };
+}

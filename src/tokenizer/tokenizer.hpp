@@ -1,5 +1,6 @@
 #pragma once
 #include "tokenlist.hpp"
+#include <unordered_map>
 #include "../error.hpp"
 
 /**
@@ -101,9 +102,9 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"enum", enum_keyword},
     {"foreach", foreach_keyword},
     {"in", in_keyword},
-    {"public", public_keyword},
-    {"private", private_keyword},
-    {"protected", protected_keyword},
+    {"public", ACCESS_SPECIFIER},
+    {"private", ACCESS_SPECIFIER},
+    {"protected", ACCESS_SPECIFIER},
     {"do", do_keyword},
     {"for", for_keyword},
     {"else", else_keyword}

@@ -1,6 +1,5 @@
 #pragma once
 #include "tokentype.hpp"
-#include <unordered_map>
 #include <string>
 
 class Token {
@@ -27,10 +26,6 @@ public:
 
     inline bool isUnaryOperator() const noexcept {
         return this->type == plus_unary or this->type == minus_unary;
-    }
-
-    inline bool isAccessKeyword() const noexcept {
-        return this->type == public_keyword or this->type == private_keyword or this->type == protected_keyword;
     }
 
     inline bool isLiteral() const noexcept {

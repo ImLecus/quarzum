@@ -1,10 +1,7 @@
 #pragma once
 #include <string>
 #include <iostream>
-#define RED "\e[31m"
-#define NOCOLOR "\e[0m"
-#define YELLOW "\e[30;103m"
-#define GREEN "\e[30;102m"
+
 
 inline void throwError(const std::string& message){
     std::cout << RED << "Error" << NOCOLOR << ": " << message << '\n';

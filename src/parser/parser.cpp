@@ -48,8 +48,8 @@ const RootNode Parser::parse(){
             identation.open<FunctionContainer>(func);
             --i;
         }
-        else if(get(i).isAccessKeyword()){
-            Access access = Access(get(i).getType() - TokenType::public_keyword);
+        else if(ask(ACCESS_SPECIFIER)){
+            Access access = Access(get(i).getValue() == "public"? 0: get(i).getValue() == "private"? 1: 2);
             ++i;
             if(auto decl = parseVar()){
                 identation.addElement(new AtributeDeclaration(access,decl));

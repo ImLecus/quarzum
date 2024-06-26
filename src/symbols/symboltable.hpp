@@ -1,7 +1,5 @@
 #pragma once
-#include <unordered_map>
-#include <string>
-#include <vector>
+#include "../Quarzum.h"
 
 struct SymbolInfo {
     char type;

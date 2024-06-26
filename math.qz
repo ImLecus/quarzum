@@ -1,5 +1,5 @@
 import Physics from "./physics.qz"
-module class Math {
+module Math {
     const num PI = 3.1415926535;
     const num E = 2.718281;
 

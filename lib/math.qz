@@ -1,3 +1,6 @@
+/**
+ * Quarzum Math library.
+ */
 module Math {
     const number PI =  3.1415926535;
     const number E =   2.7182818284;

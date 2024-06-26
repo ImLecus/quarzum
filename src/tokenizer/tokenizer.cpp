@@ -1,11 +1,13 @@
 #pragma once
 #include "tokenizer.hpp"
+#include "../Quarzum.h"
 
-namespace quarzum::lexer {
+namespace Quarzum::Lexer {
 
-const TokenList tokenize(const std::vector<char>& content) noexcept{
-    TokenList tokens;
-    uint64_t lineNumber = 1;
+const std::deque<Token> tokenize(const std::string& content) noexcept{
+    std::deque<Token> tokens;
+    uint32_t lineNumber = 1;
+    uint32_t columnNumber = 1;
     std::string buffer;
     CommentType commentType = CommentType::kNone;
     bool err = false;
@@ -13,64 +15,69 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
     for(auto index = content.begin(); index != content.end(); ++index){
         if(*index == '\n'){
             commentType = CommentType::kNone;
-            tokens.addLine(tokens.length);
             ++lineNumber;
-            continue;
+            columnNumber = 1;
         }
-        if(*index == '/' and (index + 1 != content.end()) and *(index + 1) == '*'){
+        else if(*index == '/' and (index + 1 != content.end()) and *(index + 1) == '*'){
+            columnNumber += 2;
             commentType = CommentType::kMultiple;
-            continue;
         }
-        if(*index == '*' and (index + 1 != content.end()) and *(index + 1) == '/'){
+        else if(*index == '*' and (index + 1 != content.end()) and *(index + 1) == '/'){
+            columnNumber += 2;
             commentType = CommentType::kNone;
             ++index;
-            continue;
         }
-        if(commentType != CommentType::kNone){
-            continue;
+        else if(commentType != CommentType::kNone){
+            ++columnNumber;
         }
-        if(*index == '\''){
+        else if(*index == '\''){
             buffer += '\'';
+            ++columnNumber;
             if(index + 1 != content.end() and *(index + 1) == '\\'){
                 buffer += *(++index);
+                ++columnNumber;
             }
             if(index + 1 != content.end() and isascii(*(index + 1))){
                 buffer += *(index + 1);
+                ++columnNumber;
                 if(index + 2 != content.end() and *(index + 2) == '\''){
                     buffer += '\'';
-                    tokens.add(Token(char_literal, buffer));
+                    ++columnNumber;
+                    tokens.push_back(Token(LITERAL, buffer, lineNumber, columnNumber));
                     buffer.clear();
                     index += 2;
                     continue;
                 }
-                throwLexicalError("Unexpected token", lineNumber,index);
+                tokens.push_back(Token(token_error, "", lineNumber, columnNumber));
                 err = true;
             }
-            throwLexicalError("Unexpected token", lineNumber, index);
+            tokens.push_back(Token(token_error, "", lineNumber, columnNumber));
             err = true;
         }
-        if(*index == '"'){
+        else if(*index == '"'){
             buffer += '"';
+            ++columnNumber;
             ++index;
             while(index != content.end() and *index != '"'){
                 buffer += *(index++);
+                ++columnNumber;
             }
             buffer += '"';
-            tokens.add(Token(string_literal, buffer));
+            ++columnNumber;
+            tokens.push_back(Token(LITERAL, buffer, lineNumber, columnNumber));
             buffer.clear();
-            continue;
         }
         // Identifiers and keywords
-        if(isalpha(*index)){
+        else if(isalpha(*index)){
             while (isalnum(*index) or *index == '_')
             {
                 buffer += *(index++);
+                ++columnNumber;
             }
             TokenType type = bufferToKeyword(buffer);
-            tokens.add(Token(type == token_error? identifier : type, buffer));
+            tokens.push_back(Token(type == token_error? identifier : type, buffer, lineNumber, columnNumber));
             buffer.clear();
             --index;
-            continue;
         }
         // Integers and numbers
         else if(isdigit(*index)){
@@ -79,18 +86,20 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
             {
                 if(*index == '.'){isNumber = true;}
                 buffer += *(index++);
+                ++columnNumber;
             }
-            tokens.add(Token(isNumber? num_literal : int_literal, buffer));
+            tokens.push_back(Token(LITERAL, buffer, lineNumber, columnNumber));
             buffer.clear();
             --index;
-            continue;
         }
         // Symbols
         else if(ispunct(*index)){
 
             buffer += *index;
+            ++columnNumber;
             if(index + 1 != content.end() and ispunct(*(index + 1))){
                 buffer += *(index + 1);
+                ++columnNumber;
                 TokenType type = bufferToSymbol(buffer);
 
                 if(type == comment){
@@ -99,7 +108,7 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
                     continue;
                 }
                 if(type != token_error){ 
-                    tokens.add(Token(type, buffer));
+                    tokens.push_back(Token(type, buffer, lineNumber, columnNumber));
                     buffer.clear();
                     ++index;
                     continue;
@@ -107,29 +116,29 @@ const TokenList tokenize(const std::vector<char>& content) noexcept{
                 buffer.pop_back();
             }
             TokenType type = bufferToSymbol(buffer);
-            tokens.add(Token(type, buffer));
+            tokens.push_back(Token(type, buffer, lineNumber, columnNumber));
             if(type == token_error){
-                debug::throwLexicalError("Unexpected token", tokens.getItems().back());
+                Debug::throwError("Unexpected token", tokens.back());
                 err = true;
             }
             buffer.clear();
-            continue;
         }
         else if(isspace(*index) or *index == '\0'){
-            lineNumber += *index == '\n';
-            continue;
+            lineNumber += *index == '\n'; // TO-DO: CHANGE
         }
         else{
-            tokens.add(ERROR_TOKEN);
-            debug::throwLexicalError("Unexpected token", tokens.getItems().back());
+            tokens.push_back(Token(token_error, "", lineNumber, columnNumber));
+            Debug::throwError("Unexpected token", tokens.back());
             err = true;
             ++index;
+            ++columnNumber;
         }
     }
     if(err){
-        debug::err("Lex phase finished with errors. Terminating execution...");
-        std::exit(1);
+        Debug::err("Lex phase finished with errors. Terminating execution...");
+        Debug::exit(1);
     }
+    
     return std::move(tokens);
 }
 
@@ -148,19 +157,4 @@ const TokenType bufferToKeyword(const std::string& buffer){
     }
     return identifier;
 }
-// @deprecated
-void throwLexicalError(const char* message, const uint64_t& lineNumber,std::vector<char>::const_iterator index){
-    std::cout << "\e[31m" << "LexicalError" << "\e[0m" << ": " << message << " at line " << lineNumber << ".\n";
-    std::string line;
-    uint16_t margin = 0;
-    while(*(index-1) != '\n'){--index;++margin;}
-    while(*index != '\n'){line += *(index++);}
-    std::cout << lineNumber << " | " << line << '\n';
-    margin += 3 + std::to_string(lineNumber).length();
-    line = "";
-    while(margin > 1){line += " ";--margin;}
-    line += "^^^\n";
-    std::cout << "\e[31m" << line << "\e[0m";
-}
-
 }

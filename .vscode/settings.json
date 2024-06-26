@@ -6,7 +6,9 @@
         "ostream": "cpp",
         "array": "cpp",
         "chrono": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "fstream": "cpp",
+        "new": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

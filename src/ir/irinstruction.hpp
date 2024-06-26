@@ -1,6 +1,5 @@
 #pragma once
-#include <vector>
-#include <unordered_map>
+#include "../Quarzum.h"
 
 enum IRInstructionType : u_int8_t {
     ASSIGN,

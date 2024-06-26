@@ -6,12 +6,14 @@
 #define GREEN "\e[32m"
 #define CYAN "\e[36m"
 #define MAGENTA "\e[35m"
+#define GRAY "\e[90m"
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <memory>
 
 
-namespace quarzum::debug {
+namespace Quarzum::Debug {
     /**
      * `TO-DO`: Activate debugMode by terminal arguments.
      * 
@@ -19,6 +21,32 @@ namespace quarzum::debug {
      * Can be activated by using the --debug flag in the terminal.
     */
     bool debugMode = true;
+
+    std::unique_ptr<std::string> source; 
+
+    void getLine(const uint32_t line,const uint32_t column){
+        std::cout << GRAY << ' ';
+        for(uint8_t i = 0; i <= std::to_string(line).length(); ++i){
+            std::cout << ' ';
+        }
+        std::cout << "|\n " << line << " | ";
+
+        uint32_t currentLine = 1;
+        for(char c: *source){
+            if(currentLine == line){
+                std::cout << c;
+            }
+            if(c == '\n'){++currentLine;}
+        }
+        for(uint8_t i = 0; i <= std::to_string(line).length(); ++i){
+            std::cout << ' ';
+        }
+        std::cout << " | ";
+        for(uint32_t i = 0; i <= column; ++i){
+            std::cout << ' ';
+        }
+        std::cout << RED << "^^^\n" << NOCOLOR;
+    }
 
     /**
      * @brief Displays a log in the console.
@@ -53,8 +81,10 @@ namespace quarzum::debug {
         std::cout << RED << "[ERROR]" << NOCOLOR << ' ' << message << '\n';
     }
 
-    void throwLexicalError(const std::string& message, auto& token) {
-        err(message + " at line " + std::to_string(token.line) + '.');
+    void throwError(const std::string& message, auto token) {
+        err(message + " at line " + std::to_string(token.line) + ':');
+        uint8_t lineStr = std::to_string(token.line).length();
+        getLine(token.line, token.column);
     }
     /**
      * @brief Displays the difference of time between two points
@@ -67,5 +97,19 @@ namespace quarzum::debug {
         message += std::to_string(duration.count());
         message += " microseconds from the start.";
         debug(message.c_str());
+    }
+
+    /**
+     * @brief Finishes the program.
+     * Should be called at the end of the compiler.
+    */
+    inline void exit(uint8_t code){
+        if(code == 0){
+            log("The compiler exited with exit code 0 (success).");
+        }
+        else{
+            err("The compiler exited with exit code " + std::to_string(code) + " (failure).");
+        }
+        std::exit(code);
     }
 }

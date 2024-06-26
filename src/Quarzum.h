@@ -15,14 +15,25 @@
 */
 #pragma once
 #define Q_VERSION "0.1.0" 
+
+#include <string>
+#include <memory>
+#include <fstream>
+#include <chrono>
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <cmath>
+#include <deque>
+
 #include "./debug/debug.cpp"
 #include "./tokenizer/tokenizer.cpp"
 #include "./parser/parser.cpp"
 #include "source.hpp"
-#include "./ir/irinstruction.hpp"
-#include "./backend/assembler.hpp"
-namespace quarzum {
+//#include "./ir/irinstruction.hpp"
+//#include "./backend/assembler.hpp"
+namespace Quarzum {
     constexpr bool debugMode = false;
-    namespace debug = quarzum::debug;
-    namespace lexer = quarzum::lexer;
+    namespace Debug = Quarzum::Debug;
+    namespace Lexer = Quarzum::Lexer;
 }

@@ -1,5 +1,3 @@
-#include <fstream>
-#include <vector>
 #include "string.h"
 
 bool format(const char*& filename, const char* format){
@@ -11,15 +9,15 @@ bool format(const char*& filename, const char* format){
     return true;
 }
 
-const std::vector<char> getSource(const char*& filename){
+const std::string getSource(const char*& filename){
     std::ifstream inputFile(filename);
-    std::vector<char> content;
+    std::string content;
     char c;
     if (not inputFile.is_open()) {
         return content;
     }
     while (inputFile.get(c)) {
-        content.push_back(c);
+        content += c;
     }
     inputFile.close();
     return content;

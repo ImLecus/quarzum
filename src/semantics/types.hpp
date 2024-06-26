@@ -2,7 +2,7 @@
 #define CONVERGE(t) return new t(converge(this->bits, type->bits))
 #define PROMOTE(t) return new t(promote(this->bits, type->bits))
 #define DOUBLE_PROMOTE(t) return new t(promote(this->bits, type->bits, true))
-#include <cmath>
+#include "../Quarzum.h"
 
 /**
  * @brief Throws a TypeError due to incompatibility between two types.

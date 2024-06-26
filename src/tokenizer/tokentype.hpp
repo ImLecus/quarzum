@@ -1,5 +1,5 @@
 #pragma once
-namespace quarzum::lexer {
+namespace Quarzum::Lexer {
 /**
  * TokenType values:
  * 0x00 - 0x2F : keywords
@@ -26,35 +26,21 @@ enum TokenType : uint8_t {
     foreach_keyword = 0x1C,
     in_keyword = 0x1D,
     ACCESS_SPECIFIER = 0x1E,
-
+    setup_keyword = 0x1F,
+    destroy_keyword = 0x20,
     do_keyword = 0x21,
     for_keyword = 0x22,
     else_keyword = 0x23,
+    new_keyword = 0x24,
+    delete_keyword = 0x25,
+    persist_keyword = 0x26,
     // operators
-    plus = 0x30,
-    converge_sum = 0x31,
-    minus = 0x32,
-    prod = 0x33,
-    division = 0x34,
-    mod = 0x35,
-    or_op = 0x36,
-    not_op = 0x37,
-    and_op = 0x38,
-    xor_op = 0x39,
-    is_equal = 0x3A,
-    not_equal = 0x3B,
-    greater = 0x3C,
-    lower = 0x3D,
-    greater_eq = 0x3E,
-    lower_eq = 0x3F,
-    plus_unary = 0x40,
-    minus_unary = 0x41,
-    bit_or = 0x42,
-    bit_and = 0x43,
-    bit_xor = 0x44,
-    bit_not = 0x45,
-
     ASSIGN_OPERATOR = 0x46,
+    UNARY_OPERATOR = 0x47,
+    ARITHMETIC_OPERATOR = 0x48,
+    COMPARATION_OPERATOR = 0x49,
+    ternary_operator = 0x4A,
+    ternary_separator = 0x4B,
 
     // symbols
     equal = 0x60,
@@ -69,13 +55,7 @@ enum TokenType : uint8_t {
     arrow = 0x69,
     point = 0x6A,
     // literals
-    int_literal = 0x80,
-    num_literal = 0x81,
-    char_literal = 0x82,
-    string_literal = 0x83,
-    true_literal = 0x84,
-    false_literal = 0x85,
-    null_literal = 0x86,
+    LITERAL = 0x7F,
     // other
     identifier = 0xF0,
     comment = 0xF1,

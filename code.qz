@@ -1,4 +1,8 @@
-function main(){
-	string name = "Quarzum";
-	out(name);
+if(true){
+    uint8 i = 5;
+    i++;
+    i *= 3;
+    delete i;
+
 }
+

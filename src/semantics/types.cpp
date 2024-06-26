@@ -127,35 +127,35 @@ struct Function : public GenericType {
 };
 
 
-GenericType* getTypeByName(std::string name, bool constant = false){
+std::unique_ptr<GenericType> getTypeByName(const std::string& name,const bool constant = false){
     if(name.find("uint") != std::string::npos){
-        return new UInteger(getBits(name));
+        return std::make_unique<UInteger>(getBits(name));
     }
     if(name.find("int") != std::string::npos){
-        return new Integer(getBits(name));
+        return std::make_unique<Integer>(getBits(name));
     }
     if(name == "string"){
-        return new String();
+        return std::make_unique<String>();
     }
     if(name == "char"){
-        return new Character();
+        return std::make_unique<Character>();
     }
     if(name == "var"){
-        return new Var();
+        return std::make_unique<Var>();
     }
     if(name == "bool"){
-        return new Boolean();
+        return std::make_unique<Boolean>();
     }
     if(name == "number" or name == "number64"){
-        return new Number(getBits(name));
+        return std::make_unique<Number>(getBits(name));
     }
     if(name == "decimal"){
-        return new Decimal();
+        return std::make_unique<Decimal>();
     }
     if(name == "function"){
-        return new Function();
+        return std::make_unique<Function>();
     }
-    return new Var();
+    return std::make_unique<Var>();
 }
 
 GenericType* GenericType::sum(GenericType** types){ 

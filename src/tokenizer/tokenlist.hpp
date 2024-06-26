@@ -1,15 +1,16 @@
 #pragma once
 #include "token.hpp"
 #include <vector>
-namespace quarzum::lexer {
+namespace Quarzum::Lexer {
 class TokenList {
 public:
+    TokenList(std::deque<Token> t): tokens(t) {}
     void add(const Token token){
         tokens.push_back(token);
         ++length;
     }
 
-    inline std::vector<Token> getItems() const noexcept{
+    inline std::deque<Token> getItems() const noexcept{
         return tokens;
     }
 
@@ -22,7 +23,7 @@ public:
     }
 
     TokenList split(uint32_t from, const uint32_t to){
-        TokenList newList = TokenList();
+        TokenList newList = TokenList({});
         for(; from < to; ++from){
             newList.add(this->tokens[from]);
         }
@@ -33,23 +34,8 @@ public:
         return tokens.empty();
     }
 
-    inline void addLine(const size_t& index){
-        lineJumps.push_back(index);
-    }
-
-    size_t getLine(const size_t& index) const{
-        const uint32_t size = lineJumps.size();
-        for(uint32_t i = 0; i < size; ++i){
-            if(lineJumps[i] > index){
-                return i + 1;
-            }
-        }
-        return lineJumps.at(lineJumps.size());
-    }
-
     uint64_t length;
 private:
-    std::vector<Token> tokens;
-    std::vector<size_t> lineJumps;
+    std::deque<Token> tokens;
 };
 }

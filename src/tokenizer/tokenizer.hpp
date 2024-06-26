@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "../error.hpp"
 
-namespace quarzum::lexer {
+namespace Quarzum::Lexer {
 /**
  * @brief Search if the buffer is a symbol. Otherwise, returns
  * the TokenType error_token.
@@ -20,12 +20,7 @@ const TokenType bufferToKeyword(const std::string& buffer);
  * error.
  * @param content The source code.
 */
-const TokenList tokenize(const std::vector<char>& content) noexcept;
-/**
- * @brief Prints a lexical error message.
- * @deprecated
-*/
-void throwLexicalError(const char* message, const unsigned long& line, std::vector<char>::const_iterator index);
+const std::deque<Token> tokenize(const std::string& content) noexcept;
 
 enum class CommentType : uint8_t {
     kNone,
@@ -36,39 +31,46 @@ enum class CommentType : uint8_t {
 const std::unordered_map<std::string, TokenType> symbols = {
     {";", semicolon},
     {"=", equal},
-    {"+", plus},
-    {"-", minus},
-    {"*", prod},
-    {"/", division},
-    {"%", mod},
+    {"+", ARITHMETIC_OPERATOR},
+    {"-", ARITHMETIC_OPERATOR},
+    {"*", ARITHMETIC_OPERATOR},
+    {"/", ARITHMETIC_OPERATOR},
+    {"%", ARITHMETIC_OPERATOR},
     {"(", left_par},
     {")", right_par},
     {"//", comment},
-    {">", greater},
-    {"<", lower},
-    {">=", greater_eq},
-    {"<=", lower_eq},
-    {"==", is_equal},
-    {"!=", not_equal},
+    {">", COMPARATION_OPERATOR},
+    {"<", COMPARATION_OPERATOR},
+    {">=", COMPARATION_OPERATOR},
+    {"<=", COMPARATION_OPERATOR},
+    {"==", COMPARATION_OPERATOR},
+    {"!=", COMPARATION_OPERATOR},
     {"{", left_curly},
     {"}", right_curly},
     {",", comma},
-    {"++", plus_unary},
-    {"--", minus_unary},
+    {"++", ARITHMETIC_OPERATOR},
+    {"--", ARITHMETIC_OPERATOR},
     {"=>", arrow},
     {"[", left_square},
     {"]", right_square},
-    {"&", bit_and},
-    {"|", bit_or},
-    {"^", bit_xor},
-    {"~", bit_not},
+    {"&", ARITHMETIC_OPERATOR},
+    {"|", ARITHMETIC_OPERATOR},
+    {"^", ARITHMETIC_OPERATOR},
+    {"~", ARITHMETIC_OPERATOR},
     {"+=", ASSIGN_OPERATOR},
     {"-=", ASSIGN_OPERATOR},
     {"*=", ASSIGN_OPERATOR},
     {"/=", ASSIGN_OPERATOR},
-    {"#", converge_sum},
+    {"%=", ASSIGN_OPERATOR},
+    {"#", ARITHMETIC_OPERATOR},
     {"#=", ASSIGN_OPERATOR},
-    {".", point}
+    {"&=", ASSIGN_OPERATOR},
+    {"|=", ASSIGN_OPERATOR},
+    {"^=", ASSIGN_OPERATOR},
+    {"?=", ASSIGN_OPERATOR},
+    {".", point},
+    {"?", ternary_operator},
+    {":", ternary_separator}
 };
 const std::unordered_map<std::string, TokenType> keywords = {
     {"bool", TYPE_KEYWORD},
@@ -82,19 +84,19 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"uint", TYPE_KEYWORD},
     {"uint32", TYPE_KEYWORD},
     {"uint64", TYPE_KEYWORD},
-    {"num", TYPE_KEYWORD},
-    {"num64", TYPE_KEYWORD},
+    {"number", TYPE_KEYWORD},
+    {"number64", TYPE_KEYWORD},
     {"decimal", TYPE_KEYWORD},
     {"char", TYPE_KEYWORD},
     {"string", TYPE_KEYWORD},
     {"var", TYPE_KEYWORD},
-    {"null",null_literal},
-    {"true",true_literal},
-    {"false",false_literal},
-    {"or", or_op},
-    {"and", and_op},
-    {"xor", xor_op},
-    {"not", not_op},
+    {"null",LITERAL},
+    {"true",LITERAL},
+    {"false",LITERAL},
+    {"or", COMPARATION_OPERATOR},
+    {"and", COMPARATION_OPERATOR},
+    {"xor", COMPARATION_OPERATOR},
+    {"not", COMPARATION_OPERATOR},
     {"function", TYPE_KEYWORD},
     {"module", module_keyword},
     {"class", class_keyword},
@@ -115,6 +117,11 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"protected", ACCESS_SPECIFIER},
     {"do", do_keyword},
     {"for", for_keyword},
-    {"else", else_keyword}
+    {"else", else_keyword},
+    {"setup", setup_keyword},
+    {"new", new_keyword},
+    {"destroy", destroy_keyword},
+    {"delete", delete_keyword},
+    {"persist", persist_keyword}
 };
 }

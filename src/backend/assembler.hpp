@@ -1,8 +1,6 @@
 #pragma once
 #include "../ir/irinstruction.hpp"
-#include <string>
-#include <memory>
-#include <unordered_map>
+#include "../Quarzum.h"
 #if defined(__x86_64__) || defined(__x86_64)
 #define ARCHITECTURE "x86_64"
 #endif
@@ -14,7 +12,7 @@ struct Assembler {
 };
 
 struct x86_64_Assembler : public Assembler {
-    x86_64_Assembler(std::vector<IRInstruction> instructions): Assembler(instructions) {}
+    x86_64_Assembler(std::vector<IRInstruction> instructions): Assembler(std::move(instructions)) {}
     const std::unordered_map<std::string, const char*> typeToAsm = {
         {"int8", ".byte"},
         {"int16", ".word"},

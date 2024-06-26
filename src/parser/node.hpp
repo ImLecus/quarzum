@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
-#include "../semantics/types.cpp"
-#include "../ir/irinstruction.hpp"
-#include "../symbols/symboltable.hpp"
+#include "../sem_ir/types.cpp"
+#include "../sem_ir/irinstruction.hpp"
+#include "../sem_ir/symboltable.hpp"
 #include <vector>
 
 struct Node {

@@ -1,4 +1,4 @@
-import Physics from "./physics.qz"
+import Physics from "./physics.qz";
 module Math {
     const num PI = 3.1415926535;
     const num E = 2.718281;
@@ -9,7 +9,7 @@ module Math {
 
     int abs(int a = 0){
         if(a >= 0){
-            return a++;
+            return a++; 
         }
         return -a;
     }

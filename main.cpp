@@ -17,6 +17,7 @@ int main(const int argc,const char** argv) {
         warn("File format should be .qz or .quarzum.");
     }
     log("Starting the compiler...");
+    log("Using architecture x86_64. Use the --a flag to change it.");
     auto start = std::chrono::high_resolution_clock::now();
     Debug::source = std::make_unique<std::string>(content);
     
@@ -32,14 +33,14 @@ int main(const int argc,const char** argv) {
     // symbolTable.insert("input", {'f', "input", "string", "global"});
     // symbolTable.insert("strcat", {'f', "strcat", "function", "global"});
     // symbolTable.insert("wait", {'f', "wait", "function", "global"});
-    RootNode root = parser.parse();
+    std::unique_ptr<RootNode> root = parser.parse();
     debugTime(start, "Parse phase");
-    // root.check();
-    // debugTime(start, "Check phase");
+    //root->check();
+    //debugTime(start, "Check phase");
     // root.generateIR();
     // ir.push_back(IRInstruction{EXIT, "0"});
     // debugTime(start, "IR phase");
-    // log("Using architecture x86_64. Use the --a flag to change it.");
+    
     // Assembler* assembler = getAssembler(ir);
     // std::ofstream output("output.asm");
     // if(output.is_open()){

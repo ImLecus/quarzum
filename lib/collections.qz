@@ -1,12 +1,10 @@
 module Collections {
     
     class Pair<T,U> {
-
-        constructor(T left, U right){
+        setup(T left, U right){
             this.first = left;
             this.second = right;
         }
-
         private T first;
         private U second;
     }
@@ -53,6 +51,10 @@ module Collections {
             delete this.objects;
             this.objects = newList;
         }
+    }
+
+    class Map<T,U> {
+        private List<Pair<T,U>> content;
     }
 
 

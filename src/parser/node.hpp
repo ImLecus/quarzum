@@ -16,7 +16,7 @@ struct Statement: public Node {
 struct Container: public Statement {
     std::vector<std::unique_ptr<Statement>> nodes;
 
-    void check(){
+    void check() override {
         for(auto& node: nodes){
             node->check();
         }
@@ -26,28 +26,47 @@ struct Container: public Statement {
 struct RootNode : public Container {};
 
 struct Type: public Node {
+    uint8_t branch;
+    uint8_t height;
+
     std::string name;
-    explicit Type(const std::string& name): name(name) {};
+    explicit Type(const std::string& name): name(name) {
+        if(name == "char" or name == "string"){
+            branch = 1;
+        }
+        else{
+            branch = 2;
+        }
+    };
 };
 
 struct Expr: public Node {
-    //virtual inline void check() = 0;
+    virtual inline void check() = 0;
     std::unique_ptr<Type> type;
 };
 
 struct LiteralExpr: public Expr {
     const std::string value;
     explicit LiteralExpr(const std::string& value): value(value) {};
+    void check() {
+        // convert the value to a literal type
+    }
 };
 
 struct IdentifierExpr: public Expr {
     const std::string value;
     explicit IdentifierExpr(const std::string& value): value(value) {};
+    void check(){
+        // ask the symboltable about the symbol and type
+    }
 };
 
 struct ParenExpr: public Expr{
     std::unique_ptr<Expr> expr;
     explicit ParenExpr(std::unique_ptr<Expr> expr): expr(std::move(expr)) {};
+    void check(){
+        expr->check();
+    }
 };
 
 struct UnaryExpr : public Expr {
@@ -56,6 +75,10 @@ struct UnaryExpr : public Expr {
     bool isPrefix;
     explicit UnaryExpr(const std::string& op,std::unique_ptr<Expr> expr, const bool isPrefix = true): 
     op(op), expr(std::move(expr)), isPrefix(isPrefix) {};  
+    void check(){
+        expr->check();
+        // apply operator to type
+    }
 };
 
 struct BinaryExpr : public Expr {
@@ -63,7 +86,12 @@ struct BinaryExpr : public Expr {
     std::unique_ptr<Expr> left;
     std::unique_ptr<Expr> right;
     explicit BinaryExpr(const std::string& op,std::unique_ptr<Expr> left, std::unique_ptr<Expr> right): 
-    op(op), left(std::move(left)), right(std::move(right)) {};  
+    op(op), left(std::move(left)), right(std::move(right)) {}; 
+    void check() {
+        left->check();
+        right->check();
+        // apply the binary operator
+    }
 };
 
 struct TernaryExpr : public Expr {
@@ -72,12 +100,16 @@ struct TernaryExpr : public Expr {
     std::unique_ptr<Expr> ifFalse;
     explicit TernaryExpr(std::unique_ptr<Expr> condition,std::unique_ptr<Expr> ifTrue, std::unique_ptr<Expr> ifFalse): 
     condition(std::move(condition)), ifTrue(std::move(ifTrue)), ifFalse(std::move(ifFalse)) {};  
+
+    void check(){
+        //check if the condition is a bool and ifTrue and ifFalse have the same type
+    }
 };
 
 struct Argument : public Node {
-    Type type;
+    std::unique_ptr<Type> type;
     const std::string name;
-    explicit Argument(Type type, const std::string& name): type(type), name(name) {};
+    explicit Argument(std::unique_ptr<Type> type, const std::string& name): type(std::move(type)), name(name) {};
 };
 
 struct FunctionCallExpr : public Expr {
@@ -86,6 +118,10 @@ struct FunctionCallExpr : public Expr {
     explicit FunctionCallExpr(const std::string& name): name(name), args{} {};
     explicit FunctionCallExpr(const std::string& name, std::vector<std::unique_ptr<Expr>> args): 
     name(name), args(std::move(args)) {};
+
+    void check(){
+        // apply the type to the return type of the function, check the function exists
+    }
 };
 
 struct FunctionCall : public Statement {
@@ -101,6 +137,9 @@ struct ArrayIndexExpr : public Expr {
     const std::string name;
     std::unique_ptr<Expr> index;
     explicit ArrayIndexExpr(const std::string& name, std::unique_ptr<Expr> index): name(name), index(std::move(index)) {};
+    void check(){
+        // check if its an array and the symbol table name and type
+    }
 };
 
 struct VarDeclaration : public Statement {
@@ -110,7 +149,10 @@ struct VarDeclaration : public Statement {
     std::string access = "none";
     bool constant = false;
 
-    void check(){}
+    void check(){
+        expr->check();
+        // check if the type and the expr type are the same
+    }
 };
 
 struct VarRedec : public Statement {
@@ -152,6 +194,7 @@ struct ClassContainer : public Container {
 struct FunctionContainer : public Container {
     std::string name;
     std::vector<std::unique_ptr<Argument>> args;
+    std::unique_ptr<Type> type;
 };
 struct ReturnStatement : public Statement {
     std::unique_ptr<Expr> expr;

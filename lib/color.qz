@@ -22,7 +22,6 @@ module Color {
             this.g = to_uint8(substring(hex, 3, 4));
             this.r = to_uint8(substring(hex, 5, 6));
         }
-
     };
 
     const Color RED = new Color(255,0,0);

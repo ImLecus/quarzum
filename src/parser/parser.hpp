@@ -10,7 +10,7 @@ using namespace Quarzum::Lexer;
 class Parser {
 public:
     Parser(std::deque<Token> tokens);
-    const RootNode parse();
+    const std::unique_ptr<RootNode> parse();
 private:
     std::deque<Token> tokens;
     inline const Token pop();
@@ -22,7 +22,10 @@ private:
     std::unique_ptr<ExitStatement> parseExit();
     std::unique_ptr<BreakStatement> parseBreak();
     std::unique_ptr<ContinueStatement> parseContinue();
-    std::unique_ptr<VarDeclaration> parseVar(const bool isConst = false, const std::string& access = "none");
+    /**
+     * Returns a VarDeclaration or redirects to parseFunction();
+     */
+    std::unique_ptr<Statement> parseVar(const bool isConst = false, const std::string& access = "none");
     std::unique_ptr<VarRedec> parseRedec(Token id, const bool isPrefix = false);
     std::unique_ptr<EnumStatement> parseEnum();
     std::unique_ptr<FunctionCall> parseFunctionCall(Token id);
@@ -37,8 +40,8 @@ private:
     std::unique_ptr<ForeachContainer> parseForeach();
     std::unique_ptr<ClassContainer> parseClass();
     std::unique_ptr<ForContainer> parseFor();
+    std::unique_ptr<FunctionContainer> parseFunction();
     // setup() and destroy() special functions
-    // parseFunction
     // "parseMethod" == access + parseFunction
 
     // EXPRESSION PARSING RELATED

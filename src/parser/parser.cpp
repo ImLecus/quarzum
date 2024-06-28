@@ -5,11 +5,11 @@ using std::make_unique;
 
 Parser::Parser(std::deque<Token> tokens): tokens(tokens) {}
 
-const RootNode Parser::parse(){
-    RootNode root = RootNode();
+const unique_ptr<RootNode> Parser::parse(){
+    unique_ptr<RootNode> root = make_unique<RootNode>();
     while(not tokens.empty()){
         if(auto s = parseStatement()){
-            root.nodes.push_back(std::move(s));
+            root->nodes.push_back(std::move(s));
         }
     }
     return root;    
@@ -99,9 +99,43 @@ unique_ptr<Statement> Parser::parseStatement() {
         // redec
     default:
         tokens.pop_front();
-        throwError("Expected token",t);
         return nullptr;
     }
+}
+
+unique_ptr<FunctionContainer> Parser::parseFunction(){
+    auto fCont = make_unique<FunctionContainer>();
+    Token typeToken = pop();
+    EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword");
+    Token id = pop();
+    EXPECT(id, identifier, "Expected identifier")
+    EXPECT(pop(), left_par, "Expected '('")
+    if(ask(right_par)){
+        tokens.pop_front();
+    }
+    else{
+        while(not tokens.empty()){
+            Token t = pop();
+            EXPECT(t,TYPE_KEYWORD,"Expected parameter type")
+            Token i = pop();
+            EXPECT(i, identifier, "Expected parameter name")
+            // DEFAULT VALUES
+            fCont->args.push_back(std::move(
+                make_unique<Argument>( make_unique<Type>(t.value), i.value )
+            ));
+            if(ask(comma)){
+                tokens.pop_front();
+                continue;
+            }
+            EXPECT(pop(), right_par, "Expected ')'")
+            break;
+        }
+    }
+    EXPECT(pop(), left_curly, "Expected function body");
+    fCont->name = id.value;
+    fCont->type = make_unique<Type>(typeToken.value);
+    IDENTATION(fCont)
+    return fCont;
 }
 
 unique_ptr<ImportStatement> Parser::parseImport(){
@@ -294,23 +328,27 @@ unique_ptr<ForeachContainer> Parser::parseForeach(){
 
 }
 
-unique_ptr<VarDeclaration> Parser::parseVar(const bool isConst,const std::string& access){
+unique_ptr<Statement> Parser::parseVar(const bool isConst,const std::string& access){
     auto result = make_unique<VarDeclaration>();
     result->constant = isConst;
     // type
-    Token typeToken = pop();
+    Token typeToken = tokens[0];
     EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword")
     result->type = make_unique<Type>(typeToken.value);
     // id
-    Token idToken = pop();
+    Token idToken = tokens[1];
     EXPECT(idToken, identifier, "Expected identifier")
     result->id = idToken.value;
     // assign
+    if(tokens[2].type == left_par){
+        return parseFunction();
+    }
+    tokens.pop_front();
+    tokens.pop_front();
     if(ask(equal)){
         tokens.pop_front();
         result->expr = parseExpr();
     }
-    // Parse function
 
     // semicolon
     EXPECT(pop(), semicolon, "Expected semicolon")

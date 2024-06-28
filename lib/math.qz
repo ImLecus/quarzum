@@ -2,16 +2,45 @@
  * Quarzum Math library.
  */
 module Math {
-    const number PI =  3.1415926535;
-    const number E =   2.7182818284;
-    const number PHI = 1.6180339887;
+    const decimal PI =  3.1415926535;
+    const decimal E =   2.7182818284;
+    const decimal PHI = 1.6180339887;
 
-    number64 abs(number64 n){
+    decimal abs(decimal n){
         if(n >= 0){
             return n;
         }
         return -n;
     }
 
+    decimal max(decimal a, decimal b){
+        if(a > b){
+            return a;
+        }
+        return b;
+    }
+
+    decimal min(decimal a, decimal b){
+        if(a < b){
+            return a;
+        }
+        return b;
+    }
+
+    decimal sum(decimal[] numbers){
+        decimal result = 0;
+        foreach(decimal n in numbers){
+            result += n;
+        }
+        return result;
+    }
+
+    decimal prod(decimal[] numbers){
+        decimal result = 0;
+        foreach(decimal n in numbers){
+            result *= n;
+        }
+        return result;
+    }
     
 }

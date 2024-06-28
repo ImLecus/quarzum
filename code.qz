@@ -1,8 +1,4 @@
-if(true){
-    uint8 i = 5;
-    i++;
-    i *= 3;
-    delete i;
-
+function main(){
+    string name = "world";
+    out("Hello " + name);
 }
-

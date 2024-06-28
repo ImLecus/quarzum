@@ -6,6 +6,7 @@ bool format(const char*& filename, const char* format){
             return false;
         }
     }
+
     return true;
 }
 

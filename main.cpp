@@ -32,16 +32,10 @@ int main(const int argc,const char** argv) {
     debugTime(start, "Lex phase");
 
     Parser parser = Parser(tokens);
-    
-    // symbolTable.enterScope();
-    // symbolTable.insert("out", {'f', "out", "function", "global"});
-    // symbolTable.insert("input", {'f', "input", "string", "global"});
-    // symbolTable.insert("strcat", {'f', "strcat", "function", "global"});
-    // symbolTable.insert("wait", {'f', "wait", "function", "global"});
     std::unique_ptr<RootNode> root = parser.parse();
     debugTime(start, "Parse phase");
-    //root->check();
-    //debugTime(start, "Check phase");
+    root->check();
+    debugTime(start, "Check phase");
     // root.generateIR();
     // debugTime(start, "IR phase");
     

@@ -1,6 +1,6 @@
-foreign function out(string message);
+import Math from "math.qz";
 
 function main(){
-    string name = "world";
-    out("Hello " + name);
+    int i = 0;
+
 }

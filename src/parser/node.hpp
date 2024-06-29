@@ -17,13 +17,23 @@ struct Container: public Statement {
     std::vector<std::unique_ptr<Statement>> nodes;
 
     void check() override {
-        for(auto& node: nodes){
+        for(auto& node : nodes){
+            if(node == nullptr){
+                Quarzum::Debug::err("NULL STATEMENT DETECTED");
+                std::exit(2);
+            }
             node->check();
         }
     }
 };
 
-struct RootNode : public Container {};
+struct RootNode : public Container {
+    void check() override {
+        symbolTable.enterScope();
+        Container::check();
+    }
+    
+};
 
 struct Type: public Node {
     uint8_t branch;
@@ -57,6 +67,10 @@ struct IdentifierExpr: public Expr {
     const std::string value;
     explicit IdentifierExpr(const std::string& value): value(value) {};
     void check(){
+        auto s = symbolTable.find(value);
+        if(s == nullptr){
+            Quarzum::Debug::err("Symbol " + value + " was not defined");
+        }
         // ask the symboltable about the symbol and type
     }
 };
@@ -150,6 +164,8 @@ struct VarDeclaration : public Statement {
     bool constant = false;
 
     void check(){
+        if(symbolTable.find(id) != nullptr){Quarzum::Debug::err("Symbol " + id + " was already defined.");}
+        symbolTable.insert(id,{'v',id,type->name, "global"});
         expr->check();
         // check if the type and the expr type are the same
     }
@@ -170,6 +186,10 @@ struct IfContainer : public Container {
     std::unique_ptr<Expr> condition;
     std::vector<std::unique_ptr<Statement>> elseContainer;
     explicit IfContainer(std::unique_ptr<Expr> condition): condition(std::move(condition)) {};
+
+    void check() override {
+        condition->check();
+    }
 };
 struct WhileContainer : public Container {
     std::unique_ptr<Expr> condition;

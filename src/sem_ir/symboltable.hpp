@@ -6,6 +6,7 @@ struct SymbolInfo {
     std::string name;
     std::string dataType;
     std::string scope;
+    uint8_t args;
 };
 
 struct SymbolTable {

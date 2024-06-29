@@ -2,47 +2,26 @@
  * Quarzum Math library.
  */
 module Math {
-    type Numeric = bool | uint8 | uint16 | uint32 | uint64 | ...;
+    type numeric = int8 | int16 | int32 | int64 |
+                       uint8 | uint16 | uint32 | uint64 | 
+                       num16 | num32 | num64 | 
+                       decimal | int | uint | num;
 
-    const decimal PI =  3.1415926535;
-    const decimal E =   2.7182818284;
-    const decimal PHI = 1.6180339887;
+    foreign int64 abs(int64 x);
+    foreign num64 fabs(num64 x);
 
-    Numeric abs(Numeric n){
-        if(n >= 0){
-            return n;
-        }
-        return -n;
-    }
+    foreign num acos(numeric x);
 
-    Numeric max(Numeric a, Numeric b){
-        if(a > b){
-            return a;
-        }
-        return b;
-    }
+    foreign int64 ceil(numeric x)
+    foreign int64 floor(numeric x);
+    foreign int64 round(numeric x);
 
-    Numeric min(Numeric a, Numeric b){
-        if(a < b){
-            return a;
-        }
-        return b;
-    }
+    foreign numeric pow(numeric base, numeric exponent);
 
-    Numeric sum(Numeric[] numbers){
-        Numeric result = 0;
-        foreach(decimal n in numbers){
-            result += n;
-        }
-        return result;
-    }
+    foreign num64 tan(numeric x);
 
-    Numeric prod(Numeric[] numbers){
-        Numeric result = 0;
-        foreach(decimal n in numbers){
-            result *= n;
-        }
-        return result;
-    }
-    
+    foreign numeric min(numeric a, numeric b);
+    foreign numeric max(numeric a, numeric b);
+    foreign num random();
+    foreign int randint(int a, int b);
 }

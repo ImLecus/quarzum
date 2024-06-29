@@ -96,7 +96,7 @@ unique_ptr<Statement> Parser::parseStatement() {
                 EXPECT(pop(), semicolon, "Expected semicolon")
                 return redec;
         }
-        // redec
+        return nullptr;
     default:
         tokens.pop_front();
         return nullptr;
@@ -270,6 +270,7 @@ unique_ptr<FunctionCall> Parser::parseFunctionCall(Token id){
         throwError("Expected ',' or ')'", next);
         return nullptr;
     }
+    EXPECT(pop(), semicolon, "Expected semicolon");
     return call;
 }
 

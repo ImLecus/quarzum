@@ -1,243 +1,58 @@
 #pragma once
 #include "types.hpp"
+#include <cmath>
 
-nullptr_t throwOperatorError(const std::string& op, const std::string& a, const std::string& b){
-    throwTypeError("Operation '" + op + "' does not exist between types " + a + " and " + b);
-    return nullptr;
-}
-nullptr_t throwUnaryOperatorError(const std::string& op, const std::string& a){
-    throwTypeError("Operation '" + op + "' does not exist for type " + a );
-    return nullptr;
-}
-u_int8_t converge(const u_int8_t& a, const u_int8_t& b){
-    return std::max(a,b);
-}
+struct Int;
+struct Uint;
+struct Bool;
 
-u_int8_t promote(const u_int8_t& a, const u_int8_t& b,const bool& doublePromote){
-    return converge(a,b) * (a>=32 or b>=32? 1: 2 * (1+doublePromote));
-}
-
-u_int8_t getBits(const std::string& name){
-    u_int8_t result;
-    if(name == "int" or name == "uint" or name == "number"){
-        return 32;
-    }
-    if(isdigit(name[name.length() - 1])){
-        
-        result += (name[name.length() -1])- '0';
-    }
-    if(isdigit(name[name.length() - 2])){
-        result += 10* (name[name.length() -2]- '0');
-    }
-    return result;
-}
-
-
-struct Boolean : public NumericType {
-    Boolean(): NumericType(1){
-        name = "bool";
-        flag = BOOL;
-    }
-    GenericType* notg(){
-        return new Boolean();
-    }
-};
-
-struct UInteger : public NumericType {
-    UInteger(u_int8_t bits = 32): NumericType(bits, 0, std::pow(2,bits)-1){
-        name = "uint" + std::to_string(bits);
-        flag = UINT;
-    }
-    GenericType* inc(){
-        return new UInteger(bits);
-    }
-};
-
-struct Integer : public NumericType {
-    Integer(u_int8_t bits = 32): NumericType(bits,-std::pow(2, bits - 1), std::pow(2, bits - 1) - 1){
-        name = "int" + std::to_string(bits);
-        flag = INT;
-    }
-    GenericType* inc(){
-        return new Integer(bits);
-    }
-
-    GenericType* sub(GenericType* type) override {
-        if(type->isNumeric()){
-            return new Integer(promote(this->bits, type->bits));
-        }
-        return GenericType::sub(type);
-    }
-
-    Integer* div(NumericType* type){PROMOTE(Integer);}
-    Integer* mod(NumericType* type){CONVERGE(Integer);}   
-    // TO-DO: change rules
-    Integer* pow(NumericType* type){DOUBLE_PROMOTE(Integer);}
+struct PrimitiveType {
 
 };
 
-struct Number : public DecimalType {
-    Number(u_int8_t bits = 32): DecimalType(bits) {
-        MIN_VALUE = bits == 32? __FLT32_MIN__ : __FLT64_MIN__;
-        MAX_VALUE = bits == 32? __FLT32_MAX__ : __FLT64_MAX__;
-        flag = NUMBER;
-    }
-};
-
-struct Decimal : public DecimalType {
-    Decimal(): DecimalType(32) {
-        MIN_VALUE = std::pow(10,-308);
-        MAX_VALUE = std::pow(10,308);
-        flag = DECIMAL;
-    }
-};
-
-struct Character : public GenericType {
-    Character(){
-        name = "char";
-        flag = CHAR;
-    }
+struct TextType : PrimitiveType {
 
 };
 
-struct String : public GenericType {
-    String(){
-        name = "string";
-        flag = STRING;
+struct NumericType : PrimitiveType {
+    uint8_t bits;
+    static long double MIN_VALUE;
+    static long double MAX_VALUE;
+    NumericType(uint8_t b): bits(b) {}
+    
+
+};
+
+struct Int : NumericType {
+    Int(uint8_t b): NumericType(b) {}
+    Int operator+ (const Uint& u) const;
+    Int operator+ (const Int& i) const {
+        return Int(8);
     }
 };
 
-struct NullType : public GenericType
-{
-    u_int8_t bits = 0;
-    NullType(){name = "null"; flag = NULL_T;}
-};
+struct Uint : NumericType {
+    Uint(uint8_t b): NumericType(b) {}
 
-struct Var : public GenericType {
-    Var(){
-        name = "var";
+    Int operator + (const Int& i) const {
+        return Int(8);
     }
-};
-
-struct Function : public GenericType {
-    Function(){
-        name = "function";
-        flag = FUNCTION;
+    Uint operator + (const Uint u) const {
+        return Uint(8);
     }
 };
 
+struct Bool : Uint {
+    Bool(): Uint(1) {
+        MIN_VALUE = 0;
+        MAX_VALUE = 1;
+    }
 
-std::unique_ptr<GenericType> getTypeByName(const std::string& name,const bool constant = false){
-    if(name.find("uint") != std::string::npos){
-        return std::make_unique<UInteger>(getBits(name));
-    }
-    if(name.find("int") != std::string::npos){
-        return std::make_unique<Integer>(getBits(name));
-    }
-    if(name == "string"){
-        return std::make_unique<String>();
-    }
-    if(name == "char"){
-        return std::make_unique<Character>();
-    }
-    if(name == "var"){
-        return std::make_unique<Var>();
-    }
-    if(name == "bool"){
-        return std::make_unique<Boolean>();
-    }
-    if(name == "number" or name == "number64"){
-        return std::make_unique<Number>(getBits(name));
-    }
-    if(name == "decimal"){
-        return std::make_unique<Decimal>();
-    }
-    if(name == "function"){
-        return std::make_unique<Function>();
-    }
-    return std::make_unique<Var>();
-}
+    Bool operator or (const Bool& b) const {return Bool();}
+    Bool operator and (const Bool& b) const {return Bool();}
+};
 
-GenericType* GenericType::sum(GenericType** types){ 
-    if(types[0]->flag == NULL_T){return types[1];}
-    if(types[0]->flag == INT and types[1]->isNumeric()){
-        return new Integer(promote(types[0]->bits,types[1]->bits));
-    }
-    if(types[0]->flag == UINT and types[1]->isNumeric()){
-        return new UInteger(promote(types[0]->bits,types[1]->bits));
-    }
-    return throwOperatorError("+",types[0]->name,types[1]->name); 
-}
-GenericType* GenericType::prod(GenericType** types){ 
-    if(types[0]->flag == INT and types[1]->flag == STRING){
-        return new String();
-    }
-    if(types[0]->isNumeric() and types[1]->isNumeric()){
-        return new Integer(promote(types[0]->bits, types[1]->bits));
-    }
-    return throwOperatorError("*",types[0]->name,types[1]->name); 
-}
-GenericType* GenericType::csum(GenericType** types){ 
-    switch (types[0]->flag)
-    {
-    case NULL_T:
-        return types[1];
-    case BOOL:
-        if(types[1]->isNumeric()){
-            return types[1];
-        }
-        return throwOperatorError("#",types[0]->name,types[1]->name); 
-    default:
-        return throwOperatorError("#",types[0]->name,types[1]->name); 
-    }    
-}
-GenericType* GenericType::andg(GenericType* a, GenericType* b){ 
-    if(a->flag == BOOL and b->flag == BOOL){
-        return new Boolean();
-    }
-    return throwOperatorError("and",a->name,b->name); 
-}
-GenericType* GenericType::org(GenericType* a, GenericType* b){ 
-    if(a->flag == BOOL and b->flag == BOOL){
-        return new Boolean();
-    }
-    return throwOperatorError("or",a->name,b->name); 
-}
-GenericType* GenericType::equal(GenericType* a, GenericType* b){ 
-    if(a->flag == b->flag){
-        return new Boolean();
-    }
-    return throwOperatorError("==",a->name,b->name); 
-}
 
-GenericType* GenericType::nequal(GenericType* a, GenericType* b){ 
-    if(a->flag == b->flag){
-        return new Boolean();
-    }
-    return throwOperatorError("!=",a->name,b->name); 
+Int Int::operator+ (const Uint& u) const{
+    return u+ *this;
 }
-GenericType* GenericType::lower(GenericType* a, GenericType* b){ 
-    if(a->flag == b->flag){
-        return new Boolean();
-    }
-    return throwOperatorError("<",a->name,b->name); 
-}
-GenericType* GenericType::lowereq(GenericType* a, GenericType* b){ 
-    if(a->flag == b->flag){
-        return new Boolean();
-    }
-    return throwOperatorError("<=",a->name,b->name); 
-}
-GenericType* GenericType::greater(GenericType* a, GenericType* b){ 
-    if(a->flag == b->flag){
-        return new Boolean();
-    }
-    return throwOperatorError(">",a->name,b->name); 
-}
-GenericType* GenericType::greatereq(GenericType* a, GenericType* b){ 
-    if(a->flag == b->flag){
-        return new Boolean();
-    }
-    return throwOperatorError("<=",a->name,b->name); 
-}
-

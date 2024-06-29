@@ -1,9 +1,18 @@
-#pragma once
-#include "tokenlist.hpp"
-#include <unordered_map>
-#include "../error.hpp"
-
-namespace Quarzum::Lexer {
+/*
+ * Quarzum Compiler - tokenizer.h
+ * Version 1.0, 29/06/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
+#ifndef TOKENIZER_H
+#define TOKENIZER_H
+#include "token.h"
 /**
  * @brief Search if the buffer is a symbol. Otherwise, returns
  * the TokenType error_token.
@@ -73,25 +82,25 @@ const std::unordered_map<std::string, TokenType> symbols = {
     {":", ternary_separator}
 };
 const std::unordered_map<std::string, TokenType> keywords = {
-    {"bool", TYPE_KEYWORD},
-    {"int8", TYPE_KEYWORD},
-    {"int16", TYPE_KEYWORD},
-    {"int", TYPE_KEYWORD},
-    {"int32", TYPE_KEYWORD},
-    {"int64", TYPE_KEYWORD},
-    {"uint8", TYPE_KEYWORD},
-    {"uint16", TYPE_KEYWORD},
-    {"uint", TYPE_KEYWORD},
-    {"uint32", TYPE_KEYWORD},
-    {"uint64", TYPE_KEYWORD},
-    {"num16", TYPE_KEYWORD},
-    {"num", TYPE_KEYWORD},
-    {"num32", TYPE_KEYWORD},
-    {"num64", TYPE_KEYWORD},
-    {"decimal", TYPE_KEYWORD},
-    {"char", TYPE_KEYWORD},
-    {"string", TYPE_KEYWORD},
-    {"var", TYPE_KEYWORD},
+    {"bool", type_keyword},
+    {"int8", type_keyword},
+    {"int16", type_keyword},
+    {"int", type_keyword},
+    {"int32", type_keyword},
+    {"int64", type_keyword},
+    {"uint8", type_keyword},
+    {"uint16", type_keyword},
+    {"uint", type_keyword},
+    {"uint32", type_keyword},
+    {"uint64", type_keyword},
+    {"num16", type_keyword},
+    {"num", type_keyword},
+    {"num32", type_keyword},
+    {"num64", type_keyword},
+    {"decimal", type_keyword},
+    {"char", type_keyword},
+    {"string", type_keyword},
+    {"var", type_keyword},
     {"null",LITERAL},
     {"true",LITERAL},
     {"false",LITERAL},
@@ -99,7 +108,7 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"and", COMPARATION_OPERATOR},
     {"xor", COMPARATION_OPERATOR},
     {"not", COMPARATION_OPERATOR},
-    {"function", TYPE_KEYWORD},
+    {"function", type_keyword},
     {"module", module_keyword},
     {"class", class_keyword},
     {"return", return_keyword},
@@ -113,9 +122,9 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"enum", enum_keyword},
     {"foreach", foreach_keyword},
     {"in", in_keyword},
-    {"public", ACCESS_SPECIFIER},
-    {"private", ACCESS_SPECIFIER},
-    {"protected", ACCESS_SPECIFIER},
+    {"public", access_specifier},
+    {"private", access_specifier},
+    {"protected", access_specifier},
     {"do", do_keyword},
     {"for", for_keyword},
     {"else", else_keyword},
@@ -127,4 +136,4 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"type", typedef_keyword},
     {"foreign", foreign_keyword}
 };
-}
+#endif

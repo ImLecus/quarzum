@@ -1,6 +1,3 @@
-import Math from "math.qz";
-
 function main(){
     int i = 0;
-
 }

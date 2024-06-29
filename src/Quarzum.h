@@ -36,7 +36,6 @@
 namespace Quarzum {
     
     namespace Debug = Quarzum::Debug;
-    namespace Lexer = Quarzum::Lexer;
     namespace CLI = Quarzum::CLI;
 
 }

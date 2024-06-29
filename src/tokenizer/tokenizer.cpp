@@ -1,8 +1,20 @@
-#pragma once
-#include "tokenizer.hpp"
+/*
+ * Quarzum Compiler - tokenizer.cpp
+ * Version 1.0, 29/06/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
+#ifndef TOKENIZER_CPP
+#define TOKENIZER_CPP
+#include "tokenizer.h"
 #include "../Quarzum.h"
-
-namespace Quarzum::Lexer {
+using namespace Quarzum;
 
 const std::deque<Token> tokenize(const std::string& content) noexcept{
     std::deque<Token> tokens;
@@ -157,4 +169,4 @@ const TokenType bufferToKeyword(const std::string& buffer){
     }
     return identifier;
 }
-}
+#endif

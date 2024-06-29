@@ -1,5 +1,5 @@
 #pragma once
-#include "cli.hpp"
+#include "cli.h"
 
 using namespace Quarzum::Debug;
 namespace Quarzum::CLI {

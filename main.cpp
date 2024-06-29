@@ -2,12 +2,11 @@
 
 using namespace Quarzum;
 using namespace Debug;
-using namespace Lexer;
 using namespace CLI;
 int main(const int argc,const char** argv) {
     
     if(argc < 2){
-        throwError("No file specified.");
+        err("No file specified.");
     }
 
     // filename not implemented yet
@@ -16,7 +15,7 @@ int main(const int argc,const char** argv) {
     const char* filename = argv[1];
     const std::string content = getSource(filename);
     if(content.empty()){
-        throwError("File not found.");
+        err("File not found.");
     }
     if(not format(filename, ".qz")){
         warn("File format should be .qz or .quarzum.");

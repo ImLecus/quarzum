@@ -32,10 +32,10 @@ unique_ptr<Statement> Parser::parseStatement() {
     Token t = tokens.front();
     switch (t.type)
     {
-    case ACCESS_SPECIFIER:
+    case access_specifier:
         tokens.pop_front();
         return parseVar(false,t.value);
-    case TYPE_KEYWORD:
+    case type_keyword:
         return parseVar();
     case const_keyword:
         tokens.pop_front();
@@ -105,7 +105,7 @@ unique_ptr<Statement> Parser::parseStatement() {
 
 unique_ptr<ForeignStatement> Parser::parseForeign(){
     Token typeToken = pop();
-    EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword");
+    EXPECT(typeToken, type_keyword, "Expected type keyword");
     Token id = pop();
     EXPECT(id, identifier, "Expected identifier");
     EXPECT(pop(), left_par, "Expected '('")
@@ -116,7 +116,7 @@ unique_ptr<ForeignStatement> Parser::parseForeign(){
     else{
         while(not tokens.empty()){
             Token t = pop();
-            EXPECT(t,TYPE_KEYWORD,"Expected parameter type")
+            EXPECT(t,type_keyword,"Expected parameter type")
             Token i = pop();
             EXPECT(i, identifier, "Expected parameter name")
             // DEFAULT VALUES
@@ -140,7 +140,7 @@ unique_ptr<ForeignStatement> Parser::parseForeign(){
 unique_ptr<FunctionContainer> Parser::parseFunction(){
     auto fCont = make_unique<FunctionContainer>();
     Token typeToken = pop();
-    EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword");
+    EXPECT(typeToken, type_keyword, "Expected type keyword");
     Token id = pop();
     EXPECT(id, identifier, "Expected identifier")
     EXPECT(pop(), left_par, "Expected '('")
@@ -150,7 +150,7 @@ unique_ptr<FunctionContainer> Parser::parseFunction(){
     else{
         while(not tokens.empty()){
             Token t = pop();
-            EXPECT(t,TYPE_KEYWORD,"Expected parameter type")
+            EXPECT(t,type_keyword,"Expected parameter type")
             Token i = pop();
             EXPECT(i, identifier, "Expected parameter name")
             // DEFAULT VALUES
@@ -208,7 +208,7 @@ unique_ptr<EnumStatement> Parser::parseEnum(){
     if(ask(arrow)){
         tokens.pop_front();
         Token t = pop();
-        EXPECT(t,TYPE_KEYWORD,"Expected type keyword");
+        EXPECT(t,type_keyword,"Expected type keyword");
         enumStmt->extend = std::move(make_unique<Type>(t.value));
     }
 
@@ -281,7 +281,7 @@ unique_ptr<ClassContainer> Parser::parseClass(){
     if(ask(arrow)){
         tokens.pop_front();
         Token t = pop();
-        EXPECT(t,TYPE_KEYWORD,"Expected type keyword");
+        EXPECT(t,type_keyword,"Expected type keyword");
         c->type = std::move(make_unique<Type>(t.value));
     }
     
@@ -349,7 +349,7 @@ unique_ptr<ForeachContainer> Parser::parseForeach(){
     auto feCont = make_unique<ForeachContainer>();
     EXPECT(pop(), left_par, "Expected '('")
     Token typeToken = pop();
-    EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword")
+    EXPECT(typeToken, type_keyword, "Expected type keyword")
     Token id = pop();
     EXPECT(id, identifier, "Expected identifier")
     feCont->id = id.value;
@@ -368,7 +368,7 @@ unique_ptr<Statement> Parser::parseVar(const bool isConst,const std::string& acc
     result->constant = isConst;
     // type
     Token typeToken = tokens[0];
-    EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword")
+    EXPECT(typeToken, type_keyword, "Expected type keyword")
     result->type = make_unique<Type>(typeToken.value);
     // id
     Token idToken = tokens[1];

@@ -2,7 +2,6 @@
 #include "../Quarzum.h"
 #include "./node.hpp"
 using namespace Quarzum::Debug;
-using namespace Quarzum::Lexer;
 
 #define EXPECT(cToken,cType, ErrorMessage) if(cToken.type != cType){throwError(ErrorMessage, cToken); return nullptr;}
 #define IDENTATION(iName) while(not ask(right_curly)){if(tokens.empty()){err("Mismatched '{'");return nullptr;}iName->nodes.push_back(parseStatement());}tokens.pop_front();

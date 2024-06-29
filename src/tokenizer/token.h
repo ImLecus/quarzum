@@ -1,15 +1,25 @@
-#pragma once
-namespace Quarzum::Lexer {
-/**
- * TokenType values:
- * 0x00 - 0x2F : keywords
- * 0x30 - 0x5F: operators
- * 0x60 - 0x7F : symbols
- * 0x80 - 0x9F : literals
- * 0xF0 - 0xFF : other
-*/
+/*
+ * Quarzum Compiler - token.h
+ * Version 1.0, 29/06/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
+#ifndef TOKEN_H
+#define TOKEN_H
+#include "unordered_map"
 enum TokenType : uint8_t {
-    TYPE_KEYWORD = 0x00,
+    // special tokens
+    token_error = 0x00,
+    type_keyword = 0x01,
+    access_specifier = 0x02,
+    identifier = 0x03,
+    comment = 0x04,
     // keywords
     const_keyword = 0x10,
     return_keyword = 0x11,
@@ -24,7 +34,7 @@ enum TokenType : uint8_t {
     enum_keyword = 0x1B,
     foreach_keyword = 0x1C,
     in_keyword = 0x1D,
-    ACCESS_SPECIFIER = 0x1E,
+
     setup_keyword = 0x1F,
     destroy_keyword = 0x20,
     do_keyword = 0x21,
@@ -57,9 +67,28 @@ enum TokenType : uint8_t {
     point = 0x6A,
     // literals
     LITERAL = 0x7F,
-    // other
-    identifier = 0xF0,
-    comment = 0xF1,
-    token_error = 0xFF
 };
-}
+
+struct Token {
+
+    Token(): 
+        type(TokenType::token_error), 
+        value(""), 
+        line(0), 
+        column(0) {}
+
+    Token(const TokenType& type, const std::string& value, const uint32_t line, const uint32_t column): 
+        type(type), 
+        value(value), 
+        line(line), 
+        column(column) {}
+
+    inline bool isOperator() const noexcept {
+        return this->type == ARITHMETIC_OPERATOR or this->type == COMPARATION_OPERATOR;
+    };
+    const TokenType type;
+    const std::string value;
+    const uint32_t line;
+    const uint32_t column;
+};
+#endif

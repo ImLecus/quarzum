@@ -1,5 +1,5 @@
 /*
- *  Quarzum Color library.
+ *  color.qz - Quarzum Color library
  */
 module Color {
 

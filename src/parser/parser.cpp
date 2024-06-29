@@ -46,9 +46,9 @@ unique_ptr<Statement> Parser::parseStatement() {
     case return_keyword:
         tokens.pop_front();
         return parseReturn();
-    case exit_keyword:
+    case foreign_keyword:
         tokens.pop_front();
-        return parseExit();
+        return parseForeign();
     case break_keyword:
         tokens.pop_front();
         return parseBreak();
@@ -101,6 +101,40 @@ unique_ptr<Statement> Parser::parseStatement() {
         tokens.pop_front();
         return nullptr;
     }
+}
+
+unique_ptr<ForeignStatement> Parser::parseForeign(){
+    Token typeToken = pop();
+    EXPECT(typeToken, TYPE_KEYWORD, "Expected type keyword");
+    Token id = pop();
+    EXPECT(id, identifier, "Expected identifier");
+    EXPECT(pop(), left_par, "Expected '('")
+    auto fStmt = make_unique<ForeignStatement>();
+    if(ask(right_par)){
+        tokens.pop_front();
+    }
+    else{
+        while(not tokens.empty()){
+            Token t = pop();
+            EXPECT(t,TYPE_KEYWORD,"Expected parameter type")
+            Token i = pop();
+            EXPECT(i, identifier, "Expected parameter name")
+            // DEFAULT VALUES
+            fStmt->args.push_back(std::move(
+                make_unique<Argument>( make_unique<Type>(t.value), i.value )
+            ));
+            if(ask(comma)){
+                tokens.pop_front();
+                continue;
+            }
+            EXPECT(pop(), right_par, "Expected ')'")
+            break;
+        }
+    }
+    fStmt->name = id.value;
+    fStmt->type = make_unique<Type>(typeToken.value);
+    EXPECT(pop(), semicolon, "Expected semicolon");
+    return fStmt;
 }
 
 unique_ptr<FunctionContainer> Parser::parseFunction(){
@@ -367,11 +401,6 @@ unique_ptr<ReturnStatement> Parser::parseReturn(){
     return nullptr;
 }
 
-unique_ptr<ExitStatement> Parser::parseExit(){
-    auto expr = parseExpr();
-    EXPECT(pop(), semicolon, "Expected semicolon")
-    return make_unique<ExitStatement>(std::move(expr));
-}
 unique_ptr<BreakStatement> Parser::parseBreak(){
     EXPECT(pop(), semicolon, "Expected semicolon")
     return make_unique<BreakStatement>();

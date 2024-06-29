@@ -19,9 +19,9 @@ private:
 
     // STATEMENT PARSING RELATED
     std::unique_ptr<ReturnStatement> parseReturn();
-    std::unique_ptr<ExitStatement> parseExit();
     std::unique_ptr<BreakStatement> parseBreak();
     std::unique_ptr<ContinueStatement> parseContinue();
+    std::unique_ptr<ForeignStatement> parseForeign();
     /**
      * Returns a VarDeclaration or redirects to parseFunction();
      */

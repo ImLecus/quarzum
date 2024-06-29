@@ -1,2 +1,2 @@
 clear
-./out/build/preset/quarzum ./lib/math.qz
+./out/build/preset/quarzum code.qz --debug

@@ -17,7 +17,6 @@ enum TokenType : uint8_t {
     class_keyword = 0x13,
     if_keyword = 0x14,
     while_keyword = 0x15,
-    exit_keyword = 0x16,
     import_keyword = 0x17,
     from_keyword = 0x18,
     continue_keyword = 0x19,
@@ -34,6 +33,8 @@ enum TokenType : uint8_t {
     new_keyword = 0x24,
     delete_keyword = 0x25,
     persist_keyword = 0x26,
+    typedef_keyword = 0x27,
+    foreign_keyword = 0x28,
     // operators
     ASSIGN_OPERATOR = 0x46,
     UNARY_OPERATOR = 0x47,

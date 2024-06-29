@@ -1,3 +1,5 @@
+foreign function out(string message);
+
 function main(){
     string name = "world";
     out("Hello " + name);

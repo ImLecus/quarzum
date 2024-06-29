@@ -20,7 +20,7 @@ namespace Quarzum::Debug {
      * Activates log and debug messages in console.
      * Can be activated by using the --debug flag in the terminal.
     */
-    bool debugMode = true;
+    bool debugMode = false;
 
     std::unique_ptr<std::string> source; 
 

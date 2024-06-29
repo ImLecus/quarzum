@@ -11,7 +11,6 @@ enum IRInstructionType : u_int8_t {
     CSUM,
     GOTO,
     LABEL,
-    EXIT,
     PARAM,
     RET,
     CALL,

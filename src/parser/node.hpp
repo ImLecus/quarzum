@@ -201,11 +201,6 @@ struct ReturnStatement : public Statement {
     explicit ReturnStatement(std::unique_ptr<Expr> expr): expr(std::move(expr)) {};
     void check(){}
 };
-struct ExitStatement : public Statement {
-    std::unique_ptr<Expr> expr;
-    explicit ExitStatement(std::unique_ptr<Expr> expr): expr(std::move(expr)) {};
-    void check(){}
-};
 
 struct BreakStatement : public Statement {
     void check(){}
@@ -235,5 +230,12 @@ struct EnumStatement : public Statement {
 struct DeleteStatement : public Statement {
     std::string identifier;
     explicit DeleteStatement(const std::string& identifier): identifier(identifier) {};
+    void check(){}
+};
+
+struct ForeignStatement: public Statement {
+    std::string name;
+    std::vector<std::unique_ptr<Argument>> args;
+    std::unique_ptr<Type> type;
     void check(){}
 };

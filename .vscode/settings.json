@@ -8,7 +8,8 @@
         "chrono": "cpp",
         "string": "cpp",
         "fstream": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "cmath": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

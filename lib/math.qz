@@ -2,41 +2,43 @@
  * Quarzum Math library.
  */
 module Math {
+    type Numeric = bool | uint8 | uint16 | uint32 | uint64 | ...;
+
     const decimal PI =  3.1415926535;
     const decimal E =   2.7182818284;
     const decimal PHI = 1.6180339887;
 
-    decimal abs(decimal n){
+    Numeric abs(Numeric n){
         if(n >= 0){
             return n;
         }
         return -n;
     }
 
-    decimal max(decimal a, decimal b){
+    Numeric max(Numeric a, Numeric b){
         if(a > b){
             return a;
         }
         return b;
     }
 
-    decimal min(decimal a, decimal b){
+    Numeric min(Numeric a, Numeric b){
         if(a < b){
             return a;
         }
         return b;
     }
 
-    decimal sum(decimal[] numbers){
-        decimal result = 0;
+    Numeric sum(Numeric[] numbers){
+        Numeric result = 0;
         foreach(decimal n in numbers){
             result += n;
         }
         return result;
     }
 
-    decimal prod(decimal[] numbers){
-        decimal result = 0;
+    Numeric prod(Numeric[] numbers){
+        Numeric result = 0;
         foreach(decimal n in numbers){
             result *= n;
         }

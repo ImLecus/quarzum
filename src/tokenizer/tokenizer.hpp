@@ -84,7 +84,9 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"uint", TYPE_KEYWORD},
     {"uint32", TYPE_KEYWORD},
     {"uint64", TYPE_KEYWORD},
+    {"num16", TYPE_KEYWORD},
     {"num", TYPE_KEYWORD},
+    {"num32", TYPE_KEYWORD},
     {"num64", TYPE_KEYWORD},
     {"decimal", TYPE_KEYWORD},
     {"char", TYPE_KEYWORD},
@@ -104,7 +106,6 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"const", const_keyword},
     {"if", if_keyword},
     {"while", while_keyword},
-    {"exit", exit_keyword},
     {"import", import_keyword},
     {"from", from_keyword},
     {"break", break_keyword},
@@ -122,6 +123,8 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"new", new_keyword},
     {"destroy", destroy_keyword},
     {"delete", delete_keyword},
-    {"persist", persist_keyword}
+    {"persist", persist_keyword},
+    {"type", typedef_keyword},
+    {"foreign", foreign_keyword}
 };
 }

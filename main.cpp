@@ -3,11 +3,16 @@
 using namespace Quarzum;
 using namespace Debug;
 using namespace Lexer;
+using namespace CLI;
 int main(const int argc,const char** argv) {
     
     if(argc < 2){
         throwError("No file specified.");
     }
+
+    // filename not implemented yet
+    parseCLIArgs(argv);
+
     const char* filename = argv[1];
     const std::string content = getSource(filename);
     if(content.empty()){
@@ -38,11 +43,10 @@ int main(const int argc,const char** argv) {
     //root->check();
     //debugTime(start, "Check phase");
     // root.generateIR();
-    // ir.push_back(IRInstruction{EXIT, "0"});
     // debugTime(start, "IR phase");
     
     // Assembler* assembler = getAssembler(ir);
-    // std::ofstream output("output.asm");
+    // std::ofstream output(outputFileName + ".asm");
     // if(output.is_open()){
     //     output << assembler->assemble();
     //     debugTime(start, "Asm phase");

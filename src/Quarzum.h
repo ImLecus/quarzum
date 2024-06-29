@@ -30,10 +30,13 @@
 #include "./tokenizer/tokenizer.cpp"
 #include "./parser/parser.cpp"
 #include "source.hpp"
+#include "./cli/cli.cpp"
 //#include "./ir/irinstruction.hpp"
 //#include "./backend/assembler.hpp"
 namespace Quarzum {
-    constexpr bool debugMode = false;
+    
     namespace Debug = Quarzum::Debug;
     namespace Lexer = Quarzum::Lexer;
+    namespace CLI = Quarzum::CLI;
+
 }

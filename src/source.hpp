@@ -1,3 +1,15 @@
+/*
+ * Quarzum Compiler - source.hpp
+ * Version 1.0, 02/07/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
 #include "string.h"
 
 bool format(const char*& filename, const char* format){
@@ -21,5 +33,5 @@ const std::string getSource(const char*& filename){
         content += c;
     }
     inputFile.close();
-    return content;
+    return std::move(content);
 }  

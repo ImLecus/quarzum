@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - tokenizer.cpp
- * Version 1.0, 29/06/2024
+ * Version 1.0, 02/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -55,15 +55,15 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
                 if(index + 2 != content.end() and *(index + 2) == '\''){
                     buffer += '\'';
                     ++columnNumber;
-                    tokens.push_back(Token(LITERAL, buffer, lineNumber, columnNumber));
+                    tokens.push_back(std::move(Token(LITERAL, buffer, lineNumber, columnNumber)));
                     buffer.clear();
                     index += 2;
                     continue;
                 }
-                tokens.push_back(Token(token_error, "", lineNumber, columnNumber));
+                tokens.push_back(std::move(Token(token_error, "", lineNumber, columnNumber)));
                 err = true;
             }
-            tokens.push_back(Token(token_error, "", lineNumber, columnNumber));
+            tokens.push_back(std::move(Token(token_error, "", lineNumber, columnNumber)));
             err = true;
         }
         else if(*index == '"'){
@@ -76,7 +76,7 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
             }
             buffer += '"';
             ++columnNumber;
-            tokens.push_back(Token(LITERAL, buffer, lineNumber, columnNumber));
+            tokens.push_back(std::move(Token(LITERAL, buffer, lineNumber, columnNumber)));
             buffer.clear();
         }
         // Identifiers and keywords
@@ -87,7 +87,7 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
                 ++columnNumber;
             }
             TokenType type = bufferToKeyword(buffer);
-            tokens.push_back(Token(type == token_error? identifier : type, buffer, lineNumber, columnNumber));
+            tokens.push_back(std::move(Token(type == token_error? identifier : type, buffer, lineNumber, columnNumber)));
             buffer.clear();
             --index;
         }
@@ -100,7 +100,7 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
                 buffer += *(index++);
                 ++columnNumber;
             }
-            tokens.push_back(Token(LITERAL, buffer, lineNumber, columnNumber));
+            tokens.push_back(std::move(Token(LITERAL, buffer, lineNumber, columnNumber)));
             buffer.clear();
             --index;
         }
@@ -120,7 +120,7 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
                     continue;
                 }
                 if(type != token_error){ 
-                    tokens.push_back(Token(type, buffer, lineNumber, columnNumber));
+                    tokens.push_back(std::move(Token(type, buffer, lineNumber, columnNumber)));
                     buffer.clear();
                     ++index;
                     continue;
@@ -128,7 +128,7 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
                 buffer.pop_back();
             }
             TokenType type = bufferToSymbol(buffer);
-            tokens.push_back(Token(type, buffer, lineNumber, columnNumber));
+            tokens.push_back(std::move(Token(type, buffer, lineNumber, columnNumber)));
             if(type == token_error){
                 Debug::throwError("Unexpected token", tokens.back());
                 err = true;
@@ -139,7 +139,7 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
             lineNumber += *index == '\n'; // TO-DO: CHANGE
         }
         else{
-            tokens.push_back(Token(token_error, "", lineNumber, columnNumber));
+            tokens.push_back(std::move(Token(token_error, "", lineNumber, columnNumber)));
             Debug::throwError("Unexpected token", tokens.back());
             err = true;
             ++index;
@@ -154,19 +154,19 @@ const std::deque<Token> tokenize(const std::string& content) noexcept{
     return std::move(tokens);
 }
 
-const TokenType bufferToSymbol(const std::string& buffer){  
+inline const TokenType bufferToSymbol(const std::string& buffer) noexcept{  
     auto it = symbols.find(buffer);
     if (it != symbols.end()) {
-        return it->second;
+        return std::move(it->second);
     }
-    return token_error;
+    return std::move(token_error);
 }
 
-const TokenType bufferToKeyword(const std::string& buffer){ 
+inline const TokenType bufferToKeyword(const std::string& buffer) noexcept{ 
     auto it = keywords.find(buffer);
     if (it != keywords.end()) {
-        return it->second;
+        return std::move(it->second);
     }
-    return identifier;
+    return std::move(identifier);
 }
 #endif

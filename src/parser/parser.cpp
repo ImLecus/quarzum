@@ -1,35 +1,49 @@
-#include "parser.hpp"
+/*
+ * Quarzum Compiler - parser.cpp
+ * Version 1.0, 02/07/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
+
+#include "parser.h"
 #include "expr.cpp"
 using std::unique_ptr;
 using std::make_unique;
 
-Parser::Parser(std::deque<Token> tokens): tokens(tokens) {}
+Parser::Parser(const std::deque<Token>& tokens): tokens(std::move(tokens)) {}
 
 const unique_ptr<RootNode> Parser::parse(){
     unique_ptr<RootNode> root = make_unique<RootNode>();
+    root->nodes.reserve(tokens.size());
     while(not tokens.empty()){
         if(auto s = parseStatement()){
             root->nodes.push_back(std::move(s));
         }
     }
-    return root;    
+    return std::move(root);    
 }
 
-inline const Token Parser::pop(){
+inline const Token Parser::pop() noexcept {
     if(tokens.empty()){
-        return Token();
+        return std::move(Token());
     }
     Token t = tokens.front();
     tokens.pop_front();
-    return t;
+    return std::move(t);
 }
 
-inline const bool Parser::ask(TokenType t){
+inline const bool Parser::ask(const TokenType t) const noexcept{
     return (not tokens.empty() and tokens.front().type == t);
 }
 
 unique_ptr<Statement> Parser::parseStatement() {
-    Token t = tokens.front();
+    const Token t = tokens.front();
     switch (t.type)
     {
     case access_specifier:
@@ -166,10 +180,10 @@ unique_ptr<FunctionContainer> Parser::parseFunction(){
         }
     }
     EXPECT(pop(), left_curly, "Expected function body");
-    fCont->name = id.value;
+    fCont->name = std::move(id.value);
     fCont->type = make_unique<Type>(typeToken.value);
     IDENTATION(fCont)
-    return fCont;
+    return std::move(fCont);
 }
 
 unique_ptr<ImportStatement> Parser::parseImport(){
@@ -187,7 +201,7 @@ unique_ptr<ImportStatement> Parser::parseImport(){
     }
     Token location = pop();
     EXPECT(location, LITERAL, "Expected location") // improve to detect string literal or check()
-    importStmt->path = location.value;
+    importStmt->path = std::move(location.value);
     EXPECT(pop(), semicolon, "Expected semicolon")
     return importStmt;
 }
@@ -203,7 +217,7 @@ unique_ptr<EnumStatement> Parser::parseEnum(){
     auto enumStmt = make_unique<EnumStatement>();
     Token id = pop();
     EXPECT(id, identifier, "Expected identifier")
-    enumStmt->name = id.value;
+    enumStmt->name = std::move(id.value);
 
     if(ask(arrow)){
         tokens.pop_front();
@@ -225,7 +239,7 @@ unique_ptr<EnumStatement> Parser::parseEnum(){
 
 
 
-unique_ptr<VarRedec> Parser::parseRedec(Token id, const bool isPrefix){
+unique_ptr<VarRedec> Parser::parseRedec(const Token& id, const bool isPrefix){
     auto redec = make_unique<VarRedec>(id.value);
     auto identifier = make_unique<IdentifierExpr>(id.value);
     // ++ and --
@@ -249,7 +263,7 @@ unique_ptr<VarRedec> Parser::parseRedec(Token id, const bool isPrefix){
     return redec;
 }
 
-unique_ptr<FunctionCall> Parser::parseFunctionCall(Token id){
+unique_ptr<FunctionCall> Parser::parseFunctionCall(const Token& id){
     auto call = std::make_unique<FunctionCall>(id.value);
     Token t = tokens.front();
     if(t.type == right_par){
@@ -271,7 +285,7 @@ unique_ptr<FunctionCall> Parser::parseFunctionCall(Token id){
         return nullptr;
     }
     EXPECT(pop(), semicolon, "Expected semicolon");
-    return call;
+    return std::move(call);
 }
 
 unique_ptr<ClassContainer> Parser::parseClass(){
@@ -287,7 +301,7 @@ unique_ptr<ClassContainer> Parser::parseClass(){
     
     EXPECT(pop(), left_curly, "Expected 'class' body");
     IDENTATION(c)
-    return c;
+    return std::move(c);
 }
 
 unique_ptr<ModuleContainer> Parser::parseModule(){
@@ -296,7 +310,7 @@ unique_ptr<ModuleContainer> Parser::parseModule(){
     auto mod = make_unique<ModuleContainer>(id.value);
     EXPECT(pop(), left_curly, "Expected 'module' body");
     IDENTATION(mod)
-    return mod;
+    return std::move(mod);
 }
 
 unique_ptr<IfContainer> Parser::parseIf(){
@@ -425,5 +439,5 @@ std::unique_ptr<ForContainer> Parser::parseFor(){
     EXPECT(pop(), left_curly, "Expected 'for' body")
     auto fCont = make_unique<ForContainer>();
     IDENTATION(fCont)
-    return fCont;
+    return std::move(fCont);
 }

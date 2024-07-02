@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - tokenizer.h
- * Version 1.0, 29/06/2024
+ * Version 1.0, 02/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -17,12 +17,12 @@
  * @brief Search if the buffer is a symbol. Otherwise, returns
  * the TokenType error_token.
 */
-const TokenType bufferToSymbol(const std::string& buffer);
+inline const TokenType bufferToSymbol(const std::string& buffer) noexcept;
 /**
  * @brief Search if the buffer is a keyword. Otherwise, returns
  * the TokenType identifier.
 */
-const TokenType bufferToKeyword(const std::string& buffer);
+inline const TokenType bufferToKeyword(const std::string& buffer) noexcept;
 /**
  * @brief Reads a string with the source code and creates a TokenList.
  * If some unexpected token appears, the function throws an 

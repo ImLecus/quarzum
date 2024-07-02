@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - token.h
- * Version 1.0, 29/06/2024
+ * Version 1.0, 02/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -78,10 +78,10 @@ struct Token {
         column(0) {}
 
     Token(const TokenType& type, const std::string& value, const uint32_t line, const uint32_t column): 
-        type(type), 
-        value(value), 
-        line(line), 
-        column(column) {}
+        type(std::move(type)), 
+        value(std::move(value)), 
+        line(std::move(line)), 
+        column(std::move(column)) {}
 
     inline bool isOperator() const noexcept {
         return this->type == ARITHMETIC_OPERATOR or this->type == COMPARATION_OPERATOR;

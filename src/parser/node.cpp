@@ -1,46 +1,37 @@
+/*
+ * Quarzum Compiler - node.cpp
+ * Version 1.0, 02/07/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
 #pragma once
-#include <iostream>
+#include "node.h"
 #include "../sem_ir/types.cpp"
 #include "../sem_ir/irinstruction.hpp"
 #include "../sem_ir/symboltable.hpp"
-#include <vector>
 
-struct Node {
-    virtual void generateIR(){};
-};
+struct Node {};
 
-struct Statement: public Node {
-    virtual inline void check() = 0;
-};
+struct Statement: public Node {};
 
 struct Container: public Statement {
     std::vector<std::unique_ptr<Statement>> nodes;
-
-    void check() override {
-        for(auto& node : nodes){
-            if(node == nullptr){
-                Quarzum::Debug::err("NULL STATEMENT DETECTED");
-                std::exit(2);
-            }
-            node->check();
-        }
-    }
 };
 
-struct RootNode : public Container {
-    void check() override {
-        symbolTable.enterScope();
-        Container::check();
-    }
-    
-};
+struct RootNode : public Container {};
 
 struct Type: public Node {
     uint8_t branch;
     uint8_t height;
 
-    std::string name;
-    explicit Type(const std::string& name): name(name) {
+    const std::string name;
+    explicit Type(const std::string& name): name(std::move(name)) {
         if(name == "char" or name == "string"){
             branch = 1;
         }
@@ -51,36 +42,22 @@ struct Type: public Node {
 };
 
 struct Expr: public Node {
-    virtual inline void check() = 0;
     std::unique_ptr<Type> type;
 };
 
 struct LiteralExpr: public Expr {
     const std::string value;
-    explicit LiteralExpr(const std::string& value): value(value) {};
-    void check() {
-        // convert the value to a literal type
-    }
+    explicit LiteralExpr(const std::string& value): value(std::move(value)) {};
 };
 
 struct IdentifierExpr: public Expr {
     const std::string value;
-    explicit IdentifierExpr(const std::string& value): value(value) {};
-    void check(){
-        auto s = symbolTable.find(value);
-        if(s == nullptr){
-            Quarzum::Debug::err("Symbol " + value + " was not defined");
-        }
-        // ask the symboltable about the symbol and type
-    }
+    explicit IdentifierExpr(const std::string& value): value(std::move(value)) {};
 };
 
 struct ParenExpr: public Expr{
     std::unique_ptr<Expr> expr;
     explicit ParenExpr(std::unique_ptr<Expr> expr): expr(std::move(expr)) {};
-    void check(){
-        expr->check();
-    }
 };
 
 struct UnaryExpr : public Expr {
@@ -89,10 +66,6 @@ struct UnaryExpr : public Expr {
     bool isPrefix;
     explicit UnaryExpr(const std::string& op,std::unique_ptr<Expr> expr, const bool isPrefix = true): 
     op(op), expr(std::move(expr)), isPrefix(isPrefix) {};  
-    void check(){
-        expr->check();
-        // apply operator to type
-    }
 };
 
 struct BinaryExpr : public Expr {
@@ -101,11 +74,6 @@ struct BinaryExpr : public Expr {
     std::unique_ptr<Expr> right;
     explicit BinaryExpr(const std::string& op,std::unique_ptr<Expr> left, std::unique_ptr<Expr> right): 
     op(op), left(std::move(left)), right(std::move(right)) {}; 
-    void check() {
-        left->check();
-        right->check();
-        // apply the binary operator
-    }
 };
 
 struct TernaryExpr : public Expr {
@@ -114,10 +82,6 @@ struct TernaryExpr : public Expr {
     std::unique_ptr<Expr> ifFalse;
     explicit TernaryExpr(std::unique_ptr<Expr> condition,std::unique_ptr<Expr> ifTrue, std::unique_ptr<Expr> ifFalse): 
     condition(std::move(condition)), ifTrue(std::move(ifTrue)), ifFalse(std::move(ifFalse)) {};  
-
-    void check(){
-        //check if the condition is a bool and ifTrue and ifFalse have the same type
-    }
 };
 
 struct Argument : public Node {
@@ -132,28 +96,20 @@ struct FunctionCallExpr : public Expr {
     explicit FunctionCallExpr(const std::string& name): name(name), args{} {};
     explicit FunctionCallExpr(const std::string& name, std::vector<std::unique_ptr<Expr>> args): 
     name(name), args(std::move(args)) {};
-
-    void check(){
-        // apply the type to the return type of the function, check the function exists
-    }
 };
 
 struct FunctionCall : public Statement {
     const std::string name;
     std::vector<std::unique_ptr<Expr>> args;
-    explicit FunctionCall(const std::string& name): name(name), args{} {};
+    explicit FunctionCall(const std::string& name): name(std::move(name)), args{} {};
     explicit FunctionCall(const std::string& name, std::vector<std::unique_ptr<Expr>> args): 
-    name(name), args(std::move(args)) {};
-    void check(){}
+    name(std::move(name)), args(std::move(args)) {};
 };
 
 struct ArrayIndexExpr : public Expr {
     const std::string name;
     std::unique_ptr<Expr> index;
-    explicit ArrayIndexExpr(const std::string& name, std::unique_ptr<Expr> index): name(name), index(std::move(index)) {};
-    void check(){
-        // check if its an array and the symbol table name and type
-    }
+    explicit ArrayIndexExpr(const std::string& name, std::unique_ptr<Expr> index): name(std::move(name)), index(std::move(index)) {};
 };
 
 struct VarDeclaration : public Statement {
@@ -162,34 +118,22 @@ struct VarDeclaration : public Statement {
     std::unique_ptr<Expr> expr;
     std::string access = "none";
     bool constant = false;
-
-    void check(){
-        if(symbolTable.find(id) != nullptr){Quarzum::Debug::err("Symbol " + id + " was already defined.");}
-        symbolTable.insert(id,{'v',id,type->name, "global"});
-        expr->check();
-        // check if the type and the expr type are the same
-    }
 };
 
 struct VarRedec : public Statement {
-    std::string id;
+    const std::string id;
     std::unique_ptr<Expr> expr;
-    explicit VarRedec(const std::string& id): id(id) {};
-    void check(){}
+    explicit VarRedec(const std::string& id): id(std::move(id)) {};
 };
 
 struct ModuleContainer : public Container {
-    std::string id;
-    explicit ModuleContainer(const std::string& id): id(id) {};
+    const std::string id;
+    explicit ModuleContainer(const std::string& id): id(std::move(id)) {};
 };
 struct IfContainer : public Container {
     std::unique_ptr<Expr> condition;
     std::vector<std::unique_ptr<Statement>> elseContainer;
     explicit IfContainer(std::unique_ptr<Expr> condition): condition(std::move(condition)) {};
-
-    void check() override {
-        condition->check();
-    }
 };
 struct WhileContainer : public Container {
     std::unique_ptr<Expr> condition;
@@ -207,9 +151,9 @@ struct ForContainer : public Container {
     std::unique_ptr<Expr> condition;
 };
 struct ClassContainer : public Container {
-    std::string name;
+    const std::string name;
     std::unique_ptr<Type> type;
-    explicit ClassContainer(const std::string& name): name(name) {};
+    explicit ClassContainer(const std::string& name): name(std::move(name)) {};
 };
 struct FunctionContainer : public Container {
     std::string name;
@@ -219,20 +163,14 @@ struct FunctionContainer : public Container {
 struct ReturnStatement : public Statement {
     std::unique_ptr<Expr> expr;
     explicit ReturnStatement(std::unique_ptr<Expr> expr): expr(std::move(expr)) {};
-    void check(){}
 };
 
-struct BreakStatement : public Statement {
-    void check(){}
-};
-struct ContinueStatement : public Statement {
-    void check(){}
-};
+struct BreakStatement : public Statement {};
+struct ContinueStatement : public Statement {};
 
 struct ImportStatement : public Statement {
     std::vector<std::string> objects;
     std::string path;
-    void check(){}
 };
 
 struct EnumElement : public Node {
@@ -244,18 +182,15 @@ struct EnumStatement : public Statement {
     std::string name;
     std::unique_ptr<Type> extend;
     std::vector<std::unique_ptr<EnumElement>> items;
-    void check(){}
 };
 
 struct DeleteStatement : public Statement {
-    std::string identifier;
-    explicit DeleteStatement(const std::string& identifier): identifier(identifier) {};
-    void check(){}
+    const std::string identifier;
+    explicit DeleteStatement(const std::string& identifier): identifier(std::move(identifier)) {};
 };
 
 struct ForeignStatement: public Statement {
     std::string name;
     std::vector<std::unique_ptr<Argument>> args;
     std::unique_ptr<Type> type;
-    void check(){}
 };

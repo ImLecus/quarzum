@@ -1,11 +1,23 @@
+/*
+ * Quarzum Compiler - expr.cpp
+ * Version 1.0, 02/07/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
 #pragma once
-#include "parser.hpp"
+#include "parser.h"
 std::unique_ptr<FunctionCallExpr> Parser::parseFunctionCallExpr(Token id){
     std::unique_ptr<FunctionCallExpr> call = std::make_unique<FunctionCallExpr>(id.value);
     Token t = tokens.front();
     if(t.type == right_par){
         tokens.pop_front();
-        return call;
+        return std::move(call);
     }
     while(not tokens.empty()){
         auto expr = parseExpr();
@@ -20,7 +32,7 @@ std::unique_ptr<FunctionCallExpr> Parser::parseFunctionCallExpr(Token id){
         throwError("Expected ',' or ')'", next);
         return nullptr;
     }
-    return call;
+    return std::move(call);
 }
 
 std::unique_ptr<ParenExpr> Parser::parseParenExpr(){
@@ -85,7 +97,7 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpr(){
         }
         return std::make_unique<UnaryExpr>(t.value, std::make_unique<IdentifierExpr>(suffix.value), false);
     }
-    return expr;
+    return std::move(expr);
 }
 
 std::unique_ptr<Expr> Parser::parseExpr() {
@@ -107,5 +119,5 @@ std::unique_ptr<Expr> Parser::parseExpr() {
         auto right = parseExpr();
         left = std::make_unique<BinaryExpr>(op.value,std::move(left), std::move(right));
     }
-    return left;
+    return std::move(left);
 }

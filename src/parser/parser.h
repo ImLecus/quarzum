@@ -1,6 +1,20 @@
+/*
+ * Quarzum Compiler - parser.h
+ * Version 1.0, 02/07/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
+
+
 #pragma once
 #include "../Quarzum.h"
-#include "./node.hpp"
+#include "./node.cpp"
 using namespace Quarzum::Debug;
 
 #define EXPECT(cToken,cType, ErrorMessage) if(cToken.type != cType){throwError(ErrorMessage, cToken); return nullptr;}
@@ -8,12 +22,12 @@ using namespace Quarzum::Debug;
 
 class Parser {
 public:
-    Parser(std::deque<Token> tokens);
+    Parser(const std::deque<Token>& tokens);
     const std::unique_ptr<RootNode> parse();
 private:
     std::deque<Token> tokens;
-    inline const Token pop();
-    inline const bool ask(TokenType t);
+    inline const Token pop() noexcept;
+    inline const bool ask(const TokenType t) const noexcept;
     std::unique_ptr<Statement> parseStatement();
 
     // STATEMENT PARSING RELATED
@@ -25,9 +39,9 @@ private:
      * Returns a VarDeclaration or redirects to parseFunction();
      */
     std::unique_ptr<Statement> parseVar(const bool isConst = false, const std::string& access = "none");
-    std::unique_ptr<VarRedec> parseRedec(Token id, const bool isPrefix = false);
+    std::unique_ptr<VarRedec> parseRedec(const Token& id, const bool isPrefix = false);
     std::unique_ptr<EnumStatement> parseEnum();
-    std::unique_ptr<FunctionCall> parseFunctionCall(Token id);
+    std::unique_ptr<FunctionCall> parseFunctionCall(const Token& id);
     std::unique_ptr<DeleteStatement> parseDelete();
     std::unique_ptr<ImportStatement> parseImport();
 

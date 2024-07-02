@@ -1,3 +1,15 @@
+/*
+ * Quarzum Compiler - main.cpp
+ * Version 1.0, 01/07/2024
+ *
+ * This file is part of the Quarzum project, a proprietary software.
+ *
+ * Quarzum Project License
+ * ------------------------
+ *
+ * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
+ * For full details, see LICENSE.
+ */
 #include "./src/Quarzum.h"
 
 using namespace Quarzum;
@@ -33,11 +45,13 @@ int main(const int argc,const char** argv) {
     Parser parser = Parser(tokens);
     std::unique_ptr<RootNode> root = parser.parse();
     debugTime(start, "Parse phase");
-    root->check();
+    //check(*root);
     debugTime(start, "Check phase");
     // root.generateIR();
     // debugTime(start, "IR phase");
     
+    // delete root;
+
     // Assembler* assembler = getAssembler(ir);
     // std::ofstream output(outputFileName + ".asm");
     // if(output.is_open()){

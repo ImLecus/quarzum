@@ -31,6 +31,7 @@
 #include "./parser/parser.cpp"
 #include "source.hpp"
 #include "./cli/cli.cpp"
+#include "sem_ir/check.cpp"
 //#include "./ir/irinstruction.hpp"
 //#include "./backend/assembler.hpp"
 namespace Quarzum {

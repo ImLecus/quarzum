@@ -13,29 +13,28 @@
 
 #include "parser.h"
 #include "expr.cpp"
-using std::unique_ptr;
-using std::make_unique;
 
-Parser::Parser(const std::deque<Token>& tokens): tokens(std::move(tokens)) {}
+
+Parser::Parser(const std::deque<Token>& tokens): tokens(move(tokens)) {}
 
 const unique_ptr<RootNode> Parser::parse(){
     unique_ptr<RootNode> root = make_unique<RootNode>();
     root->nodes.reserve(tokens.size());
     while(not tokens.empty()){
         if(auto s = parseStatement()){
-            root->nodes.push_back(std::move(s));
+            root->nodes.push_back(move(s));
         }
     }
-    return std::move(root);    
+    return move(root);    
 }
 
 inline const Token Parser::pop() noexcept {
     if(tokens.empty()){
-        return std::move(Token());
+        return move(ERROR_TOKEN);
     }
     Token t = tokens.front();
     tokens.pop_front();
-    return std::move(t);
+    return move(t);
 }
 
 inline const bool Parser::ask(const TokenType t) const noexcept{
@@ -117,6 +116,19 @@ unique_ptr<Statement> Parser::parseStatement() {
     }
 }
 
+string Parser::getIdentifier() {
+    string id = "";
+    Token t = pop();
+    id += t.value;
+    EXPECT(t, identifier, "Expected identifier")
+    while(ask(point)){
+        Token next = pop();
+        EXPECT(next, identifier, "Expected identifier")
+        id += '.' + next.value;
+    }
+    return id;
+}
+
 unique_ptr<ForeignStatement> Parser::parseForeign(){
     Token typeToken = pop();
     EXPECT(typeToken, type_keyword, "Expected type keyword");
@@ -134,7 +146,7 @@ unique_ptr<ForeignStatement> Parser::parseForeign(){
             Token i = pop();
             EXPECT(i, identifier, "Expected parameter name")
             // DEFAULT VALUES
-            fStmt->args.push_back(std::move(
+            fStmt->args.push_back(move(
                 make_unique<Argument>( make_unique<Type>(t.value), i.value )
             ));
             if(ask(comma)){
@@ -168,7 +180,7 @@ unique_ptr<FunctionContainer> Parser::parseFunction(){
             Token i = pop();
             EXPECT(i, identifier, "Expected parameter name")
             // DEFAULT VALUES
-            fCont->args.push_back(std::move(
+            fCont->args.push_back(move(
                 make_unique<Argument>( make_unique<Type>(t.value), i.value )
             ));
             if(ask(comma)){
@@ -180,10 +192,10 @@ unique_ptr<FunctionContainer> Parser::parseFunction(){
         }
     }
     EXPECT(pop(), left_curly, "Expected function body");
-    fCont->name = std::move(id.value);
+    fCont->name = move(id.value);
     fCont->type = make_unique<Type>(typeToken.value);
     IDENTATION(fCont)
-    return std::move(fCont);
+    return move(fCont);
 }
 
 unique_ptr<ImportStatement> Parser::parseImport(){
@@ -200,8 +212,8 @@ unique_ptr<ImportStatement> Parser::parseImport(){
         break;
     }
     Token location = pop();
-    EXPECT(location, LITERAL, "Expected location") // improve to detect string literal or check()
-    importStmt->path = std::move(location.value);
+    EXPECT(location, string_literal, "Expected location")
+    importStmt->path = move(location.value);
     EXPECT(pop(), semicolon, "Expected semicolon")
     return importStmt;
 }
@@ -217,13 +229,13 @@ unique_ptr<EnumStatement> Parser::parseEnum(){
     auto enumStmt = make_unique<EnumStatement>();
     Token id = pop();
     EXPECT(id, identifier, "Expected identifier")
-    enumStmt->name = std::move(id.value);
+    enumStmt->name = move(id.value);
 
     if(ask(arrow)){
         tokens.pop_front();
         Token t = pop();
         EXPECT(t,type_keyword,"Expected type keyword");
-        enumStmt->extend = std::move(make_unique<Type>(t.value));
+        enumStmt->extend = move(make_unique<Type>(t.value));
     }
 
     EXPECT(pop(), left_curly, "Expected 'enum' body");
@@ -244,7 +256,7 @@ unique_ptr<VarRedec> Parser::parseRedec(const Token& id, const bool isPrefix){
     auto identifier = make_unique<IdentifierExpr>(id.value);
     // ++ and --
     if(tokens.front().type != ASSIGN_OPERATOR){
-        redec->expr = make_unique<UnaryExpr>(pop().value,std::move(identifier),isPrefix);
+        redec->expr = make_unique<UnaryExpr>(pop().value,move(identifier),isPrefix);
         return redec;
     }
     tokens.pop_front();
@@ -252,19 +264,19 @@ unique_ptr<VarRedec> Parser::parseRedec(const Token& id, const bool isPrefix){
     char op = id.value[0];
     switch (op){
         case '|':
-            redec->expr = make_unique<BinaryExpr>("or",std::move(identifier), std::move(expr));
+            redec->expr = make_unique<BinaryExpr>("or",move(identifier), move(expr));
         case '&':
-            redec->expr = make_unique<BinaryExpr>("and",std::move(identifier),std::move(expr));
+            redec->expr = make_unique<BinaryExpr>("and",move(identifier),move(expr));
         case '^':
-            redec->expr = make_unique<BinaryExpr>("xor",std::move(identifier),std::move(expr));
+            redec->expr = make_unique<BinaryExpr>("xor",move(identifier),move(expr));
         default:
-            redec->expr = make_unique<BinaryExpr>(std::to_string(op),std::move(identifier),std::move(expr));
+            redec->expr = make_unique<BinaryExpr>(std::to_string(op),move(identifier),move(expr));
     }
     return redec;
 }
 
 unique_ptr<FunctionCall> Parser::parseFunctionCall(const Token& id){
-    auto call = std::make_unique<FunctionCall>(id.value);
+    auto call = make_unique<FunctionCall>(id.value);
     Token t = tokens.front();
     if(t.type == right_par){
         tokens.pop_front();
@@ -272,7 +284,7 @@ unique_ptr<FunctionCall> Parser::parseFunctionCall(const Token& id){
     }
     while(not tokens.empty()){
         auto expr = parseExpr();
-        call->args.push_back(std::move(expr));
+        call->args.push_back(move(expr));
         Token next = pop();
         if(next.type == comma){
             continue;
@@ -285,7 +297,7 @@ unique_ptr<FunctionCall> Parser::parseFunctionCall(const Token& id){
         return nullptr;
     }
     EXPECT(pop(), semicolon, "Expected semicolon");
-    return std::move(call);
+    return move(call);
 }
 
 unique_ptr<ClassContainer> Parser::parseClass(){
@@ -296,12 +308,12 @@ unique_ptr<ClassContainer> Parser::parseClass(){
         tokens.pop_front();
         Token t = pop();
         EXPECT(t,type_keyword,"Expected type keyword");
-        c->type = std::move(make_unique<Type>(t.value));
+        c->type = move(make_unique<Type>(t.value));
     }
     
     EXPECT(pop(), left_curly, "Expected 'class' body");
     IDENTATION(c)
-    return std::move(c);
+    return move(c);
 }
 
 unique_ptr<ModuleContainer> Parser::parseModule(){
@@ -310,13 +322,13 @@ unique_ptr<ModuleContainer> Parser::parseModule(){
     auto mod = make_unique<ModuleContainer>(id.value);
     EXPECT(pop(), left_curly, "Expected 'module' body");
     IDENTATION(mod)
-    return std::move(mod);
+    return move(mod);
 }
 
 unique_ptr<IfContainer> Parser::parseIf(){
     EXPECT(pop(), left_par, "Expected '('")
     auto expr = parseExpr();
-    auto ifCont = make_unique<IfContainer>(std::move(expr));
+    auto ifCont = make_unique<IfContainer>(move(expr));
     EXPECT(pop(), right_par, "Expected ')'")
     EXPECT(pop(), left_curly, "Expected 'if' body");
     IDENTATION(ifCont)
@@ -339,7 +351,7 @@ unique_ptr<IfContainer> Parser::parseIf(){
 unique_ptr<WhileContainer> Parser::parseWhile(){
     EXPECT(pop(), left_par, "Expected '('")
     auto expr = parseExpr();
-    auto wCont = make_unique<WhileContainer>(std::move(expr));
+    auto wCont = make_unique<WhileContainer>(move(expr));
     EXPECT(pop(), right_par, "Expected ')'")
     EXPECT(pop(), left_curly, "Expected 'while' body");
     IDENTATION(wCont)
@@ -369,7 +381,7 @@ unique_ptr<ForeachContainer> Parser::parseForeach(){
     feCont->id = id.value;
     EXPECT(pop(), in_keyword, "Expected 'in' keyword")
     
-    feCont->expr = std::move(parseExpr());
+    feCont->expr = move(parseExpr());
     EXPECT(pop(), right_par, "Expected ')'")
     EXPECT(pop(), left_curly, "Expected 'foreach' body");
     IDENTATION(feCont)
@@ -377,7 +389,7 @@ unique_ptr<ForeachContainer> Parser::parseForeach(){
 
 }
 
-unique_ptr<Statement> Parser::parseVar(const bool isConst,const std::string& access){
+unique_ptr<Statement> Parser::parseVar(const bool isConst,const string& access){
     auto result = make_unique<VarDeclaration>();
     result->constant = isConst;
     // type
@@ -411,7 +423,7 @@ unique_ptr<ReturnStatement> Parser::parseReturn(){
         }
         auto expr = parseExpr();
         EXPECT(pop(), semicolon, "Expected semicolon")
-        return make_unique<ReturnStatement>(std::move(expr));
+        return make_unique<ReturnStatement>(move(expr));
     }
     return nullptr;
 }
@@ -425,7 +437,7 @@ unique_ptr<ContinueStatement> Parser::parseContinue(){
     return make_unique<ContinueStatement>();
 }
 
-std::unique_ptr<ForContainer> Parser::parseFor(){
+unique_ptr<ForContainer> Parser::parseFor(){
     EXPECT(pop(), left_par, "Expected '('")
     auto var = parseVar(); // parseVar already includes semicolon at the end
     auto condition = parseExpr(); 
@@ -439,5 +451,5 @@ std::unique_ptr<ForContainer> Parser::parseFor(){
     EXPECT(pop(), left_curly, "Expected 'for' body")
     auto fCont = make_unique<ForContainer>();
     IDENTATION(fCont)
-    return std::move(fCont);
+    return move(fCont);
 }

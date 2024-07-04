@@ -8,12 +8,12 @@
 struct Assembler {
     const std::vector<IRInstruction> instructions;
     Assembler(std::vector<IRInstruction> instructions): instructions(instructions) {} 
-    virtual std::string assemble() = 0;
+    virtual string assemble() = 0;
 };
 
 struct x86_64_Assembler : public Assembler {
-    x86_64_Assembler(std::vector<IRInstruction> instructions): Assembler(std::move(instructions)) {}
-    const std::unordered_map<std::string, const char*> typeToAsm = {
+    x86_64_Assembler(std::vector<IRInstruction> instructions): Assembler(move(instructions)) {}
+    const std::unordered_map<string, const char*> typeToAsm = {
         {"int8", ".byte"},
         {"int16", ".word"},
         {"int32", ".long"},
@@ -27,8 +27,8 @@ struct x86_64_Assembler : public Assembler {
         {"char", ".byte"},
         {"string", ".string"}
     };
-    uint8_t paramRegister = 0;
-    uint8_t temporalRegister = 0;
+    uint8 paramRegister = 0;
+    uint8 temporalRegister = 0;
     const char* paramRegisters[6] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
     const char* tempRegisters[6] = {"%r10", "%r11", "%r12", "%r13", "%r14", "%r15"};
     inline const char* getParamRegister() const {
@@ -37,7 +37,7 @@ struct x86_64_Assembler : public Assembler {
     inline const char* getTRegister() const{
         return tempRegisters[temporalRegister];
     }
-    const std::string getValue(const std::string& i,const std::string& var = ""){
+    const string getValue(const string& i,const string& var = ""){
         if(i[0] == '.' and i[1] == 't'){
             temporalRegister = i[2]- '0';
             return tempRegisters[temporalRegister] + op_size(var);
@@ -47,19 +47,19 @@ struct x86_64_Assembler : public Assembler {
         }
         return "$" + i;
     }  
-    inline const std::string create_operation(const std::string& opcode, const std::string& value1 = "", const std::string& value2 = ""){
+    inline const string create_operation(const string& opcode, const string& value1 = "", const string& value2 = ""){
         return '\t'+opcode+' '+value1+(value2.empty()? "":", " + value2)+'\n';
     }
-    const std::string op_size(const std::string& var){
+    const string op_size(const string& var){
         if(var == ""){return var;}
-        uint8_t bits = getBits(var);
+        uint8 bits = getBits(var);
         if(bits == 64){return "q";}
         if(bits == 32){return "d";}
         if(bits == 16){return "w";}
         if(bits == 8 or var == "bool"){return "b";}
         return "d";
     }
-    void create_logical_operation(std::string& textSection,IRInstruction& i, const std::string& op){
+    void create_logical_operation(string& textSection,IRInstruction& i, const string& op){
         if(i.origin2 == i.target){
             i.target = getValue(i.target,i.varType);
             textSection += create_operation("cmp",getValue(i.origin1,i.varType),i.target);
@@ -77,9 +77,9 @@ struct x86_64_Assembler : public Assembler {
         textSection += create_operation("cmp",getValue(i.origin2,i.varType),i.target);
         textSection += create_operation(op, i.target);
     }
-    std::string assemble(){
-        std::string dataSection = ".data\n";
-        std::string textSection = ".text\n.globl _start\n";
+    string assemble(){
+        string dataSection = ".data\n";
+        string textSection = ".text\n.globl _start\n";
         for(auto i : instructions){
             switch (i.type)
             {

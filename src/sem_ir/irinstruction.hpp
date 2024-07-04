@@ -1,7 +1,7 @@
 #pragma once
 #include "../Quarzum.h"
 
-enum IRInstructionType : u_int8_t {
+enum IRInstructionType : uint8 {
     ASSIGN,
     ADD,
     SUB,
@@ -31,13 +31,13 @@ enum IRInstructionType : u_int8_t {
 struct IRInstruction
 {
     IRInstructionType type;
-    std::string target;
-    std::string origin1;
-    std::string origin2;
-    std::string varType;
+    string target;
+    string origin1;
+    string origin2;
+    string varType;
 };
 
-const std::unordered_map<std::string, IRInstructionType> operatorToType = {
+const std::unordered_map<string, IRInstructionType> operatorToType = {
     {"+", ADD},
     {"-", SUB},
     {"*", PROD},
@@ -53,7 +53,7 @@ const std::unordered_map<std::string, IRInstructionType> operatorToType = {
     {"++", INC}
 };
 
-IRInstructionType getInstructionType(const std::string& op){
+IRInstructionType getInstructionType(const string& op){
     auto it = operatorToType.find(op);
     if(it != operatorToType.end()){
         return it->second;
@@ -61,20 +61,20 @@ IRInstructionType getInstructionType(const std::string& op){
     return ADD;
 }
 
-u_int8_t cIndex;
-u_int8_t lIndex;
-u_int8_t tIndex;
-u_int8_t vIndex;
-inline const std::string getVIndex() noexcept{
+uint8 cIndex;
+uint8 lIndex;
+uint8 tIndex;
+uint8 vIndex;
+inline const string getVIndex() noexcept{
     return ".v"+std::to_string(vIndex);
 }
-inline const std::string getTIndex() noexcept{
+inline const string getTIndex() noexcept{
     return ".t"+std::to_string(tIndex);
 }
-inline const std::string getLIndex() noexcept{
+inline const string getLIndex() noexcept{
     return ".l"+std::to_string(lIndex);
 }
-inline const std::string getCIndex() noexcept{
+inline const string getCIndex() noexcept{
     return ".c"+std::to_string(cIndex);
 }
 std::vector<IRInstruction> ir;

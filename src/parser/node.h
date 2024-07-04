@@ -19,8 +19,6 @@ struct Node;
 struct Statement;
 struct Container;
 struct RootNode;
-struct Type; // TO-DO: merge with BaseType
-
 
 struct Expr;
 struct LiteralExpr;

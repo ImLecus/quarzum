@@ -2,28 +2,28 @@
 #include "../Quarzum.h"
 
 struct SymbolInfo {
-    char type;
-    std::string name;
-    std::string dataType;
-    std::string scope;
-    uint8_t args;
+    char type; // 'v' for variable, 'f' for function
+    string name;
+    string dataType;
+    string scope;
+    uint8 args;
 };
 
 struct SymbolTable {
-    inline void insert(const std::string& name, SymbolInfo info){
+    inline void insert(const string& name, SymbolInfo info){
         table[name] = info;
     }
-    inline void remove(const std::string& name){
+    inline void remove(const string& name){
         table.erase(name);
     }
-    SymbolInfo* find(const std::string& name){
+    SymbolInfo* find(const string& name){
         auto it = table.find(name);
         if(it != table.end()){
             return &(it->second);
         }
         return nullptr;
     }
-    std::unordered_map<std::string, SymbolInfo> table;
+    std::unordered_map<string, SymbolInfo> table;
 };
 
 struct ScopedSymbolTable {
@@ -35,12 +35,12 @@ struct ScopedSymbolTable {
             scopes.pop_back();
         }
     }
-    inline void insert(const std::string& name, SymbolInfo info){
+    inline void insert(const string& name, SymbolInfo info){
         if(not scopes.empty()){
             scopes.back().insert(name, info);
         }
     }
-    SymbolInfo* find(const std::string& name){
+    SymbolInfo* find(const string& name){
         for(auto it = scopes.rbegin(); it != scopes.rend(); ++it){
             if(it->find(name) != nullptr){
                 return it->find(name);

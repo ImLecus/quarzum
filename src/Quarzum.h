@@ -16,22 +16,31 @@
 #pragma once
 #define Q_VERSION "0.1.0" 
 
+typedef unsigned char uint8;
+typedef unsigned int uint32;
+
+
 #include <string>
+using std::string;
 #include <memory>
+using std::move;
+using std::unique_ptr;
+using std::make_unique;
 #include <fstream>
 #include <chrono>
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <cmath>
+using std::pow;
 #include <deque>
 
 #include "./debug/debug.cpp"
-#include "./tokenizer/tokenizer.cpp"
-#include "./parser/parser.cpp"
+#include "tokenizer.cpp"
+//#include "./parser/parser.cpp"
 #include "source.hpp"
 #include "./cli/cli.cpp"
-#include "sem_ir/check.cpp"
+
 //#include "./ir/irinstruction.hpp"
 //#include "./backend/assembler.hpp"
 namespace Quarzum {
@@ -40,3 +49,4 @@ namespace Quarzum {
     namespace CLI = Quarzum::CLI;
 
 }
+

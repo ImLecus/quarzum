@@ -14,7 +14,7 @@
 #define TYPES_CPP
 #include "types.h"
 
-long double getNumMinValue(uint8_t bits){
+long double getNumMinValue(uint8 bits){
     switch (bits)
     {
     case 16:
@@ -27,7 +27,7 @@ long double getNumMinValue(uint8_t bits){
         return 0;
     }
 }
-long double getNumMaxValue(uint8_t bits){
+long double getNumMaxValue(uint8 bits){
     switch (bits)
     {
     case 16:
@@ -47,14 +47,14 @@ struct BaseType {
 };
 
 struct NumericType : public BaseType {
-    NumericType(uint8_t size, const long double min, const long double max): 
+    NumericType(uint8 size, const long double min, const long double max): 
         size(size), 
         MIN_VALUE(min), 
         MAX_VALUE(max){
             isNumeric = true;
             isText = false;
         }
-    uint8_t size;
+    uint8 size;
     const long double MIN_VALUE;
     const long double MAX_VALUE;
 };
@@ -75,8 +75,8 @@ struct Bool : public NumericType {
     Bool(): NumericType(1,0,1) {};
 };
 
-BaseType strToType(const std::string& str){
-    std::unordered_map<std::string, BaseType> types = {
+BaseType strToType(const string& str){
+    std::unordered_map<string, BaseType> types = {
         {"bool", Bool()},
         {"uint8", Uint(8)},
         {"uint16", Uint(16)},

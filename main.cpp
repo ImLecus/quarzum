@@ -15,8 +15,8 @@
 using namespace Quarzum;
 using namespace Debug;
 using namespace CLI;
+
 int main(const int argc,const char** argv) {
-    
     if(argc < 2){
         err("No file specified.");
     }
@@ -25,7 +25,7 @@ int main(const int argc,const char** argv) {
     parseCLIArgs(argv);
 
     const char* filename = argv[1];
-    const std::string content = getSource(filename);
+    const std::vector<char> content = getSource(filename);
     if(content.empty()){
         err("File not found.");
     }
@@ -35,18 +35,18 @@ int main(const int argc,const char** argv) {
     log("Starting the compiler...");
     log("Using architecture x86_64. Use the --a flag to change it.");
     auto start = std::chrono::high_resolution_clock::now();
-    Debug::source = std::make_unique<std::string>(content);
+    Debug::source = std::make_unique<std::vector<char>>(content);
     
     std::deque<Token> tokens = tokenize(content);
 
     log("Lex phase finished correctly. " + std::to_string(tokens.size()) + " tokens found.");
     debugTime(start, "Lex phase");
 
-    Parser parser = Parser(tokens);
-    std::unique_ptr<RootNode> root = parser.parse();
-    debugTime(start, "Parse phase");
+    //Parser parser = Parser(tokens);
+    //unique_ptr<RootNode> root = parser.parse();
+    //debugTime(start, "Parse phase");
     //check(*root);
-    debugTime(start, "Check phase");
+    //debugTime(start, "Check phase");
     // root.generateIR();
     // debugTime(start, "IR phase");
     
@@ -65,6 +65,6 @@ int main(const int argc,const char** argv) {
     //     //system("rm output.asm");
     //     system("rm output.o");
     // }
-    Debug::exit(0);
+    //Debug::exit(0);
     return 0;
 }

@@ -12,16 +12,16 @@
  */
 #pragma once
 #include "parser.h"
-std::unique_ptr<FunctionCallExpr> Parser::parseFunctionCallExpr(Token id){
-    std::unique_ptr<FunctionCallExpr> call = std::make_unique<FunctionCallExpr>(id.value);
+unique_ptr<FunctionCallExpr> Parser::parseFunctionCallExpr(Token id){
+    unique_ptr<FunctionCallExpr> call = make_unique<FunctionCallExpr>(id.value);
     Token t = tokens.front();
     if(t.type == right_par){
         tokens.pop_front();
-        return std::move(call);
+        return move(call);
     }
     while(not tokens.empty()){
         auto expr = parseExpr();
-        call->args.push_back(std::move(expr));
+        call->args.push_back(move(expr));
         Token next = pop();
         if(next.type == comma){
             continue;
@@ -32,35 +32,36 @@ std::unique_ptr<FunctionCallExpr> Parser::parseFunctionCallExpr(Token id){
         throwError("Expected ',' or ')'", next);
         return nullptr;
     }
-    return std::move(call);
+    return move(call);
 }
 
-std::unique_ptr<ParenExpr> Parser::parseParenExpr(){
+unique_ptr<ParenExpr> Parser::parseParenExpr(){
     auto expr = parseExpr();
     if(tokens.empty()){
         err("Mismatched '('");
         return nullptr;
     }
     EXPECT(pop(), right_par, "Expected ')'");
-    return std::make_unique<ParenExpr>(std::move(expr));
+    return make_unique<ParenExpr>(move(expr));
 }
 
-std::unique_ptr<Expr> Parser::parsePrimaryExpr(){
+unique_ptr<Expr> Parser::parsePrimaryExpr(){
     Token t = pop();
     if(t.type == ARITHMETIC_OPERATOR and (t.value == "+" or t.value == "-" or t.value == "not" or t.value == "++" or t.value == "--")){
         if(t.value == "--" or t.value == "++"){
             Token next = pop();
             EXPECT(next,identifier,"Increment or decrement operators are only compatible with identifiers")
-            return std::make_unique<UnaryExpr>(t.value, std::make_unique<IdentifierExpr>(next.value));
+            return make_unique<UnaryExpr>(t.value, make_unique<IdentifierExpr>(next.value));
         }
         auto operand = parsePrimaryExpr();
-        return std::make_unique<UnaryExpr>(t.value,std::move(operand));
+        return make_unique<UnaryExpr>(t.value,move(operand));
     }
-    std::unique_ptr<Expr> expr = nullptr;
+    unique_ptr<Expr> expr = nullptr;
 
     switch (t.type)
     {
     case identifier:
+        
         if(ask(left_par)){
             tokens.pop_front();
             expr = parseFunctionCallExpr(t);
@@ -74,13 +75,18 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpr(){
                 return nullptr;
             }
             EXPECT(pop(), right_square, "Expected ']");
-            expr = std::make_unique<ArrayIndexExpr>(t.value, std::move(index));
+            expr = make_unique<ArrayIndexExpr>(t.value, move(index));
             break;
         }
-        expr = std::make_unique<IdentifierExpr>(t.value);
+        expr = make_unique<IdentifierExpr>(t.value);
         break;
-    case LITERAL:
-        expr = std::make_unique<LiteralExpr>(t.value);
+    case int_literal:
+    case numeric_literal:
+    case string_literal:
+    case char_literal:
+    case bool_literal:
+    case null_literal:
+        expr = make_unique<LiteralExpr>(t);
         break;
     case left_par:
         expr = parseParenExpr();
@@ -95,12 +101,12 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpr(){
             throwError("Increment or decrement operators are only compatible with identifiers", suffix);
             return nullptr;
         }
-        return std::make_unique<UnaryExpr>(t.value, std::make_unique<IdentifierExpr>(suffix.value), false);
+        return make_unique<UnaryExpr>(t.value, make_unique<IdentifierExpr>(suffix.value), false);
     }
-    return std::move(expr);
+    return move(expr);
 }
 
-std::unique_ptr<Expr> Parser::parseExpr() {
+unique_ptr<Expr> Parser::parseExpr() {
     auto left = parsePrimaryExpr();
     while(not tokens.empty()){
         Token op = tokens.front();
@@ -109,7 +115,7 @@ std::unique_ptr<Expr> Parser::parseExpr() {
             auto ifTrue = parseExpr();
             EXPECT(pop(), ternary_separator, "Expected ternary expression")
             auto ifFalse = parseExpr();
-            left = std::make_unique<TernaryExpr>(std::move(left), std::move(ifTrue), std::move(ifFalse));
+            left = make_unique<TernaryExpr>(move(left), move(ifTrue), move(ifFalse));
             break;
         }
         if(not op.isOperator() or op.value == "++" or op.value == "--"){
@@ -117,7 +123,7 @@ std::unique_ptr<Expr> Parser::parseExpr() {
         }
         tokens.pop_front();
         auto right = parseExpr();
-        left = std::make_unique<BinaryExpr>(op.value,std::move(left), std::move(right));
+        left = make_unique<BinaryExpr>(op.value,move(left), move(right));
     }
-    return std::move(left);
+    return move(left);
 }

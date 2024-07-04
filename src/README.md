@@ -14,7 +14,7 @@ Inside each folder, a file must have two versions: the **library** file and the 
 
 ### Toolchain modules
 
-* **Tokenizer**: converts a `std::string` with the source file content in a `std::deque<Token>`.
+* **Tokenizer**: converts a `string` with the source file content in a `std::deque<Token>`.
 * **Parser**: converts the previous `std::deque<Token>` into an AST.
 * **Sem-IR**: this module does the semantic analisys and generates the Intermediate Representation.
 * **Backend**: translates the IR into assembly code, depending on the architecture of the computer.

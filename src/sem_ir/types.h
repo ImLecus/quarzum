@@ -44,8 +44,8 @@ struct NumericType;
  * Sizes: 16, 32, 64
  */
 struct Num;
-long double getNumMinValue(uint8_t bits);
-long double getNumMaxValue(uint8_t bits);
+long double getNumMinValue(uint8 bits);
+long double getNumMaxValue(uint8 bits);
 /**
  * @brief Defines an integer. 
  * Sizes: 8, 16, 32, 64
@@ -69,7 +69,7 @@ struct Function;
 /**
  * @brief Converts a string into a BaseType.
  */
-BaseType strToType(const std::string& str);
+BaseType strToType(const string& str);
 
 #endif
 

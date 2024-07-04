@@ -22,16 +22,16 @@ bool format(const char*& filename, const char* format){
     return true;
 }
 
-const std::string getSource(const char*& filename){
+const std::vector<char> getSource(const char*& filename){
     std::ifstream inputFile(filename);
-    std::string content;
+    std::vector<char> content;
     char c;
     if (not inputFile.is_open()) {
         return content;
     }
     while (inputFile.get(c)) {
-        content += c;
+        content.push_back(c);
     }
     inputFile.close();
-    return std::move(content);
+    return move(content);
 }  

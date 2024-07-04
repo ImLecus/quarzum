@@ -3,9 +3,9 @@
 
 using namespace Quarzum::Debug;
 namespace Quarzum::CLI {
-    std::string outputFileName = "output";
-    std::string inputFileName = "";
-    std::unordered_map<std::string, uint8_t> flags = {
+    string outputFileName = "output";
+    string inputFileName = "";
+    std::unordered_map<string, uint8> flags = {
         {"--a", 1},
         {"--architecture", 1},
         {"--d", 2},
@@ -14,13 +14,13 @@ namespace Quarzum::CLI {
         {"--output", 3}
     };
 
-    std::string commands[] = {"run", "install", "create"};
+    string commands[] = {"run", "install", "create"};
 
     void parseCLIArgs(const char** argv){
-        std::string filename;
+        string filename;
         for(int i = 1; argv[i]; ++i){
 
-            std::string arg = argv[i];
+            string arg = argv[i];
             auto it = flags.find(arg);
             if(it != flags.end()){
                 switch (it->second)

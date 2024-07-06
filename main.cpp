@@ -11,6 +11,7 @@
  * For full details, see LICENSE.
  */
 #include "./src/Quarzum.h"
+#include "./include/quarzum.h"
 
 using namespace Quarzum;
 using namespace Debug;

@@ -15,7 +15,7 @@
 /**
  * @brief Defines a Token type as an uint8 (byte).
  */
-enum class TokenType : uint8_t {
+enum class TokenType : unsigned char {
     // Special tokens
     TokenError,
     TypeKeyword,
@@ -86,12 +86,12 @@ struct Token {
     };
     const TokenType type;
     const char* value;
-    const uint32_t line;
-    const uint32_t column;
+    const unsigned int line;
+    const unsigned int column;
 };
 
 /**
  * @brief Defines an error as a Token. 
  * Used to not interrumpt by force the toolchain.
  */
-constexpr Token ERROR_TOKEN = {TokenType::TokenError, nullptr, 0, 0};
+const Token ERROR_TOKEN = {TokenType::TokenError, nullptr, 0, 0};

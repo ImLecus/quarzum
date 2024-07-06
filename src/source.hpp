@@ -10,9 +10,9 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#include "string.h"
+#include "../include/quarzum/source.h"
 
-bool format(const char*& filename, const char* format){
+bool format(const char*& filename, const char* format) {
     for(u_int16_t i = 0; i < strlen(filename) and i < strlen(format); ++i){
         if(filename[strlen(filename) - i] != format[strlen(format) - i]){
             return false;
@@ -22,7 +22,7 @@ bool format(const char*& filename, const char* format){
     return true;
 }
 
-const std::vector<char> getSource(const char*& filename){
+const std::vector<char> getSource(const char*& filename) {
     std::ifstream inputFile(filename);
     std::vector<char> content;
     char c;

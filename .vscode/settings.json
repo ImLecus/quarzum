@@ -10,7 +10,8 @@
         "fstream": "cpp",
         "new": "cpp",
         "cmath": "cpp",
-        "limits": "cpp"
+        "limits": "cpp",
+        "iosfwd": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

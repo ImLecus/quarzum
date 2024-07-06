@@ -12,14 +12,21 @@
  */
 #pragma once
 #include "Quarzum.h"
-#include "../include/lexer.h"
+#include "../include/quarzum.h"
+#include "internal/buffer.c"
 using namespace Quarzum;
 
 std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
+
+
     std::deque<Token> tokens;
-    uint lineNumber = 1; 
-    uint columnNumber = 1;
+    unsigned int lineNumber = 1; 
+    unsigned int columnNumber = 1;
+
     string buffer;
+    // EXPERIMENTAL
+    Buffer* buff = createBuffer(10);
+
     CommentType commentType = CommentType::None;
     bool err = false;
 
@@ -54,7 +61,7 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
                 if(index + 2 != content.end() and *(index + 2) == '\''){
                     buffer.push_back('\'');
                     ++columnNumber;
-                    tokens.push_back(Token{TokenType::CharLiteral, buffer.data(), lineNumber, columnNumber});
+                    tokens.push_back(Token{TokenType::CharLiteral, buffer.c_str(), lineNumber, columnNumber});
                     buffer.clear();
                     index += 2;
                     continue;
@@ -75,7 +82,7 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
             }
             buffer.push_back('"');
             ++columnNumber;
-            tokens.push_back(Token{TokenType::StringLiteral, buffer.data(), lineNumber, columnNumber});
+            tokens.push_back(Token{TokenType::StringLiteral, buffer.c_str(), lineNumber, columnNumber});
             buffer.clear();
         }
         // Identifiers and keywords
@@ -86,7 +93,7 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
                 ++columnNumber;
             }
             TokenType type = bufferToKeyword(buffer.data());
-            tokens.push_back(Token{type == TokenType::TokenError? TokenType::Identifier : type, buffer.data(), lineNumber, columnNumber});
+            tokens.push_back(Token{type == TokenType::TokenError? TokenType::Identifier : type, buffer.c_str(), lineNumber, columnNumber});
             buffer.clear();
             --index;
         }
@@ -99,7 +106,7 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
                 buffer.push_back(*(index++));
                 ++columnNumber;
             }
-            tokens.push_back(Token{isNumber? TokenType::NumericLiteral: TokenType::IntLiteral, buffer.data(), lineNumber, columnNumber});
+            tokens.push_back(Token{isNumber? TokenType::NumericLiteral: TokenType::IntLiteral, buffer.c_str(), lineNumber, columnNumber});
             buffer.clear();
             --index;
         }
@@ -119,7 +126,7 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
                     continue;
                 }
                 if(type != TokenType::TokenError){ 
-                    tokens.push_back(Token{type, buffer.data(), lineNumber, columnNumber});
+                    tokens.push_back(Token{type, buffer.c_str(), lineNumber, columnNumber});
                     buffer.clear();
                     ++index;
                     continue;
@@ -127,7 +134,7 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
                 buffer.pop_back();
             }
             TokenType type = bufferToSymbol(buffer);
-            tokens.push_back(Token{type, buffer.data(), lineNumber, columnNumber});
+            tokens.push_back(Token{type, buffer.c_str(), lineNumber, columnNumber});
             if(type == TokenType::TokenError){
                 Debug::throwError("Unexpected token", tokens.back());
                 err = true;
@@ -149,6 +156,8 @@ std::deque<Token> tokenize(const std::vector<char>& content) noexcept{
         Debug::err("Lex phase finished with errors. Terminating execution...");
         Debug::exit(1);
     }
+
+    deleteBuffer(buff);
     
     return move(tokens);
 }

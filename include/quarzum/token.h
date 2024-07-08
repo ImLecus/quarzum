@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - token.h
- * Version 1.0, 04/07/2024
+ * Version 1.0, 06/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -10,12 +10,13 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#pragma once
-
+#ifndef TOKEN_H
+#define TOKEN_H
+#include <stddef.h>
 /**
  * @brief Defines a Token type as an uint8 (byte).
  */
-enum class TokenType : unsigned char {
+typedef enum {
     // Special tokens
     TokenError,
     TypeKeyword,
@@ -75,23 +76,21 @@ enum class TokenType : unsigned char {
     BoolLiteral,
     NullLiteral,
     IntLiteral
-};
+} TokenType;
 
 /**
  * @brief Defines a Token. Used as basic interpretation structure by the compiler.
  */
-struct Token {
-    inline bool isOperator() const noexcept {
-        return this->type == TokenType::ArithmeticOperator or this->type == TokenType::ComparationOperator;
-    };
-    const TokenType type;
+typedef struct {
+    TokenType type;
     const char* value;
-    const unsigned int line;
-    const unsigned int column;
-};
+    unsigned int line;
+    unsigned int column;
+} Token;
 
 /**
  * @brief Defines an error as a Token. 
  * Used to not interrumpt by force the toolchain.
  */
-const Token ERROR_TOKEN = {TokenType::TokenError, nullptr, 0, 0};
+#define ERROR_TOKEN = {TokenError, NULL, 0, 0};
+#endif

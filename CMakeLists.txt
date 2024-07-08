@@ -1,10 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
 project(quarzum VERSION 0.1.0 LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED True)
 
-include_directories(src)
+include_directories(include)
+set(SOURCES
+    main.c
+    src/core/buffer.c
+    src/core/bsearch.c
+    src/core/process.c
 
-add_executable(quarzum main.cpp)
+    src/internal/token.c
+    src/internal/io.c
+    src/internal/tokenlist.c
+    src/internal/debug.c
+    src/internal/defs.c
+    src/internal/config.c
+
+    src/toolchain/tokenizer.c
+)
+add_executable(quarzum ${SOURCES})
 

@@ -1,5 +1,5 @@
 /*
- * Quarzum Compiler - source.h
+ * Quarzum Compiler - io.h
  * Version 1.0, 06/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
@@ -10,9 +10,14 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#pragma once
-#include "string.h"
+#ifndef IO_H
+#define IO_H
+#include <stdio.h>
+#include "../core/buffer.h"
 
-bool format(const char*& filename, const char* format);
+/**
+ * @brief Returns the content of a file as a `Buffer`.
+ */
+Buffer* read(const char* filename);
 
-const std::vector<char> getSource(const char*& filename);
+#endif

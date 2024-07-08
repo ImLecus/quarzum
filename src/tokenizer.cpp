@@ -13,7 +13,6 @@
 #pragma once
 #include "Quarzum.h"
 #include "../include/quarzum.h"
-#include "internal/buffer.c"
 using namespace Quarzum;
 
 std::deque<Token> tokenize(const std::vector<char>& content) noexcept{

@@ -11,7 +11,11 @@
         "new": "cpp",
         "cmath": "cpp",
         "limits": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "io.h": "c",
+        "defs.h": "c",
+        "tokenlist.h": "c",
+        "buffer.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

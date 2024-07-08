@@ -10,7 +10,9 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#pragma once
+#ifndef BUFFER_H
+#define BUFFER_H
+#include <stdlib.h>
 #include <string.h>
 
 /**
@@ -34,7 +36,7 @@ Buffer* createBuffer(const long size);
 /**
  * @brief Deletes a `Buffer` and free the allocated memory.
  */
-void deleteBuffer(const Buffer* b);
+void deleteBuffer(Buffer* b);
 /**
  * @brief Adds a new `char` at the last avaliable position.
  * If the `Buffer` is full, it will be resized.
@@ -51,4 +53,5 @@ void clearBuffer(Buffer* b);
 /**
  * @brief Returns a copy of the `Buffer` value. 
  */
-const char* getBuffer(Buffer *b);
+const char* getBuffer(const Buffer *b);
+#endif

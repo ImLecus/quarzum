@@ -10,7 +10,7 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#include "../include/quarzum/buffer.h"
+#include "../include/core/buffer.h"
 
 Buffer* createBuffer(const long size){
     Buffer* b = (Buffer*) malloc(sizeof(Buffer));
@@ -28,7 +28,7 @@ void deleteBuffer(Buffer* b){
 }
 
 unsigned char resizeBuffer(Buffer* b, const long newSize){
-    char* newBuffer = (char*) malloc(newSize);
+    char* newBuffer = (char*) realloc(b->value,newSize);
     if(newBuffer == NULL){
         return -1;
     }
@@ -65,10 +65,12 @@ void clearBuffer(Buffer* b){
     b->len = 0;
 }
 
-const char* getBuffer(Buffer *b){
-    char* value = (char*) malloc(b->len);
-    for(unsigned long i = 0; i <= b->len; ++i){
-        value[i] = b->value[i];
+const char* getBuffer(const Buffer *b){
+    char* result = (char *) malloc(b->len + 1);
+    if(result == NULL){
+        // err
+        
     }
-    return value;
+    strcpy(result, b->value);
+    return result;
 }

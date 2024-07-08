@@ -63,8 +63,7 @@ TokenList* tokenize(Buffer* src){
                 addToBuffer(buffer, src->value[i++]);
             }
             TokenType t = keywordToType(buffer->value);
-            const char* value = getBuffer(buffer);
-            Token tok = {t, value, 0, 0};
+            Token tok = {t, getBuffer(buffer), 0, 0};
             ADD_TOKEN(tok);
             continue;
         }

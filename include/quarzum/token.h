@@ -83,7 +83,7 @@ typedef enum {
  */
 typedef struct {
     TokenType type;
-    const char* value;
+    char* value;
     unsigned int line;
     unsigned int column;
 } Token;

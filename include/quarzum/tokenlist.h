@@ -38,5 +38,9 @@ void deleteTokenList(TokenList* list);
  * @brief Adds a new `Token` into the list.
  */
 void addToTokenList(TokenList* list, Token token);
-
+/**
+ * @brief Returns the token at the list[i] position.
+ * If the position is out of bounds, it will return an ErrorToken.
+ */
+Token getToken(TokenList* list, unsigned int i);
 #endif

@@ -65,7 +65,7 @@ void clearBuffer(Buffer* b){
     b->len = 0;
 }
 
-const char* getBuffer(const Buffer *b){
+char* getBuffer(const Buffer *b){
     char* result = (char *) malloc(b->len + 1);
     if(result == NULL){
         // err

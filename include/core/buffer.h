@@ -53,5 +53,5 @@ void clearBuffer(Buffer* b);
 /**
  * @brief Returns a copy of the `Buffer` value. 
  */
-const char* getBuffer(const Buffer *b);
+char* getBuffer(const Buffer *b);
 #endif

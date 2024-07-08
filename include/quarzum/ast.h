@@ -25,7 +25,13 @@ typedef enum {
     
     IdentifierNode,
     ExprNode,
-    TypeNode
+    TypeNode,
+
+    UnaryExpr,
+    BinaryExpr,
+    ParenExpr,
+    TernaryExpr,
+    Literal
 } NodeType;
 
 /**

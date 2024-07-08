@@ -14,5 +14,18 @@
 #define EXPR_H
 #include "ast.h"
 #include "tokenlist.h"
-    Node* parseExpr(TokenList* list, unsigned int* i);
+#include "../core/debug.h"
+#include <string.h>
+#define PARSING_POS TokenList* tokens, unsigned int* i
+
+/**
+ * @brief Parses an expression. 
+ */
+Node* parseExpr(PARSING_POS);
+
+Node* parsePrimaryExpr(PARSING_POS);
+
+Node* parseParenExpr(PARSING_POS);
+
+    
 #endif

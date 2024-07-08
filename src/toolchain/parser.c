@@ -13,10 +13,6 @@
 #include "../../include/toolchain/parser.h"
 #include <stdio.h>
 
-Token getToken(TokenList* list, unsigned int i){
-    return i <= list->size? 
-        list->content[i]: (Token){TokenError, NULL, 0, 0};
-}
 
 Node* parse(TokenList* tokens){
     Node* root = createNode(Root,1);
@@ -33,7 +29,7 @@ Node* parse(TokenList* tokens){
     return root;
 }
 
-Node* parseStatement(TokenList* tokens, unsigned int* i){
+Node* parseStatement(PARSING_POS){
     Node* stmt = NULL;
     switch (getToken(tokens,*i).type)
     {
@@ -55,7 +51,7 @@ Node* parseStatement(TokenList* tokens, unsigned int* i){
     return stmt;
 }
 
-Node* parseDeclaration(TokenList* tokens, unsigned int* i){
+Node* parseDeclaration(PARSING_POS){
     Node* decl = NULL;
     EXPECT(TypeKeyword, "Expected type keyword.")
     Token id = getToken(tokens,*i);

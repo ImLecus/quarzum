@@ -23,12 +23,6 @@
  * @brief Discards the actual Token to check next.
  */
 #define pass ++(*i)
-
-/**
- * @brief Returns the token at the list[i] position.
- * If the position is out of bounds, it will return an ErrorToken.
- */
-Token getToken(TokenList* list, unsigned int i);
 /**
  * @brief General parsing function.
  * It will generate a `Node` with type Root and wll call
@@ -38,10 +32,10 @@ Node* parse(TokenList* tokens);
 /**
  * @brief Statement parsing function.
  */
-Node* parseStatement(TokenList* tokens, unsigned int *i);
+Node* parseStatement(PARSING_POS);
 /**
  * @brief Variable and function declaration parsing function.
  */
-Node* parseDeclaration(TokenList* tokens, unsigned int* i);
+Node* parseDeclaration(PARSING_POS);
 
 #endif

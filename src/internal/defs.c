@@ -41,10 +41,10 @@ const char* keywords[KEYWORDS_SIZE] = {
     "import",
     "in",
     "int",
-    "int8",
     "int16",
     "int32",
     "int64",
+    "int8",
     "module",
     "new",
     "not",
@@ -65,10 +65,10 @@ const char* keywords[KEYWORDS_SIZE] = {
     "try",
     "typedef",
     "uint",
-    "uint8",
     "uint16",
     "uint32",
     "uint64",
+    "uint8",
     "while",
     "xor"
 };

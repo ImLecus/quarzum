@@ -1,4 +1,1 @@
-function main(){
-    string name = "world";
-    out("Hello" + name);
-}
+function main = 1;

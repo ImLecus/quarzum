@@ -15,6 +15,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "debug.h"
 
 /**
  * @brief Defines a process.

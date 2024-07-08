@@ -17,8 +17,12 @@ set(SOURCES
     src/internal/debug.c
     src/internal/defs.c
     src/internal/config.c
+    src/internal/ast.c
+    src/internal/expr.c
 
     src/toolchain/tokenizer.c
+    src/toolchain/compile.c
+    src/toolchain/parser.c
 )
 add_executable(quarzum ${SOURCES})
 

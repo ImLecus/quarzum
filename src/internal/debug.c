@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - debug.c
- * Version 1.0, 06/07/2024
+ * Version 1.0, 08/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -10,21 +10,21 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#include "../../include/quarzum/debug.h"
+#include "../../include/core/debug.h"
 
 
 void print(const char* message){
-
+    printf(CYAN "[LOG]" RESET " %s\n",message);
 }
 
 void debug(const char* message){
-
+    printf(ORANGE "[DEBUG]" RESET " %s\n",message);
 }
 
 void warn(const char* message){
-
+    printf(YELLOW "[WARNING]" RESET " %s\n",message);
 }
 
 void err(const char* message, unsigned char fatal){
-
+    printf(RED "[ERROR]" RESET " %s\n",message);
 }

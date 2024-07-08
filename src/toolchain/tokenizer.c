@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - tokenizer.c
- * Version 1.0, 06/07/2024
+ * Version 1.0, 08/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *

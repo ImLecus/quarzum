@@ -21,7 +21,8 @@ Process* startProcess(const char* name){
 
 void endProcess(Process* process){
     process->end = clock();
-    printf("%s finished in %f microseconds.\n", process->name, 
-    (float)(process->end - process->start)*1000000/CLOCKS_PER_SEC);
+    char buffer[100];
+    sprintf(buffer,"%s finished in %f seconds.", process->name,  (float)(process->end - process->start)/CLOCKS_PER_SEC);
+    debug(buffer);
     free(process);
 }

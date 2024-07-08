@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - debug.h
- * Version 1.0, 06/07/2024
+ * Version 1.0, 08/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -12,16 +12,23 @@
  */
 #ifndef DEBUG_H
 #define DEBUG_H
+#include <stdio.h>
+
 /**
- * COLOR DEFINITIONSs
+ * STYLE DEFINITIONSs
  */
+#define RESET "\e[0m"
+
 #define RED "\e[31m"
-#define NOCOLOR "\e[0m"
 #define YELLOW "\e[33m"
 #define GREEN "\e[32m"
 #define CYAN "\e[36m"
 #define MAGENTA "\e[35m"
 #define GRAY "\e[90m"
+#define ORANGE "\e[38;5;214m"
+
+#define UNDERLINE "\e[4m"
+#define BOLD "\e[1m"
 
 /**
  * @brief Prints a message in console with the tag [LOG].

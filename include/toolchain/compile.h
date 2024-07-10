@@ -14,6 +14,9 @@
 #define COMPILE_H
 #include "../core/debug.h"
 #include "../core/process.h"
+#include "../quarzum/config.h"
+#include "../quarzum/symbol.h"
+#include "../quarzum/ir.h"
 #include "tokenizer.h"
 #include "parser.h"
 /**

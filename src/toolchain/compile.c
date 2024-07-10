@@ -21,12 +21,22 @@ void compile(const char* file){
     TokenList* t = tokenize(b);
     endProcess(lex);
     Process* parsing = startProcess("Parse phase");
-    Node* ast = parse(t);
+    SymbolTable* symbolTable = createSymbolTable();
+    // create type table
+    // add symbol and type tables into parsing
+    Node* ast = parse(t, symbolTable);
     endProcess(parsing);
 
+    // generate IR
+    InstructionList* ir = createInstructionList();
+
+    // generate asm
+    //createFile(outputFileName);
 
     // free memory
     deleteTokenList(t);
     deleteBuffer(b);
+    deleteInstructionList(ir);
+    deleteSymbolTable(symbolTable);
     endProcess(task);
 }

@@ -12,7 +12,11 @@
  */
 #ifndef IR_H
 #define IR_H
-
+#include <stdlib.h>
+#include "ast.h"
+/**
+ * @brief Defines the instruction set in the intermediate representation.
+ */
 typedef enum {
     Call,
     Sum,
@@ -34,24 +38,56 @@ typedef enum {
     Store,
     AssignConst,
     Jump,
-    Return
+    Ret
 } InstructionType;
-
+/**
+ * @brief Defines an instruction with 5 arguments.
+ */
 typedef struct {
     InstructionType type;
-    void*[5]        args;
+    void*           args[5];
 } Instruction;
-
-static unsigned int branchIndex;
-static unsigned int temporalIndex;
-
+/**
+ * @brief Defines the branchIndex.
+ * When a branch is generated, the index will grow.
+ * If the branch ends, the index will NOT return to its original value.
+ */
+static unsigned int branchIndex = 0;
+/**
+ * @brief Defines the temporalIndex.
+ * When a large operation is defined, results must be temporally stored
+ * in a register. temporalIndex defines which is the first free temporal
+ * register to use. When the operation ends, the index returns to 0.
+ */
+static unsigned int temporalIndex = 0;
+/**
+ * @brief Defines an `Instruction` list. Used by the asm code generator
+ * as its input.
+ */
 typedef struct {
     Instruction** list;
+    unsigned long size;
+    unsigned long capacity;
 } InstructionList;
 
+#define DEFAULT_INSTRUCTION_LIST_SIZE 50
+/**
+ * @brief Creates a new `InstructionList` with size `DEFAULT_INSTRUCTION_LIST_SIZE`.
+ */
 InstructionList* createInstructionList();
-void deleteInstructionList();
+/**
+ * @brief Deletes an `InstructionList`.
+ */
+void deleteInstructionList(InstructionList* list);
+/**
+ * @brief Adds a new element to an `InstructionList`. 
+ * The list will be reallocated if it's full.
+ */
 void addInstruction(InstructionList* list, Instruction* i);
-
+/**
+ * @brief Reads an AST generating zero or more `Instruction`
+ * per `Node`, adding them to an `InstructionList`.
+ */
+void generateIR(Node* ast, InstructionList* list);
 
 #endif

@@ -12,10 +12,10 @@
  */
 #include "../../include/toolchain/parser.h"
 
-Node* parse(TokenList* tokens){
+Node* parse(TokenList* tokens, SymbolTable* symbolTable){
     Node* root = createNode(Root,1);
     for(unsigned int i = 0; i < tokens->size; ++i){
-        Node* statement = parseStatement(tokens, &i);
+        Node* statement = parseStatement(tokens, &i, symbolTable);
         if(statement != NULL){
             addChildNode(root, statement);
         }
@@ -40,7 +40,7 @@ Node* parseStatement(PARSING_POS){
         stmt = createNode(ContinueStmt,0);
         break;
     case TypeKeyword:
-        stmt = parseDeclaration(tokens, i);
+        stmt = parseDeclaration(tokens, i,symbolTable);
         break;
     default:
         break;
@@ -61,7 +61,7 @@ Node* parseDeclaration(PARSING_POS){
     {
     case Equal:
         pass;
-        Node* expr = parseExpr(tokens, i);
+        Node* expr = parseExpr(tokens, i,symbolTable);
         if(expr ==  NULL){
             err("Expected expression",0);
             break;
@@ -86,7 +86,7 @@ Node* parseDeclaration(PARSING_POS){
         EXPECT(LeftCurly, "Expected 'function' body");
         pass;
         while(getToken(tokens, *i).type != RightPar){
-            Node* statement = parseStatement(tokens, i);
+            Node* statement = parseStatement(tokens, i,symbolTable);
             if(statement != NULL){
                 addChildNode(decl, statement);
             }
@@ -99,7 +99,11 @@ Node* parseDeclaration(PARSING_POS){
         break;
     }
     Type* t = getTypeFromToken(type);
-    
+    if(t == NULL){
+        // err
+    }
+    Symbol s = {t,NULL,Global,0};
+    addSymbol(symbolTable, s);
     return decl;
 }
 

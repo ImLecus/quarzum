@@ -16,7 +16,8 @@
         "defs.h": "c",
         "tokenlist.h": "c",
         "buffer.h": "c",
-        "debug.h": "c"
+        "debug.h": "c",
+        "ir.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

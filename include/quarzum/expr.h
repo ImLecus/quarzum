@@ -13,10 +13,11 @@
 #ifndef EXPR_H
 #define EXPR_H
 #include "ast.h"
+#include "symbol.h"
 #include "tokenlist.h"
 #include "../core/debug.h"
 #include <string.h>
-#define PARSING_POS TokenList* tokens, unsigned int* i
+#define PARSING_POS TokenList* tokens, unsigned int* i, SymbolTable* symbolTable
 
 /**
  * @brief Parses an expression. 

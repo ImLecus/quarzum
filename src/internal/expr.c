@@ -13,7 +13,7 @@
 #include "../../include/quarzum/expr.h"
 
 Node* parseExpr(PARSING_POS){
-    Node* left = parsePrimaryExpr(tokens, i);
+    Node* left = parsePrimaryExpr(tokens, i,symbolTable);
     
     while (getToken(tokens, *i).value != NULL)
     {
@@ -21,12 +21,12 @@ Node* parseExpr(PARSING_POS){
 
         if(strcmp(op.value,"?") == 0){
             ++(*i);
-            Node* ifTrue = parseExpr(tokens,i);
+            Node* ifTrue = parseExpr(tokens,i,symbolTable);
             if(getToken(tokens, (*i)++).type != TernarySeparator){
                 err("Expected ternary expression.",0);
                 return NULL;
             }
-            Node* ifFalse = parseExpr(tokens,i);
+            Node* ifFalse = parseExpr(tokens,i,symbolTable);
             Node* expr = createNode(TernaryExpr, 3);
             addChildNode(expr, left);
             addChildNode(expr, ifTrue);
@@ -39,7 +39,7 @@ Node* parseExpr(PARSING_POS){
         }
 
         ++(*i);
-        Node* right = parseExpr(tokens, i);
+        Node* right = parseExpr(tokens, i,symbolTable);
         Node* expr = createNode(BinaryExpr, 2);
         expr->data = op.value;
         addChildNode(expr, left);
@@ -50,7 +50,7 @@ Node* parseExpr(PARSING_POS){
 
 Node* parseParenExpr(PARSING_POS){
 
-    Node* expr = parseExpr(tokens,i);
+    Node* expr = parseExpr(tokens,i,symbolTable);
 
     if(getToken(tokens, *i).type != RightPar){
         err("Expected ')'",0);
@@ -80,7 +80,7 @@ Node* parsePrimaryExpr(PARSING_POS){
         }
         Node* unaryExpr = createNode(UnaryExpr,1);
         unaryExpr->data = t.value;
-        addChildNode(unaryExpr, parsePrimaryExpr(tokens,i));
+        addChildNode(unaryExpr, parsePrimaryExpr(tokens,i,symbolTable));
         return unaryExpr;
     }
     Node* expr = NULL;
@@ -100,7 +100,7 @@ Node* parsePrimaryExpr(PARSING_POS){
         expr->data = t.value;
         break;
     case LeftPar:
-        expr = parseParenExpr(tokens,i);
+        expr = parseParenExpr(tokens,i,symbolTable);
         break;
     default:
         return NULL;

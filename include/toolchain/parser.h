@@ -29,7 +29,7 @@
  * It will generate a `Node` with type Root and wll call
  * `parseStatement` until the `TokenList` is fully iterated.
  */
-Node* parse(TokenList* tokens);
+Node* parse(TokenList* tokens, SymbolTable* symbolTable);
 /**
  * @brief Statement parsing function.
  */

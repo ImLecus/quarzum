@@ -26,3 +26,16 @@ Buffer* read(const char* filename){
     fclose(file);
     return b;
 }
+
+FILE* createFile(const char* filename){
+    FILE* file = fopen(filename, "rw");
+    return file;
+}
+
+void write(FILE* file, char* content){
+    if(file == NULL){
+        return;
+    }
+    fprintf(file,"%s",content);
+    fflush(file);
+}

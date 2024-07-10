@@ -3,3 +3,4 @@ output/
 tests/
 .vscode/
 test/
+asm/

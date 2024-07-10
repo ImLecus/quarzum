@@ -30,7 +30,7 @@ void addToTokenList(TokenList* list, Token token){
         list->content[list->size++] = token;
         return;
     }
-    
+    // realloc
 }
 
 Token getToken(TokenList* list, unsigned int i){

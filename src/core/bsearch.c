@@ -11,12 +11,11 @@
  * For full details, see LICENSE.
  */
 #include "../../include/core/bsearch.h"
-#include <stdio.h>
 
 int binarySearch(const char* symbol, const char** list, unsigned int size){
     int left = 0;
     int right = size;
-    while(left <= right){
+    while(left < right){
         int mid = left + (right - left)/2;
         int cmp = strcmp(symbol, list[mid]);
 

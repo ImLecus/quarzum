@@ -18,6 +18,7 @@ set(SOURCES
     src/internal/ast.c
     src/internal/expr.c
     src/internal/cli.c
+    src/internal/type.c
 
     src/toolchain/tokenizer.c
     src/toolchain/compile.c

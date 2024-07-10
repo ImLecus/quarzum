@@ -13,11 +13,17 @@
     _input_buffer: .space 256
     _timeval: .space 16
 .text
+
+.global len
+.global out
+.global input
+.global time
+.global strcat
+
 #
 #   uint len(char* string)
 #   Returns the length of the string
 #
-.global len
 len:
     enter $0, $0
     push %rsi
@@ -36,7 +42,6 @@ len:
 #   function out(char* message)
 #   Displays a message
 #
-.global out
 out:
     enter $0, $0
     push %rdx
@@ -63,7 +68,6 @@ out:
 #   char[256] input();
 #   Reads the console and stores the content inside _input_buffer
 #
-.global input
 input:
     enter $0, $0
     push %rsi
@@ -85,7 +89,6 @@ input:
 # uint time();
 # Returns the number of seconds since 1/1/1970
 #
-.global time
 time:
     enter $0, $0
 
@@ -101,7 +104,6 @@ time:
 # function strcat(string str1, string str2);
 # Modifies the first string, adding the second.
 #
-.global strcat
 strcat:
     enter $0, $0
     push %rcx

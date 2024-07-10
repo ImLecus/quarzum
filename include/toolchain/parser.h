@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - parser.h
- * Version 1.0, 08/07/2024
+ * Version 1.0, 10/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -14,10 +14,11 @@
 #define PARSER_H
 #include "../quarzum/expr.h"
 #include "../quarzum/ast.h"
+#include "../quarzum/symbol.h"
 #include "../quarzum/tokenlist.h"
 #include "../core/debug.h"
 
-#define EXPECT(t,errMessage) if(getToken(tokens, ++(*i)).type != t){err(errMessage,0); return NULL;}
+#define EXPECT(t,errMessage) if(getToken(tokens, *i).type != t){err(errMessage,0); return NULL;}
 
 /**
  * @brief Discards the actual Token to check next.

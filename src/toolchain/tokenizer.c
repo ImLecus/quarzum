@@ -62,7 +62,9 @@ TokenList* tokenize(Buffer* src){
             while(isalnum(src->value[i]) || src->value[i] == '_'){
                 addToBuffer(buffer, src->value[i++]);
             }
+           
             TokenType t = keywordToType(buffer->value);
+
             Token tok = {t, getBuffer(buffer), 0, 0};
             ADD_TOKEN(tok);
             continue;

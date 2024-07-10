@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - parser.c
- * Version 1.0, 08/07/2024
+ * Version 1.0, 10/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -11,8 +11,6 @@
  * For full details, see LICENSE.
  */
 #include "../../include/toolchain/parser.h"
-#include <stdio.h>
-
 
 Node* parse(TokenList* tokens){
     Node* root = createNode(Root,1);
@@ -42,7 +40,6 @@ Node* parseStatement(PARSING_POS){
         stmt = createNode(ContinueStmt,0);
         break;
     case TypeKeyword:
-        --(*i);
         stmt = parseDeclaration(tokens, i);
         break;
     default:
@@ -56,9 +53,11 @@ Node* parseDeclaration(PARSING_POS){
     // to-do: add types into declarations
     Token type = getToken(tokens, *i);
     EXPECT(TypeKeyword, "Expected type keyword.")
+    pass;
     Token id = getToken(tokens,*i);
     EXPECT(Identifier, "Expected identifier")
-    switch (getToken(tokens, ++(*i)).type)
+    pass;
+    switch (getToken(tokens, *i).type)
     {
     case Equal:
         pass;
@@ -72,16 +71,20 @@ Node* parseDeclaration(PARSING_POS){
         addChildNode(decl, expr);
         break;
     case Semicolon:
+        pass;
         decl = createNode(VarStmt,1);
         decl->data = id.value;
         break;
     case LeftPar:
+        pass;
         // parse arguments
         EXPECT(RightPar, "Expected ')'");
+        pass;
         decl = createNode(FunctionStmt,2);
         decl->data = id.value;
         // semicolon for incompletion
         EXPECT(LeftCurly, "Expected 'function' body");
+        pass;
         while(getToken(tokens, *i).type != RightPar){
             Node* statement = parseStatement(tokens, i);
             if(statement != NULL){
@@ -95,6 +98,8 @@ Node* parseDeclaration(PARSING_POS){
         err("Expected semicolon or declaration", 0);
         break;
     }
+    Type* t = getTypeFromToken(type);
+    
     return decl;
 }
 

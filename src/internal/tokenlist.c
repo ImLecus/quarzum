@@ -35,5 +35,5 @@ void addToTokenList(TokenList* list, Token token){
 
 Token getToken(TokenList* list, unsigned int i){
     return i <= list->size? 
-        list->content[i]: (Token){TokenError, NULL, 0, 0};
+        list->content[i]: ERROR_TOKEN;
 }

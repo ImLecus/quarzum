@@ -22,6 +22,7 @@
 #include "quarzum/io.h"
 #include "quarzum/tokenlist.h"
 #include "quarzum/ast.h"
+#include "quarzum/cli.h"
 
 #include "toolchain/tokenizer.h"
 #include "toolchain/parser.h"

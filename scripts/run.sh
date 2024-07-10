@@ -1,2 +1,2 @@
 clear
-./out/build/preset/quarzum code.qz --debug
+./out/build/preset/quarzum code.qz

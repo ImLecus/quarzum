@@ -10,15 +10,14 @@ set(SOURCES
     src/core/buffer.c
     src/core/bsearch.c
     src/core/process.c
+    src/core/debug.c
 
-    src/internal/token.c
     src/internal/io.c
     src/internal/tokenlist.c
-    src/internal/debug.c
     src/internal/defs.c
-    src/internal/config.c
     src/internal/ast.c
     src/internal/expr.c
+    src/internal/cli.c
 
     src/toolchain/tokenizer.c
     src/toolchain/compile.c

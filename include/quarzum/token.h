@@ -92,5 +92,5 @@ typedef struct {
  * @brief Defines an error as a Token. 
  * Used to not interrumpt by force the toolchain.
  */
-#define ERROR_TOKEN = {TokenError, NULL, 0, 0};
+static Token ERROR_TOKEN = {TokenError, NULL, 0, 0};
 #endif

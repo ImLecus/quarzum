@@ -22,9 +22,9 @@ typedef enum {
     ModuleStmt,
     BreakStmt,
     ContinueStmt,
+    FunctionStmt,
     
     IdentifierNode,
-    ExprNode,
     TypeNode,
 
     UnaryExpr,

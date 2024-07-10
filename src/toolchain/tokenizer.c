@@ -69,8 +69,8 @@ TokenList* tokenize(Buffer* src){
         }
         if(isdigit(src->value[i])){
             int isNumber = 0;
-            while(isdigit(src->value[i]) || src->value[i]=='_'){
-                if(src->value[i]=='_'){
+            while(isdigit(src->value[i]) || src->value[i]=='.'){
+                if(src->value[i]=='.'){
                     if(isNumber == 1){
                         // err
                     }

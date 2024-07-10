@@ -13,10 +13,12 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define noWarningMessages 0x00000001
-#define debugMode         0x00000010
+#define noWarningMessages 0x001
+#define debugMode         0x010
+#define showTokens        0x100
 
-
-int flags = 0;
+static int flags = 0;
+static char* architecture = "x86_64";
+static char* outputFileName = "program";
 
 #endif

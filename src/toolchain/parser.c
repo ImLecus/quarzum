@@ -53,6 +53,8 @@ Node* parseStatement(PARSING_POS){
 
 Node* parseDeclaration(PARSING_POS){
     Node* decl = NULL;
+    // to-do: add types into declarations
+    Token type = getToken(tokens, *i);
     EXPECT(TypeKeyword, "Expected type keyword.")
     Token id = getToken(tokens,*i);
     EXPECT(Identifier, "Expected identifier")
@@ -74,7 +76,20 @@ Node* parseDeclaration(PARSING_POS){
         decl->data = id.value;
         break;
     case LeftPar:
-        pass;
+        // parse arguments
+        EXPECT(RightPar, "Expected ')'");
+        decl = createNode(FunctionStmt,2);
+        decl->data = id.value;
+        // semicolon for incompletion
+        EXPECT(LeftCurly, "Expected 'function' body");
+        while(getToken(tokens, *i).type != RightPar){
+            Node* statement = parseStatement(tokens, i);
+            if(statement != NULL){
+                addChildNode(decl, statement);
+            }
+            pass;
+        }
+        // parse identation
         break;
     default:
         err("Expected semicolon or declaration", 0);

@@ -21,7 +21,7 @@
 #define ADD_TOKEN(t) addToTokenList(tokens, t);clearBuffer(buffer);
 
 /**
- * @brief Converts the source file text into a TokenList.
+ * @brief Reads a file and converts the source file text into a TokenList.
  * It will return NULL if something goes wrong.
  */
-TokenList* tokenize(Buffer* src);
+TokenList* tokenize(char* file);

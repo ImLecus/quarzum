@@ -17,7 +17,6 @@ set(SOURCES
     src/internal/defs.c
     src/internal/ast.c
     src/internal/expr.c
-    src/internal/cli.c
     src/internal/type.c
     src/internal/symbol.c
     src/internal/ir.c

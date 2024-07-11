@@ -18,11 +18,15 @@ void print(const char* message){
 }
 
 void debug(const char* message){
-    printf(ORANGE "[DEBUG]" RESET " %s\n",message);
+    if(1){//flags & debugMode == debugMode){
+        printf(ORANGE "[DEBUG]" RESET " %s\n",message);
+    }
 }
 
 void warn(const char* message){
-    printf(YELLOW "[WARNING]" RESET " %s\n",message);
+    if(flags & noWarningMessages != noWarningMessages){
+        printf(YELLOW "[WARNING]" RESET " %s\n",message);
+    }
 }
 
 void err(const char* message, unsigned char fatal){

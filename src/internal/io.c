@@ -15,7 +15,7 @@
 Buffer* read(const char* filename){
     FILE* file = fopen(filename, "r");
     if(file == NULL){
-        // err
+        err("No such file or directory.",1);
         return NULL;
     }
     Buffer* b = createBuffer(256);

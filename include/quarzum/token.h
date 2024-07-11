@@ -79,18 +79,28 @@ typedef enum {
 } TokenType;
 
 /**
+ * @brief Defines the extra information that contains a Token. It
+ * includes the line, column and file name where the Token was
+ * created.
+ */
+typedef struct {
+    unsigned int line;
+    unsigned int column;
+    char* file;
+} TokenInfo;
+
+/**
  * @brief Defines a Token. Used as basic interpretation structure by the compiler.
  */
 typedef struct {
     TokenType type;
     char* value;
-    unsigned int line;
-    unsigned int column;
+    TokenInfo info;
 } Token;
 
 /**
  * @brief Defines an error as a Token. 
  * Used to not interrumpt by force the toolchain.
  */
-static Token ERROR_TOKEN = {TokenError, NULL, 0, 0};
+static Token ERROR_TOKEN = {TokenError, NULL, {0,0,NULL}};
 #endif

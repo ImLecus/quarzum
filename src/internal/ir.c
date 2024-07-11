@@ -26,3 +26,9 @@ void deleteInstructionList(InstructionList* list){
 void addInstruction(InstructionList* list, Instruction* i){
 
 }
+
+void generateIR(Node* ast, InstructionList* list){
+    for(unsigned long i = 0; i < ast->childrenCount; ++i){
+        // generate ir (child)
+    }
+}

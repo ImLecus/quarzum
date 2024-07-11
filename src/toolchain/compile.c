@@ -14,11 +14,9 @@
 
 void compile(const char* file){
     Process* task = startProcess("Task");
-    print("Starting the compiler...");
-    Buffer* b = read(file);
-
+    debug("Starting the compiler...");
     Process* lex = startProcess("Lex phase");
-    TokenList* t = tokenize(b);
+    TokenList* t = tokenize(file);
     endProcess(lex);
     Process* parsing = startProcess("Parse phase");
     SymbolTable* symbolTable = createSymbolTable();
@@ -35,7 +33,6 @@ void compile(const char* file){
 
     // free memory
     deleteTokenList(t);
-    deleteBuffer(b);
     deleteInstructionList(ir);
     deleteSymbolTable(symbolTable);
     endProcess(task);

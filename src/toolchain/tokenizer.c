@@ -12,7 +12,11 @@
  */
 #include "../include/toolchain/tokenizer.h"
 
-TokenList* tokenize(Buffer* src){
+TokenList* tokenize(char* file){
+    Buffer* src = read(file);
+    if(src == NULL){
+        return NULL;
+    }
     TokenList* tokens = createTokenList(src->len);
     Buffer* buffer = createBuffer(DEFAULT_TOKENIZER_BUFFER_SIZE);
     unsigned long i = 0;
@@ -54,7 +58,7 @@ TokenList* tokenize(Buffer* src){
             addToBuffer(buffer,'"');
             ++i;
             ++columnNumber;
-            Token tok = {StringLiteral, getBuffer(buffer), lineNumber, columnNumber};
+            Token tok = {StringLiteral, getBuffer(buffer), {lineNumber, columnNumber, NULL}};
             ADD_TOKEN(tok);
             continue;
         }
@@ -65,7 +69,7 @@ TokenList* tokenize(Buffer* src){
            
             TokenType t = keywordToType(buffer->value);
 
-            Token tok = {t, getBuffer(buffer), 0, 0};
+            Token tok = {t, getBuffer(buffer),{lineNumber, columnNumber, NULL}};
             ADD_TOKEN(tok);
             continue;
         }
@@ -80,7 +84,7 @@ TokenList* tokenize(Buffer* src){
                 }
                 addToBuffer(buffer, src->value[i++]);
             }
-            Token tok = {isNumber == 1? NumericLiteral : IntLiteral, getBuffer(buffer), 0, 0};
+            Token tok = {isNumber == 1? NumericLiteral : IntLiteral, getBuffer(buffer), {lineNumber, columnNumber, NULL}};
             ADD_TOKEN(tok);
             continue;
         }
@@ -97,7 +101,7 @@ TokenList* tokenize(Buffer* src){
                     continue;
                 }
                 if(t != TokenError){
-                    Token tok = {t, getBuffer(buffer), lineNumber, 0};
+                    Token tok = {t, getBuffer(buffer),{lineNumber, columnNumber, NULL}};
                     ADD_TOKEN(tok);
                     continue;
                 }
@@ -109,7 +113,7 @@ TokenList* tokenize(Buffer* src){
                 Token errorToken = {t,NULL,0,0};
                 ADD_TOKEN(errorToken);
             }
-            Token tok = {t, getBuffer(buffer), lineNumber, 0};
+            Token tok = {t, getBuffer(buffer), {lineNumber, columnNumber, NULL}};
             ADD_TOKEN(tok);
             continue;
         }
@@ -123,6 +127,7 @@ TokenList* tokenize(Buffer* src){
         ++columnNumber;
         ++i;
     }
+    deleteBuffer(src);
     deleteBuffer(buffer);
     return tokens;
 }

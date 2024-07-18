@@ -20,7 +20,7 @@ TokenList* createTokenList(unsigned long size){
     return list;
 } 
 
-void deleteTokenList(TokenList* list){
+inline void deleteTokenList(TokenList* list){
     free(list->content);
     free(list);
 }
@@ -33,7 +33,8 @@ void addToTokenList(TokenList* list, Token token){
     // realloc
 }
 
-Token getToken(TokenList* list, unsigned int i){
-    return i <= list->size? 
-        list->content[i]: ERROR_TOKEN;
+inline Token getToken(TokenList* list, unsigned int i){
+    return  i <= list->size? 
+            list->content[i]: 
+            ERROR_TOKEN;
 }

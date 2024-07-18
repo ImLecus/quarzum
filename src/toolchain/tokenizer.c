@@ -19,10 +19,11 @@ TokenList* tokenize(char* file){
     }
     TokenList* tokens = createTokenList(src->len);
     Buffer* buffer = createBuffer(DEFAULT_TOKENIZER_BUFFER_SIZE);
-    unsigned long i = 0;
-    unsigned int lineNumber = 1;
-    unsigned int columnNumber = 1;
-    unsigned char commentType = 0;
+    
+    u_int64_t i = 0;
+    u_int32_t lineNumber = 1;
+    u_int32_t columnNumber = 1;
+    u_char commentType = 0;
 
     while(i < src->len && src->value[i] != '\0'){
         if(src->value[i] == '\n'){
@@ -58,7 +59,7 @@ TokenList* tokenize(char* file){
             addToBuffer(buffer,'"');
             ++i;
             ++columnNumber;
-            Token tok = {StringLiteral, getBuffer(buffer), {lineNumber, columnNumber, NULL}};
+            Token tok = {StringLiteral, getBuffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
@@ -69,7 +70,7 @@ TokenList* tokenize(char* file){
            
             TokenType t = keywordToType(buffer->value);
 
-            Token tok = {t, getBuffer(buffer),{lineNumber, columnNumber, NULL}};
+            Token tok = {t, getBuffer(buffer),TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
@@ -84,7 +85,7 @@ TokenList* tokenize(char* file){
                 }
                 addToBuffer(buffer, src->value[i++]);
             }
-            Token tok = {isNumber == 1? NumericLiteral : IntLiteral, getBuffer(buffer), {lineNumber, columnNumber, NULL}};
+            Token tok = {isNumber == 1? NumericLiteral : IntLiteral, getBuffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
@@ -101,7 +102,7 @@ TokenList* tokenize(char* file){
                     continue;
                 }
                 if(t != TokenError){
-                    Token tok = {t, getBuffer(buffer),{lineNumber, columnNumber, NULL}};
+                    Token tok = {t, getBuffer(buffer),TOKEN_INFO};
                     ADD_TOKEN(tok);
                     continue;
                 }
@@ -113,7 +114,7 @@ TokenList* tokenize(char* file){
                 Token errorToken = {t,NULL,0,0};
                 ADD_TOKEN(errorToken);
             }
-            Token tok = {t, getBuffer(buffer), {lineNumber, columnNumber, NULL}};
+            Token tok = {t, getBuffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
@@ -122,8 +123,7 @@ TokenList* tokenize(char* file){
             ++columnNumber;
             continue;
         }
-
-        printf("Unexpected token %c at line %d.\n",src->value[i], lineNumber);
+        lexicalErr("Unexpected token", file, &src->value[i], lineNumber);
         ++columnNumber;
         ++i;
     }

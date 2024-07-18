@@ -12,7 +12,7 @@
  */
 #include "../../include/toolchain/compile.h"
 
-void compile(const char* file){
+void compile(char* file){
     Process* task = startProcess("Task");
     debug("Starting the compiler...");
     Process* lex = startProcess("Lex phase");

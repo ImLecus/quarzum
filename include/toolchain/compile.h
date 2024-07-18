@@ -23,6 +23,6 @@
  * @brief Compiles a file. 
  * Compiler options are not managed by this function.
  */
-void compile(const char* file);
+void compile(char* file);
 
 #endif

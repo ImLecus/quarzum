@@ -14,6 +14,7 @@
 #define DEBUG_H
 #include <stdio.h>
 #include "../quarzum/config.h"
+#include "../quarzum/token.h"
 
 /**
  * STYLE DEFINITIONSs
@@ -45,11 +46,14 @@ void debug(const char* message);
  * Can be desactivated with the `noWarningErrors` flag activated.
  */
 void warn(const char* message);
-/**
+/*
  * @brief Throws an error message in console with the tag [ERROR].
  * @param fatal Exits the program if the error is considered fatal.
  */
 void err(const char* message, unsigned char fatal);
-
+/**
+ * @brief Throws a lexical error.
+ */
+void lexicalErr(const char* message, char* file, char* value, unsigned int line);
 
 #endif

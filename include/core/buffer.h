@@ -14,13 +14,13 @@
 #define BUFFER_H
 #include <stdlib.h>
 #include <string.h>
-
+typedef const unsigned long b_size_t;
 /**
  * @brief Defines a buffer with limited size.
  */
 typedef struct {
-    unsigned long size;
-    unsigned long len;
+    u_int64_t size;
+    u_int64_t len;
     char* value;
 } Buffer;
 
@@ -28,15 +28,15 @@ typedef struct {
  * @brief Allocates new memory for a larger buffer of size `newSize`.
  * @return `-1` if the allocation goes wrong, `0` otherwise.
  */
-unsigned char resizeBuffer(Buffer* b, long newSize);
+u_char resizeBuffer(Buffer* b, u_int64_t newSize);
 /**
  * @brief Creates a new `Buffer`.
  */
-Buffer* createBuffer(const long size);
+Buffer* createBuffer(b_size_t size);
 /**
  * @brief Deletes a `Buffer` and free the allocated memory.
  */
-void deleteBuffer(Buffer* b);
+void deleteBuffer(Buffer* buffer);
 /**
  * @brief Adds a new `char` at the last avaliable position.
  * If the `Buffer` is full, it will be resized.

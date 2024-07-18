@@ -32,3 +32,7 @@ void warn(const char* message){
 void err(const char* message, unsigned char fatal){
     printf(RED "[ERROR]" RESET " %s\n",message);
 }
+
+void lexicalErr(const char* message, char* file, char* value, unsigned int line){
+    printf(RED "[ERROR]" RESET "(%s) %s %s at line %d. \n",file,message, value, line);
+}

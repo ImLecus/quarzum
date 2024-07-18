@@ -13,7 +13,6 @@
 #ifndef AST_H
 #define AST_H
 #include <stdlib.h>
-
 typedef enum {
     Root,
     IfStmt,
@@ -42,14 +41,16 @@ typedef enum {
 typedef struct  {
     NodeType type;
     struct Node** children;
-    unsigned int childrenCount;
-    unsigned int maxChildren;
+    u_int32_t childrenCount;
+    u_int32_t maxChildren;
     void* data;
-} Node;
 
-Node* createNode(NodeType type, unsigned int defaultChildren);
-void deleteNode(Node* node);
-void addChildNode(Node* parent, Node* child);
+    struct Node* (*create)(NodeType type, u_int32_t defaultChildren);
+} Node;
+typedef Node* node_t;
+node_t createNode(NodeType type, u_int32_t defaultChildren);
+void deleteNode(node_t node);
+void addChildNode(node_t parent, node_t child);
 
 
 

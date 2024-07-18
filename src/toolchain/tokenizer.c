@@ -63,8 +63,8 @@ TokenList* tokenize(char* file){
             ADD_TOKEN(tok);
             continue;
         }
-        if(isalpha(src->value[i])){
-            while(isalnum(src->value[i]) || src->value[i] == '_'){
+        if(isAlpha(src->value[i])){
+            while(isAlphaNumeric(src->value[i]) || src->value[i] == '_'){
                 addToBuffer(buffer, src->value[i++]);
             }
            
@@ -74,9 +74,9 @@ TokenList* tokenize(char* file){
             ADD_TOKEN(tok);
             continue;
         }
-        if(isdigit(src->value[i])){
+        if(isDigit(src->value[i])){
             int isNumber = 0;
-            while(isdigit(src->value[i]) || src->value[i]=='.'){
+            while(isDigit(src->value[i]) || src->value[i]=='.'){
                 if(src->value[i]=='.'){
                     if(isNumber == 1){
                         // err
@@ -89,10 +89,10 @@ TokenList* tokenize(char* file){
             ADD_TOKEN(tok);
             continue;
         }
-        if(ispunct(src->value[i])){
+        if(isSymbol(src->value[i])){
             addToBuffer(buffer, src->value[i++]);
 
-            if(i <= src->len && ispunct(src->value[i])){
+            if(i <= src->len && isSymbol(src->value[i])){
                
 
                 addToBuffer(buffer, src->value[i]);
@@ -118,7 +118,7 @@ TokenList* tokenize(char* file){
             ADD_TOKEN(tok);
             continue;
         }
-        if(isspace(src->value[i])){
+        if(isSpace(src->value[i])){
             ++i;
             ++columnNumber;
             continue;

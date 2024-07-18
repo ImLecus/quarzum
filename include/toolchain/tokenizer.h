@@ -15,7 +15,7 @@
 #include "../quarzum/defs.h"
 #include "../quarzum/io.h"
 #include "../core/debug.h"
-#include <ctype.h>
+#include "../core/char.h"
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10
 

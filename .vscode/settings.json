@@ -18,7 +18,8 @@
         "buffer.h": "c",
         "debug.h": "c",
         "ir.h": "c",
-        "quarzum.h": "c"
+        "quarzum.h": "c",
+        "char.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

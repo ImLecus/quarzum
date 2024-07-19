@@ -12,8 +12,8 @@
  */
 #include "../../include/quarzum/expr.h"
 
-Node* parseExpr(PARSING_POS){
-    Node* left = parsePrimaryExpr(tokens, i,symbolTable);
+node_t parseExpr(PARSING_POS){
+    node_t left = parsePrimaryExpr(tokens, i,symbolTable);
     
     while (getToken(tokens, *i).value != NULL)
     {
@@ -21,13 +21,13 @@ Node* parseExpr(PARSING_POS){
 
         if(strcmp(op.value,"?") == 0){
             ++(*i);
-            Node* ifTrue = parseExpr(tokens,i,symbolTable);
+            node_t ifTrue = parseExpr(tokens,i,symbolTable);
             if(getToken(tokens, (*i)++).type != TernarySeparator){
                 err("Expected ternary expression.",0);
                 return NULL;
             }
-            Node* ifFalse = parseExpr(tokens,i,symbolTable);
-            Node* expr = createNode(TernaryExpr, 3);
+            node_t ifFalse = parseExpr(tokens,i,symbolTable);
+            node_t expr = createNode(TernaryExpr, 3);
             addChildNode(expr, left);
             addChildNode(expr, ifTrue);
             addChildNode(expr, ifFalse);
@@ -39,8 +39,8 @@ Node* parseExpr(PARSING_POS){
         }
 
         ++(*i);
-        Node* right = parseExpr(tokens, i,symbolTable);
-        Node* expr;
+        node_t right = parseExpr(tokens, i,symbolTable);
+        node_t expr;
         expr->create(BinaryExpr, 2);
         expr->data = op.value;
         addChildNode(expr, left);
@@ -49,20 +49,20 @@ Node* parseExpr(PARSING_POS){
     return left;
 }
 
-Node* parseParenExpr(PARSING_POS){
+node_t parseParenExpr(PARSING_POS){
 
-    Node* expr = parseExpr(tokens,i,symbolTable);
+    node_t expr = parseExpr(tokens,i,symbolTable);
 
     if(getToken(tokens, *i).type != RightPar){
         err("Expected ')'",0);
         return NULL;
     }
-    Node* parenExpr = createNode(ParenExpr,0);
+    node_t parenExpr = createNode(ParenExpr,0);
     parenExpr->data = expr;
     return parenExpr;
 }
 
-Node* parsePrimaryExpr(PARSING_POS){
+node_t parsePrimaryExpr(PARSING_POS){
     Token t = getToken(tokens,(*i)++);
     if(t.type == ArithmeticOperator && 
     (strcmp(t.value, "+") == 0 || strcmp(t.value, "-") == 0 || strcmp(t.value, "++") == 0 || strcmp(t.value, "--") == 0) ){
@@ -72,19 +72,19 @@ Node* parsePrimaryExpr(PARSING_POS){
                 err("Increment or decrement operators are only compatible with identifiers", 0);
                 return NULL;
             }
-            Node* unaryExpr = createNode(UnaryExpr,1);
+            node_t unaryExpr = createNode(UnaryExpr,1);
             unaryExpr->data = t.value;
-            Node* id = createNode(IdentifierNode, 0);
+            node_t id = createNode(IdentifierNode, 0);
             id->data = next.value;
             addChildNode(unaryExpr, id);
             return unaryExpr;
         }
-        Node* unaryExpr = createNode(UnaryExpr,1);
+        node_t unaryExpr = createNode(UnaryExpr,1);
         unaryExpr->data = t.value;
         addChildNode(unaryExpr, parsePrimaryExpr(tokens,i,symbolTable));
         return unaryExpr;
     }
-    Node* expr = NULL;
+    node_t expr = NULL;
     switch (t.type)
     {
     case Identifier:
@@ -113,9 +113,9 @@ Node* parsePrimaryExpr(PARSING_POS){
             err("Increment or decrement operators are only compatible with identifiers", 0);
             return NULL;
         }
-        Node* unaryExpr = createNode(UnaryExpr, 1);
+        node_t unaryExpr = createNode(UnaryExpr, 1);
         unaryExpr->data = suffix.value;
-        Node* id = createNode(Identifier, 0);
+        node_t id = createNode(Identifier, 0);
         id->data = suffix.value;
         addChildNode(unaryExpr, id);
         return unaryExpr;

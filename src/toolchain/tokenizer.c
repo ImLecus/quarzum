@@ -13,6 +13,7 @@
 #include "../include/toolchain/tokenizer.h"
 
 TokenList* tokenize(char* file){
+    
     Buffer* src = read(file);
     if(src == NULL){
         return NULL;

@@ -12,11 +12,18 @@
  */
 #include "../include/core/buffer.h"
 
-Buffer* createBuffer(b_size_t size){
+inline Buffer* createBuffer(b_size_t size){
     Buffer* b = (Buffer*) malloc(sizeof(Buffer));
+    if(b == NULL){
+        return NULL;
+    }
     b->size = size;
     b->len = 0;
     b->value = (char*) malloc(size + 1);
+    if(b->value == NULL){
+        free(b);
+        return NULL;
+    }
     b->value[0] = '\0';
     return b;
 }
@@ -26,35 +33,30 @@ inline void deleteBuffer(Buffer* buffer){
     free(buffer);
 }
 
-u_char resizeBuffer(Buffer* b, const u_int64_t newSize){
+void resizeBuffer(Buffer* b, b_size_t newSize){
     char* newBuffer = (char*) realloc(b->value,newSize);
     if(newBuffer == NULL){
-        return -1;
+        return;
     }
     long size = b->size;
-    for(unsigned int i = 0; i < size; ++i){
+    for(unsigned long i = 0; i < size; ++i){
         newBuffer[i] = b->value[i];
     }
     free(b->value);
     b->size = newSize;
     b->value = newBuffer;
-    return 0;
 }
 
 inline void addToBuffer(Buffer* b,char c){
     if(b->len >= b->size){
         resizeBuffer(b, b->size * 2);
     }
-    b->value[b->len] = c;
-    ++(b->len);
+    b->value[b->len++] = c;
     b->value[b->len] = '\0';
 }
 
-inline char popFromBuffer(Buffer* b){
-    char c = b->value[b->len - 1];
-    b->value[b->len - 1] = '\0';
-    --(b->len);
-    return c;
+inline void popFromBuffer(Buffer* b){
+    b->value[--b->len] = '\0';
 }
 
 inline void clearBuffer(Buffer* b){
@@ -67,8 +69,7 @@ inline void clearBuffer(Buffer* b){
 char* getBuffer(const Buffer *b){
     char* result = (char *) malloc(b->len + 1);
     if(result == NULL){
-        // err
-        
+        return NULL;
     }
     strcpy(result, b->value);
     return result;

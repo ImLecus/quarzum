@@ -25,22 +25,23 @@ typedef struct {
     unsigned long size;
     unsigned long capacity;
 } TokenList;
+typedef TokenList* tlist_t;
 
 /**
  * @brief Creates a new `TokenList` with a determined size.
  */
-TokenList* createTokenList(unsigned long size);
+tlist_t createTokenList(unsigned long size);
 /**
  * @brief Deletes a `TokenList`.
  */
-void deleteTokenList(TokenList* list);
+void deleteTokenList(tlist_t list);
 /**
  * @brief Adds a new `Token` into the list.
  */
-void addToTokenList(TokenList* list, Token token);
+void addToTokenList(tlist_t list, Token token);
 /**
  * @brief Returns the token at the list[i] position.
  * If the position is out of bounds, it will return an ErrorToken.
  */
-Token getToken(TokenList* list, unsigned int i);
+Token getToken(tlist_t list, unsigned int i);
 #endif

@@ -24,5 +24,9 @@
  * Compiler options are not managed by this function.
  */
 void compile(char* file);
+/**
+ * @brief Tokenizes and parses a file, returning the AST.
+ */
+node_t getAST(char* file);
 
 #endif

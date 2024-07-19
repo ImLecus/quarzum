@@ -1,1 +1,3 @@
-int i = -1.2;
+import "./math.qz";
+
+string name = "Quarzum";

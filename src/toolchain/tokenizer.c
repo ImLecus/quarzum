@@ -57,11 +57,26 @@ void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t*
             case 'n':
                 addToBuffer(target, '\n');
                 break;
+            case 'r':
+                addToBuffer(target, '\r');
+                break;
+            case 'b':
+                addToBuffer(target, '\b');
+                break;
+            case 'f':
+                addToBuffer(target, '\f');
+                break;
+            case '0':
+                addToBuffer(target, '\0');
+                break;
             case 't':
                 addToBuffer(target, '\t');
                 break;
             case '"':
                 addToBuffer(target, '"');
+                break;
+            case '\'':
+                addToBuffer(target, '\'');
                 break;
             case '\\':
                 addToBuffer(target, '\\');
@@ -148,14 +163,9 @@ TokenList* tokenize(char* file){
         }
         if(isSymbol(src->value[i])){
             addToBuffer(buffer, src->value[i++]);
-
             if(i <= src->len && isSymbol(src->value[i])){
                 addToBuffer(buffer, src->value[i]);
                 TokenType t = symbolToType(buffer->value);
-                if(t == Comment){
-                    clearBuffer(buffer);
-                    continue;
-                }
                 if(t != TokenError){
                     Token tok = {t, getBuffer(buffer),TOKEN_INFO};
                     ADD_TOKEN(tok);
@@ -163,11 +173,10 @@ TokenList* tokenize(char* file){
                 }
                 popFromBuffer(buffer);
             }
-
             TokenType t = symbolToType(buffer->value);
             if(t == TokenError){
-                Token errorToken = {t,NULL,0,0};
-                ADD_TOKEN(errorToken);
+                lexicalErr("Unexpected token", file, buffer->value, lineNumber);
+                continue;
             }
             Token tok = {t, getBuffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);

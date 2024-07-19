@@ -12,10 +12,10 @@
  */
 #include "../../include/toolchain/parser.h"
 
-Node* parse(TokenList* tokens, SymbolTable* symbolTable){
-    Node* root = createNode(Root,1);
+node_t parse(TokenList* tokens, SymbolTable* symbolTable){
+    node_t root = createNode(Root,1);
     for(unsigned int i = 0; i < tokens->size; ++i){
-        Node* statement = parseStatement(tokens, &i, symbolTable);
+        node_t statement = parseStatement(tokens, &i, symbolTable);
         if(statement != NULL){
             addChildNode(root, statement);
         }
@@ -27,8 +27,8 @@ Node* parse(TokenList* tokens, SymbolTable* symbolTable){
     return root;
 }
 
-Node* parseStatement(PARSING_POS){
-    Node* stmt = NULL;
+node_t parseStatement(PARSING_POS){
+    node_t stmt = NULL;
     switch (getToken(tokens,*i).type)
     {
     case Break:
@@ -42,14 +42,16 @@ Node* parseStatement(PARSING_POS){
     case TypeKeyword:
         stmt = parseDeclaration(tokens, i,symbolTable);
         break;
+    case Import:
+        stmt = parseImport(tokens, i, symbolTable);
     default:
         break;
     }
     return stmt;
 }
 
-Node* parseDeclaration(PARSING_POS){
-    Node* decl = NULL;
+node_t parseDeclaration(PARSING_POS){
+    node_t decl = NULL;
     // to-do: add types into declarations
     Token type = getToken(tokens, *i);
     EXPECT(TypeKeyword, "Expected type keyword.")
@@ -61,7 +63,7 @@ Node* parseDeclaration(PARSING_POS){
     {
     case Equal:
         pass;
-        Node* expr = parseExpr(tokens, i,symbolTable);
+        node_t expr = parseExpr(tokens, i,symbolTable);
         if(expr ==  NULL){
             err("Expected expression",0);
             break;
@@ -86,7 +88,7 @@ Node* parseDeclaration(PARSING_POS){
         EXPECT(LeftCurly, "Expected 'function' body");
         pass;
         while(getToken(tokens, *i).type != RightPar){
-            Node* statement = parseStatement(tokens, i,symbolTable);
+            node_t statement = parseStatement(tokens, i,symbolTable);
             if(statement != NULL){
                 addChildNode(decl, statement);
             }
@@ -107,3 +109,15 @@ Node* parseDeclaration(PARSING_POS){
     return decl;
 }
 
+node_t parseImport(PARSING_POS){
+    pass;
+    Token next = getToken(tokens, *i);
+    pass;
+    // Single import, merges the two AST.
+    if(next.type == StringLiteral){
+        EXPECT(Semicolon, "Expected semicolon");
+        //node_t importedAST = getAST(next.value);
+    }
+    // Complex import, merges the selected nodes with the AST.
+    return NULL;
+}

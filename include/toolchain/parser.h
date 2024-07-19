@@ -17,6 +17,7 @@
 #include "../quarzum/symbol.h"
 #include "../quarzum/tokenlist.h"
 #include "../core/debug.h"
+#include "compile.h"
 
 #define EXPECT(t,errMessage) if(getToken(tokens, *i).type != t){err(errMessage,0); return NULL;}
 
@@ -29,14 +30,16 @@
  * It will generate a `Node` with type Root and wll call
  * `parseStatement` until the `TokenList` is fully iterated.
  */
-Node* parse(TokenList* tokens, SymbolTable* symbolTable);
+node_t parse(TokenList* tokens, SymbolTable* symbolTable);
 /**
  * @brief Statement parsing function.
  */
-Node* parseStatement(PARSING_POS);
+node_t parseStatement(PARSING_POS);
 /**
  * @brief Variable and function declaration parsing function.
  */
-Node* parseDeclaration(PARSING_POS);
+node_t parseDeclaration(PARSING_POS);
+
+node_t parseImport(PARSING_POS);
 
 #endif

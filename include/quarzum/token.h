@@ -12,9 +12,12 @@
  */
 #ifndef TOKEN_H
 #define TOKEN_H
-#include <stddef.h>
+#ifndef NULL
+#define NULL ((void*)0)
+#endif
+
 /**
- * @brief Defines a Token type as an uint8 (byte).
+ * @brief Defines a Token type.
  */
 typedef enum {
     // Special tokens
@@ -22,7 +25,6 @@ typedef enum {
     TypeKeyword,
     AccessSpecifier,
     Identifier,
-    Comment,
     // Keywords
     Const,
     Return,
@@ -90,7 +92,8 @@ typedef struct {
 } TokenInfo;
 
 /**
- * @brief Defines a Token. Used as basic interpretation structure by the compiler.
+ * @brief Defines a Token. Used as basic interpretation structure 
+ * by the compiler. 
  */
 typedef struct {
     TokenType type;

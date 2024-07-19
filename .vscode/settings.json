@@ -19,7 +19,8 @@
         "debug.h": "c",
         "ir.h": "c",
         "quarzum.h": "c",
-        "char.h": "c"
+        "char.h": "c",
+        "tokenizer.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

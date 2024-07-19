@@ -22,6 +22,32 @@
 #define ADD_TOKEN(t) addToTokenList(tokens, t);clearBuffer(buffer);
 
 #define TOKEN_INFO {lineNumber, columnNumber, file}
+
+/**
+ * @brief Reads a comment line and discards its text. 
+ */
+void readComment(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
+/**
+ * @brief Reads a comment block. Will throw an error if the
+ * comment block is not closed.
+ */
+void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
+
+/**
+ * @brief Reads a string literal between double quotes ("").
+ * Will throw an error if the string is not closed.
+ * Escape characters are supported. Will throw an error if the
+ * espace character does not exist.
+ */
+void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber);
+
+/**
+ * @brief Reads a numeric literal (integer or decimal).
+ * Will throw an error if the number has two or more points.
+ * @return 1 if the number is a decimal, 0 if it's an integer,
+ * -1 if is not valid.
+ */
+int readNumberLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber);
 /**
  * @brief Reads a file and converts the source file text into a TokenList.
  * It will return NULL if something goes wrong.

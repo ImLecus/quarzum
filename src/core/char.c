@@ -25,7 +25,7 @@ inline bool_t isSymbol(char c){
 }
 
 inline bool_t isAlphaNumeric(char c){
-    return isAlpha(c) || isDigit(c);
+    return isAlpha(c) || isDigit(c) || c == '_';
 }
 
 inline bool_t isSpace(char c){

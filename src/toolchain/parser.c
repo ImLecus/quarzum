@@ -12,10 +12,10 @@
  */
 #include "../../include/toolchain/parser.h"
 
-node_t parse(TokenList* tokens, SymbolTable* symbolTable){
+node_t parse(TokenList* tokens){
     node_t root = createNode(Root,1);
     for(unsigned int i = 0; i < tokens->size; ++i){
-        node_t statement = parseStatement(tokens, &i, symbolTable);
+        node_t statement = parseStatement(tokens, &i);
         if(statement != NULL){
             addChildNode(root, statement);
         }
@@ -40,10 +40,10 @@ node_t parseStatement(PARSING_POS){
         stmt = createNode(ContinueStmt,0);
         break;
     case TypeKeyword:
-        stmt = parseDeclaration(tokens, i,symbolTable);
+        stmt = parseDeclaration(tokens, i);
         break;
     case Import:
-        stmt = parseImport(tokens, i, symbolTable);
+        stmt = parseImport(tokens, i);
     default:
         break;
     }
@@ -63,7 +63,7 @@ node_t parseDeclaration(PARSING_POS){
     {
     case Equal:
         pass;
-        node_t expr = parseExpr(tokens, i,symbolTable);
+        node_t expr = parseExpr(tokens, i);
         if(expr ==  NULL){
             err("Expected expression",0);
             break;
@@ -88,7 +88,7 @@ node_t parseDeclaration(PARSING_POS){
         EXPECT(LeftCurly, "Expected 'function' body");
         pass;
         while(getToken(tokens, *i).type != RightPar){
-            node_t statement = parseStatement(tokens, i,symbolTable);
+            node_t statement = parseStatement(tokens, i);
             if(statement != NULL){
                 addChildNode(decl, statement);
             }
@@ -104,8 +104,6 @@ node_t parseDeclaration(PARSING_POS){
     if(t == NULL){
         // err
     }
-    Symbol s = {t,NULL,Global,0};
-    addSymbol(symbolTable, s);
     return decl;
 }
 
@@ -118,7 +116,9 @@ node_t parseImport(PARSING_POS){
         EXPECT(Semicolon, "Expected semicolon");
 
         node_t importedAST = getAST(deleteQuotes(next.value));
+        return NULL;
     }
+    err("Expected string literal or identifier",0);
     // Complex import, merges the selected nodes with the AST.
     return NULL;
 }

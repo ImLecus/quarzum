@@ -17,7 +17,7 @@
 #include "tokenlist.h"
 #include "../core/debug.h"
 #include <string.h>
-#define PARSING_POS TokenList* tokens, unsigned int* i, SymbolTable* symbolTable
+#define PARSING_POS TokenList* tokens, unsigned int* i
 
 /**
  * @brief Parses an expression. 

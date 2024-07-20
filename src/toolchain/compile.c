@@ -22,10 +22,9 @@ void compile(char* file){
     TokenList* t = tokenize(file);
     endProcess(lex);
     Process* parsing = startProcess("Parse phase");
-    SymbolTable* symbolTable = createSymbolTable();
     // create type table
     // add symbol and type tables into parsing
-    node_t ast = parse(t, symbolTable);
+    node_t ast = parse(t);
     endProcess(parsing);
 
     // generate IR
@@ -37,7 +36,6 @@ void compile(char* file){
     // free memory
     deleteTokenList(t);
     deleteInstructionList(ir);
-    deleteSymbolTable(symbolTable);
     endProcess(task);
 }
 
@@ -48,12 +46,14 @@ node_t getAST(char* file){
     endProcess(lex);
     if(t != NULL){
         Process* parsing = startProcess("Parse phase");
-        SymbolTable* symbolTable = createSymbolTable();
-        node_t ast = parse(t, symbolTable);
+        node_t ast = parse(t);
+        deleteTokenList(t);
         endProcess(parsing);
         endProcess(task);
         return ast;
     }
+    deleteTokenList(t);
+    endProcess(task);
     return NULL;
     
 }

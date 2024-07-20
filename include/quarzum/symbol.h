@@ -14,29 +14,50 @@
 #define SYMBOL_H
 #include "type.h"
 #include <stdlib.h>
-#define constFlag 0x001
-#define staticFlag 0x010
-#define foreignFlag 0x100
+#define constFlag   0b001
+#define staticFlag  0b010
+#define foreignFlag 0b100
 
+/**
+ * @brief Defines the scope of a Symbol. 
+ */
 typedef enum {
     Global,
     Local,
     Parameter
 } Scope;
-
+/**
+ * @brief Defines the access scope of a Symbol.
+ * Default is used in symbols with no access specifier.
+ * Public is avaliable in every code fragment where the symbol is defined.
+ * Private is only avaliable for a class.
+ * Protected is avaliable for a class and its child classes.
+ */
 typedef enum {
+    Default,
     Public,
     Private,
     Protected
 } Access;
-
+/**
+ * @brief Defines a Symbol. It contains relevant information for the semantic
+ * analisys and code generation. It includes the identifier of the variable,
+ * the type, the scope, the access specification and the flags, that defines 
+ * special behaviour like constants, foreign declarations or static methods.
+ */
 typedef struct {
+    char* id;
     Type* type;
-    char* name;
     Scope scope;
-    unsigned int flags;
+    Access access;
+    u_int8_t flags;
 } Symbol;
 
+/**
+ * @brief Defines a SymbolTable, which is basically a vector of symbols.
+ * SymbolTable can merge with another SymbolTable, only if there is no
+ * id collission between them.
+ */
 typedef struct {
     Symbol* content;
     unsigned long size;
@@ -45,10 +66,23 @@ typedef struct {
 
 #define DEFAULT_SYMBOL_SIZE 20
 
+/**
+ * @brief Creates a new SymbolTable with size DEFAULT_SYMBOL_SIZE.
+ */
 SymbolTable* createSymbolTable();
-
+/**
+ * @brief Deletes a SymbolTable.
+ */
 void deleteSymbolTable(SymbolTable* table);
-
-void addSymbol(SymbolTable* table, Symbol symbol);
+/**
+ * @brief Adds a new Symbol to a SymbolTable. 
+ * Returns -1 if there is an id collission.
+ */
+int addSymbol(SymbolTable* table, Symbol symbol);
+/**
+ * @brief Merges two SymbolTable and stores the result in the first.
+ * In case of error, it will return -1.
+ */
+int mergeSymbolTable(SymbolTable* target, SymbolTable* other);
 
 #endif

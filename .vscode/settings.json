@@ -21,7 +21,8 @@
         "quarzum.h": "c",
         "char.h": "c",
         "tokenizer.h": "c",
-        "compile.h": "c"
+        "compile.h": "c",
+        "symbol.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

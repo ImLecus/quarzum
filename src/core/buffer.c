@@ -33,27 +33,14 @@ inline void deleteBuffer(Buffer* buffer){
     free(buffer);
 }
 
-void resizeBuffer(Buffer* b, const b_size_t newSize){
-    
-    char* newBuffer = (char*) realloc(b->value,newSize);
-    if(newBuffer == NULL){
-        return;
-    }
-    
-    long size = b->size;
-    for(unsigned long i = 0; i < size; ++i){
-        newBuffer[i] = b->value[i];
-    }
-
-    b->size = newSize;
-    b->value = newBuffer;
-}
-
 inline void addToBuffer(Buffer* b, const char c){
     if(b->len >= b->size){
-       
-        resizeBuffer(b, b->size * 2);
-
+        char* newBuffer = (char*) realloc(b->value,b->size * 2);
+        if(newBuffer == NULL){
+            return;
+        }
+        b->size *= 2;
+        b->value = newBuffer;
     }
     b->value[b->len++] = c;
     b->value[b->len] = '\0';
@@ -70,7 +57,7 @@ inline void clearBuffer(Buffer* b){
     b->len = 0;
 }
 
-char* getBuffer(const Buffer *b){
+inline char* getBuffer(const Buffer *b){
     char* result = (char *) malloc(b->len + 1);
     if(result == NULL){
         return NULL;

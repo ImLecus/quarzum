@@ -14,7 +14,6 @@
 #define PARSER_H
 #include "../quarzum/expr.h"
 #include "../quarzum/ast.h"
-#include "../quarzum/symbol.h"
 #include "../quarzum/tokenlist.h"
 #include "../core/debug.h"
 #include "compile.h"
@@ -30,7 +29,7 @@
  * It will generate a `Node` with type Root and wll call
  * `parseStatement` until the `TokenList` is fully iterated.
  */
-node_t parse(TokenList* tokens, SymbolTable* symbolTable);
+node_t parse(TokenList* tokens);
 /**
  * @brief Statement parsing function.
  */

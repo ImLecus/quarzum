@@ -31,3 +31,11 @@ inline bool_t isAlphaNumeric(char c){
 inline bool_t isSpace(char c){
     return c == ' ';
 }
+
+char* deleteQuotes(char* string){
+    char* newString = (char*)malloc(sizeof(char) *  (strlen(string) - 2));
+    for(unsigned int i = 0; i < strlen(string) - 2; ++i){
+       newString[i] = string[i + 1];
+    }
+    return newString;
+}

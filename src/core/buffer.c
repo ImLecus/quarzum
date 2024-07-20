@@ -11,8 +11,8 @@
  * For full details, see LICENSE.
  */
 #include "../include/core/buffer.h"
-
-inline Buffer* createBuffer(b_size_t size){
+#include <stdio.h>
+inline Buffer* createBuffer(const b_size_t size){
     Buffer* b = (Buffer*) malloc(sizeof(Buffer));
     if(b == NULL){
         return NULL;
@@ -33,23 +33,27 @@ inline void deleteBuffer(Buffer* buffer){
     free(buffer);
 }
 
-void resizeBuffer(Buffer* b, b_size_t newSize){
+void resizeBuffer(Buffer* b, const b_size_t newSize){
+    
     char* newBuffer = (char*) realloc(b->value,newSize);
     if(newBuffer == NULL){
         return;
     }
+    
     long size = b->size;
     for(unsigned long i = 0; i < size; ++i){
         newBuffer[i] = b->value[i];
     }
-    free(b->value);
+
     b->size = newSize;
     b->value = newBuffer;
 }
 
-inline void addToBuffer(Buffer* b,char c){
+inline void addToBuffer(Buffer* b, const char c){
     if(b->len >= b->size){
+       
         resizeBuffer(b, b->size * 2);
+
     }
     b->value[b->len++] = c;
     b->value[b->len] = '\0';

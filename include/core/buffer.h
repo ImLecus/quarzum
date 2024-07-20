@@ -14,7 +14,7 @@
 #define BUFFER_H
 #include <stdlib.h>
 #include <string.h>
-typedef const unsigned long b_size_t;
+typedef unsigned long b_size_t;
 /**
  * @brief Defines a buffer with limited size.
  */
@@ -29,12 +29,12 @@ typedef struct {
  * @return `-1` if the allocation goes wrong, `0` otherwise.
  * Complexity: O(n)
  */
-void resizeBuffer(Buffer* b, b_size_t newSize);
+void resizeBuffer(Buffer* b, const b_size_t newSize);
 /**
  * @brief Creates a new `Buffer`.
  * Complexity: O(1)
  */
-Buffer* createBuffer(b_size_t size);
+Buffer* createBuffer(const b_size_t size);
 /**
  * @brief Deletes a `Buffer` and free the allocated memory.
  * Complexity: O(1)
@@ -45,7 +45,7 @@ void deleteBuffer(Buffer* buffer);
  * If the `Buffer` is full, it will be resized.
  * Complexity: O(1), O(n) if it needs to resize.s
  */
-void addToBuffer(Buffer* b,const char c);
+void addToBuffer(Buffer* b, const char c);
 /**
  * @brief Deletes the last `char` and returns it.
  * Complexity: O(1)

@@ -14,6 +14,7 @@
 #define COMPILE_H
 #include "../core/debug.h"
 #include "../core/process.h"
+#include "../core/path.h"
 #include "../quarzum/config.h"
 #include "../quarzum/symbol.h"
 #include "../quarzum/ir.h"

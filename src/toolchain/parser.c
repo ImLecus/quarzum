@@ -116,7 +116,8 @@ node_t parseImport(PARSING_POS){
     // Single import, merges the two AST.
     if(next.type == StringLiteral){
         EXPECT(Semicolon, "Expected semicolon");
-        //node_t importedAST = getAST(next.value);
+
+        node_t importedAST = getAST(deleteQuotes(next.value));
     }
     // Complex import, merges the selected nodes with the AST.
     return NULL;

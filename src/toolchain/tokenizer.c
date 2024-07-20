@@ -39,11 +39,12 @@ void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
 
 void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber){
     addToBuffer(target, '"');
+     
     ++(*index);
     while(*index < src->len){
         if(src->value[*index] == '"'){
-            ++(*index);
             addToBuffer(target, '"');
+            ++(*index);
             return;
         }
         if(src->value[*index] == '\n'){
@@ -107,7 +108,7 @@ inline int readNumberLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_in
 
 TokenList* tokenize(char* file){
     
-    Buffer* src = read(file);
+    Buffer* src = readFile(file);
     if(src == NULL){
         return NULL;
     }

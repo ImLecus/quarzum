@@ -13,6 +13,9 @@
 #include "../../include/toolchain/compile.h"
 
 void compile(char* file){
+    printf(resolvePath("code.qz\n"));
+    printf(resolvePath("./math.qz\n"));
+
     Process* task = startProcess("Task");
     debug("Starting the compiler...");
     Process* lex = startProcess("Lex phase");
@@ -43,10 +46,14 @@ node_t getAST(char* file){
     Process* lex = startProcess("Lex phase");
     TokenList* t = tokenize(file);
     endProcess(lex);
-    Process* parsing = startProcess("Parse phase");
-    SymbolTable* symbolTable = createSymbolTable();
-    node_t ast = parse(t, symbolTable);
-    endProcess(parsing);
-    endProcess(task);
-    return ast;
+    if(t != NULL){
+        Process* parsing = startProcess("Parse phase");
+        SymbolTable* symbolTable = createSymbolTable();
+        node_t ast = parse(t, symbolTable);
+        endProcess(parsing);
+        endProcess(task);
+        return ast;
+    }
+    return NULL;
+    
 }

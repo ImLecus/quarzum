@@ -11,7 +11,8 @@ set(SOURCES
     src/core/bsearch.c
     src/core/process.c
     src/core/debug.c
-    src/core/char.c
+    src/core/char.c 
+    src/core/path.c
 
     src/internal/io.c
     src/internal/tokenlist.c

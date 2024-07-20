@@ -18,7 +18,7 @@
 /**
  * @brief Returns the content of a file as a `Buffer`.
  */
-Buffer* read(const char* filename);
+Buffer* readFile(const char* filename);
 /**
  * @brief Creates a new file in read+write mode.
  */
@@ -26,6 +26,6 @@ FILE* createFile(const char* filename);
 /**
  * @brief Writes content in a file.
  */
-void write(FILE* file, char* content);
+void writeFile(FILE* file, char* content);
 
 #endif

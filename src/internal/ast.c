@@ -19,7 +19,6 @@ node_t createNode(NodeType type, u_int32_t defaultChildren){
     node->maxChildren = defaultChildren;
     node->children = (node_t*)malloc(sizeof(Node) * defaultChildren);
     node->data = NULL;
-    node->create = createNode;
     return node;
 }
 

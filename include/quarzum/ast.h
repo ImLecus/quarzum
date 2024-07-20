@@ -45,7 +45,6 @@ typedef struct  {
     u_int32_t maxChildren;
     void* data;
 
-    struct Node* (*create)(NodeType type, u_int32_t defaultChildren);
 } Node;
 typedef Node* node_t;
 node_t createNode(NodeType type, u_int32_t defaultChildren);

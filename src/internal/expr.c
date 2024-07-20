@@ -40,8 +40,7 @@ node_t parseExpr(PARSING_POS){
 
         ++(*i);
         node_t right = parseExpr(tokens, i);
-        node_t expr;
-        expr->create(BinaryExpr, 2);
+        node_t expr = createNode(BinaryExpr, 2);
         expr->data = op.value;
         addChildNode(expr, left);
         addChildNode(expr, right);

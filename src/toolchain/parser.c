@@ -104,6 +104,7 @@ node_t parseDeclaration(PARSING_POS){
     if(t == NULL){
         // err
     }
+
     return decl;
 }
 
@@ -114,9 +115,8 @@ node_t parseImport(PARSING_POS){
     // Single import, merges the two AST.
     if(next.type == StringLiteral){
         EXPECT(Semicolon, "Expected semicolon");
-
         node_t importedAST = getAST(deleteQuotes(next.value));
-        return NULL;
+        return importedAST;
     }
     err("Expected string literal or identifier",0);
     // Complex import, merges the selected nodes with the AST.

@@ -20,6 +20,7 @@
 #include "../quarzum/ir.h"
 #include "tokenizer.h"
 #include "parser.h"
+#include "checker.h"
 /**
  * @brief Compiles a file. 
  * Compiler options are not managed by this function.

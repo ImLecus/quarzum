@@ -13,25 +13,22 @@
 #include "../../include/toolchain/compile.h"
 
 void compile(char* file){
-    printf(resolvePath("code.qz\n"));
-    printf(resolvePath("./math.qz\n"));
-
     Process* task = startProcess("Task");
     debug("Starting the compiler...");
+    // Lexical analisys
     Process* lex = startProcess("Lex phase");
     TokenList* t = tokenize(file);
     endProcess(lex);
+    // Syntax analisys
     Process* parsing = startProcess("Parse phase");
-    // create type table
-    // add symbol and type tables into parsing
     node_t ast = parse(t);
     endProcess(parsing);
-
-    // generate IR
+    // Semantic analisys
+    checkAST(ast);
+    // Intermediate representation
     InstructionList* ir = createInstructionList();
 
-    // generate asm
-    //createFile(outputFileName);
+    // ASM and output file
 
     // free memory
     deleteTokenList(t);

@@ -22,7 +22,7 @@ inline void readComment(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
     ++(*lineNumber);
 }
 
-void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
+inline void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
     while(*index < src->len){
         if(src->value[*index] == '\n'){
             ++(*lineNumber);

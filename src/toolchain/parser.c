@@ -33,21 +33,48 @@ node_t parseStatement(PARSING_POS){
     {
     case Break:
         EXPECT(Semicolon, "Expected semicolon")
-        stmt = createNode(BreakStmt,0);
-        break;
+        return createNode(BreakStmt,0);
     case Continue:
         EXPECT(Semicolon, "Expected semicolon")
-        stmt = createNode(ContinueStmt,0);
-        break;
+        return createNode(ContinueStmt,0);
     case TypeKeyword:
-        stmt = parseDeclaration(tokens, i);
-        break;
+        return parseDeclaration(tokens, i);
     case Import:
-        stmt = parseImport(tokens, i);
+        return parseImport(tokens, i);
+    case Identifier:
+        if(getToken(tokens, *i + 1).type == LeftPar){
+            return parseFunctionCall(tokens,i);
+        }
     default:
-        break;
+        return stmt;
     }
-    return stmt;
+}
+
+node_t parseFunctionCall(PARSING_POS){
+    Token id = getToken(tokens, *i);
+    pass;
+    pass;
+    node_t call = createNode(CallStmt,0);
+    // args
+    while(*i < tokens->size){
+        if(getToken(tokens, *i).type == RightPar){
+            pass;
+            break;
+        }
+        node_t expr = parseExpr(tokens, i);
+        if(expr == NULL){
+            err("Expected expression", 0);
+            pass;
+        }
+        addChildNode(call, expr);
+        if(getToken(tokens, *i).type == Comma){
+            pass;
+            continue;
+        }
+    }
+    EXPECT(Semicolon, "Expected semicolon");
+    pass;
+    return call;
 }
 
 node_t parseDeclaration(PARSING_POS){
@@ -115,7 +142,8 @@ node_t parseImport(PARSING_POS){
     // Single import, merges the two AST.
     if(next.type == StringLiteral){
         EXPECT(Semicolon, "Expected semicolon");
-        node_t importedAST = getAST(deleteQuotes(next.value));
+        print(resolvePath(next.value));
+        node_t importedAST = getAST(resolvePath(next.value));
         return importedAST;
     }
     err("Expected string literal or identifier",0);

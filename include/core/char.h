@@ -36,10 +36,5 @@ bool_t isAlphaNumeric(char c);
  * @brief Returns 1 if the character is a whitespace (' ');
  */
 bool_t isSpace(char c);
-/**
- * @brief Transforms a string ("someting") into text, deleting
- * the quotes (something).
- */
-char* deleteQuotes(char* string);
 
 #endif

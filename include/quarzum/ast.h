@@ -22,6 +22,7 @@ typedef enum {
     BreakStmt,
     ContinueStmt,
     FunctionStmt,
+    CallStmt,
     
     IdentifierNode,
     TypeNode,

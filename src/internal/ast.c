@@ -12,7 +12,7 @@
  */
 #include "../../include/quarzum/ast.h"
 
-node_t createNode(NodeType type, u_int32_t defaultChildren){
+inline node_t createNode(NodeType type, u_int32_t defaultChildren){
     node_t node = (node_t)malloc(sizeof(Node));
     node->type = type;
     node->childrenCount = 0;
@@ -22,7 +22,7 @@ node_t createNode(NodeType type, u_int32_t defaultChildren){
     return node;
 }
 
-void deleteNode(node_t node){
+inline void deleteNode(node_t node){
     for(u_int32_t i = 0; i < node->childrenCount; ++i){
         if(node->children[i] != NULL){
             deleteNode(node->children[i]);

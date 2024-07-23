@@ -11,7 +11,6 @@
  * For full details, see LICENSE.
  */
 #include "../../include/quarzum/defs.h"
-#include "stdio.h"
 
 const TokenType keywordToType(const char* keyword){
     int search = binarySearch(keyword, keywords, KEYWORDS_SIZE);

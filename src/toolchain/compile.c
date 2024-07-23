@@ -24,7 +24,9 @@ void compile(char* file){
     node_t ast = parse(t);
     endProcess(parsing);
     // Semantic analisys
+    Process* checking = startProcess("Check phase");
     checkAST(ast);
+    endProcess(checking);
     // Intermediate representation
     InstructionList* ir = createInstructionList();
 

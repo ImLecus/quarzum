@@ -4,3 +4,4 @@ tests/
 .vscode/
 test/
 asm/
+example/

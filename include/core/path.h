@@ -12,13 +12,12 @@
  */
 #ifndef PATH_H
 #define PATH_H
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-
+#include <string.h>
+#include <stdlib.h>
 #define PATH_MAX 4096
+#define LIBRARY_PATH "/usr/lib/quarzum/"
+#define LIB_PATH_LEN 18
 
 static char PATH[PATH_MAX];
 /**
@@ -26,8 +25,10 @@ static char PATH[PATH_MAX];
  */
 char* getCWD();
 /**
- * @brief Converts a relative path into an absolute path.
+ * @brief Detects when a route starting with '@' and
+ * transforms it into the library route. Also removes the
+ * quotes.
  */
-char* resolvePath(const char* relativePath);
+char* resolvePath(char* path);
 
 #endif

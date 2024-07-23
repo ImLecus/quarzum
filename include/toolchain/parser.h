@@ -41,4 +41,6 @@ node_t parseDeclaration(PARSING_POS);
 
 node_t parseImport(PARSING_POS);
 
+node_t parseFunctionCall(PARSING_POS);
+
 #endif

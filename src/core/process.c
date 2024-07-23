@@ -12,7 +12,7 @@
  */
 #include "../../include/core/process.h"
 
-Process* startProcess(const char* name){
+inline Process* startProcess(const char* name){
     Process* process = (Process*) malloc(sizeof(Process));
     process->name = name;
     process->start = clock();

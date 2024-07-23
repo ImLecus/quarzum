@@ -19,9 +19,28 @@ char* getCWD(){
     return NULL;
 }
 
-char* resolvePath(const char* relativePath){
-    char* basePath = getCWD();
-    strcat(basePath, "/");
-    strcat(basePath, relativePath);
-    return basePath;
+char* deleteQuotes(char* string){
+    char* newString = (char*)malloc(sizeof(char) *  (strlen(string) - 2));
+    for(unsigned int i = 0; i < strlen(string) - 2; ++i){
+       newString[i] = string[i + 1];
+    }
+    return newString;
+}
+
+char* resolvePath(char* _path){
+    char* newPath;
+    char* path = deleteQuotes(_path);
+    if(path[0] == '@'){
+        // newPath has the length of the path, deleting the @ and
+        // the quotes, and adding the LIBRARY_PATH length.
+        newPath = (char*)malloc(sizeof(char) * (strlen(path) - 1 + LIB_PATH_LEN));
+        strcat(newPath, LIBRARY_PATH);
+        // for(unsigned int i = 1; i < strlen(path) - 1; ++i){
+        //     newPath[LIB_PATH_LEN + i - 1] = path[i];
+        // }
+    }
+    else{
+        newPath = path;
+    }
+    return newPath;
 }

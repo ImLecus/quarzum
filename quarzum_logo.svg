@@ -1,0 +1,8 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-7 -10.5 14 14.5">
+	<path d="M -3 -5 L 0 -6.5 L 3 -5 L 0 -3.5 Z M -7 -7 L 0 -10.5 L 7 -7 L 5 -6 L 0 -8.5 L -5 -6 Z" fill="#fff200"/>
+	<path d="M 2 1 L 5 -0.5 L 5 -6 L 5 -6 L 7 -7 L 7 0.5 L 4 2 Z" fill="#ffcc00"/>
+	<path d="M -7 -7 L -7 0.5 L 0 4 L 2 3 L -5 -0.5 L -5 -6 Z" fill="#ffa600"/>
+	<path d="M 0 -3.5 L 0 0 L 3 -1.5 L 3 -5 Z" fill="#ffcc00"/>
+	<path d="M 0 -3.5 L -3 -5 L -3 -1.5 L 0 0 Z" fill="#ffa600"/>
+</svg>

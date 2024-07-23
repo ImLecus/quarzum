@@ -1,5 +1,7 @@
 # Welcome to Quarzum
 
+<img src="./quarzum_logo.svg" width="150">
+<br><br>
 This is a compiled, general-purpose programming language. The
 objective of this language is to offer a newer solution to the
 low-level programming users, generally as an alternative to 

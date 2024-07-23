@@ -24,11 +24,25 @@ void deleteInstructionList(InstructionList* list){
     free(list);
 }
 void addInstruction(InstructionList* list, Instruction* i){
-
+    if(list->size >= list->capacity){
+        // resize
+    }
+    list->list[++list->size] = i;
 }
 
-void generateIR(Node* ast, InstructionList* list){
-    for(unsigned long i = 0; i < ast->childrenCount; ++i){
-        // generate ir (child)
+void generateIR(Node* node, InstructionList* list){
+    switch (node->type)
+    {
+    case Root:
+        for(unsigned long i = 0; i < node->childrenCount; ++i){
+            generateIR(node->children[i], list);
+        }
+        break;
+    case CallStmt:
+        Instruction i = {iCall, {node->data}};
+        addInstruction(list, &i);
+        break;
+    default:
+        break;
     }
 }

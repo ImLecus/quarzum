@@ -55,6 +55,7 @@ node_t parseFunctionCall(PARSING_POS){
     pass;
     pass;
     node_t call = createNode(CallStmt,0);
+    call->data = id.value;
     // args
     while(*i < tokens->size){
         if(getToken(tokens, *i).type == RightPar){

@@ -13,7 +13,6 @@
 #include "../../include/quarzum/io.h"
 
 Buffer* readFile(const char* filename){
-    printf(filename);
     FILE* file = fopen(filename, "r");
     if(file == NULL){
         err("No such file or directory.",1);

@@ -18,7 +18,7 @@
  * @brief Defines the instruction set in the intermediate representation.
  */
 typedef enum {
-    Call,
+    iCall,
     Sum,
     Sub,
     Mul,

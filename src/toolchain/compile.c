@@ -29,7 +29,8 @@ void compile(char* file){
     endProcess(checking);
     // Intermediate representation
     InstructionList* ir = createInstructionList();
-
+    generateIR(ast, ir);
+    printf("%d",ir->size);
     // ASM and output file
 
     // free memory

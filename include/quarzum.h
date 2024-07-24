@@ -10,13 +10,10 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#pragma once
-
 #include "core/debug.h"
 #include "core/process.h"
 
 #include "quarzum/defs.h"
-#include "quarzum/version.h"
 #include "quarzum/token.h"
 #include "quarzum/io.h"
 #include "quarzum/tokenlist.h"

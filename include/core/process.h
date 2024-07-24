@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "debug.h"
+#include "defines.h"
 
 /**
  * @brief Defines a process.
@@ -23,17 +24,17 @@
  */
 typedef struct {
     const char* name;
-    long start;
-    long end;
+    int64 start;
+    int64 end;
 } Process;
 
 /**
  * @brief Creates a `Process`.
  */
-Process* startProcess(const char* name);
+Process* start_process(const char* name);
 /**
  * @brief Ends a `Process` and prints a debug message with the time interval.
  */
-void endProcess(Process* process);
+void end_Process(Process* process);
 
 #endif

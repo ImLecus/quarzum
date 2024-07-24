@@ -22,7 +22,6 @@ set(SOURCES
     src/internal/type.c
     src/internal/symbol.c
     src/internal/ir.c
-
     src/toolchain/tokenizer.c
     src/toolchain/compile.c
     src/toolchain/parser.c

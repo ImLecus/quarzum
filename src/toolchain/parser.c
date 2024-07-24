@@ -143,8 +143,8 @@ node_t parseImport(PARSING_POS){
     // Single import, merges the two AST.
     if(next.type == StringLiteral){
         EXPECT(Semicolon, "Expected semicolon");
-        print(resolvePath(next.value));
-        node_t importedAST = getAST(resolvePath(next.value));
+        print(resolve_path(next.value));
+        node_t importedAST = getAST(resolve_path(next.value));
         return importedAST;
     }
     err("Expected string literal or identifier",0);

@@ -12,14 +12,14 @@
  */
 #include "../../include/core/process.h"
 
-inline Process* startProcess(const char* name){
+inline Process* start_process(const char* name){
     Process* process = (Process*) malloc(sizeof(Process));
     process->name = name;
     process->start = clock();
     return process;
 }
 
-inline void endProcess(Process* process){
+inline void end_Process(Process* process){
     process->end = clock();
     char buffer[100];
     sprintf(buffer,"%s finished in %f seconds.", process->name,  (float)(process->end - process->start)/CLOCKS_PER_SEC);

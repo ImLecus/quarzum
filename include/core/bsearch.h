@@ -19,6 +19,6 @@
  * Returns the index of the symbol in the list.
  * Returns -1 if something goes wrong.
  */
-int binarySearch(const char* symbol, const char** list, unsigned int size); 
+int binary_search(const char* symbol, const char** list, unsigned int size); 
 
 #endif

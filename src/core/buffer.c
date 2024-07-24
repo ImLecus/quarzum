@@ -11,8 +11,7 @@
  * For full details, see LICENSE.
  */
 #include "../include/core/buffer.h"
-#include <stdio.h>
-inline Buffer* createBuffer(const b_size_t size){
+inline Buffer* init_buffer(const uint64 size){
     Buffer* b = (Buffer*) malloc(sizeof(Buffer));
     if(b == NULL){
         return NULL;
@@ -28,12 +27,12 @@ inline Buffer* createBuffer(const b_size_t size){
     return b;
 }
 
-inline void deleteBuffer(Buffer* buffer){
+inline void delete_buffer(Buffer* buffer){
     free(buffer->value);
     free(buffer);
 }
 
-inline void addToBuffer(Buffer* b, const char c){
+inline void add_buffer(Buffer* b, const char c){
     if(b->len >= b->size){
         char* newBuffer = (char*) realloc(b->value,b->size * 2);
         if(newBuffer == NULL){
@@ -46,18 +45,18 @@ inline void addToBuffer(Buffer* b, const char c){
     b->value[b->len] = '\0';
 }
 
-inline void popFromBuffer(Buffer* b){
+inline void pop_buffer(Buffer* b){
     b->value[--b->len] = '\0';
 }
 
-inline void clearBuffer(Buffer* b){
+inline void clear_buffer(Buffer* b){
     for(unsigned long i = 0; b->value[i]; ++i){
         b->value[i] = '\0';
     }
     b->len = 0;
 }
 
-inline char* getBuffer(const Buffer *b){
+inline char* get_buffer(const Buffer *b){
     char* result = (char *) malloc(b->len + 1);
     if(result == NULL){
         return NULL;

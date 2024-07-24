@@ -12,29 +12,28 @@
  */
 #ifndef CHAR_H
 #define CHAR_H
-typedef unsigned char bool_t;
-#include <string.h>
+#include "defines.h"
 /**
  * @brief Returns 1 if the character is alphabetic (a-zA-Z),
  * 0 otherwise.
  */
-bool_t isAlpha(char c);
+bool isAlpha(char c);
 /**
  * @brief Returns 1 if the character is a digit (0-9), 0 otherwise.
  */
-bool_t isDigit(char c);
+bool isDigit(char c);
 /**
  * @brief Returns 1 if the character is a symbol, 0 otherwise.
  */
-bool_t isSymbol(char c);
+bool isSymbol(char c);
 /**
  * @brief Returns 1 if the character is a digit (0-9) or an
  * alphabetic (a-zA-Z), 0 otherwise.
  */
-bool_t isAlphaNumeric(char c);
+bool isAlphaNumeric(char c);
 /**
  * @brief Returns 1 if the character is a whitespace (' ');
  */
-bool_t isSpace(char c);
+bool isSpace(char c);
 
 #endif

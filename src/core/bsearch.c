@@ -12,7 +12,7 @@
  */
 #include "../../include/core/bsearch.h"
 
-int binarySearch(const char* symbol, const char** list, unsigned int size){
+int binary_search(const char* symbol, const char** list, unsigned int size){
     int left = 0;
     int right = size;
     while(left <= right){

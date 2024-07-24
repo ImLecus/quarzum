@@ -30,7 +30,7 @@ typedef TokenList* tlist_t;
 /**
  * @brief Creates a new `TokenList` with a determined size.
  */
-tlist_t createTokenList(unsigned long size);
+tlist_t init_tokenlist(unsigned long size);
 /**
  * @brief Deletes a `TokenList`.
  */

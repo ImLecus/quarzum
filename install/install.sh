@@ -8,5 +8,5 @@ echo "Installing Quarzum..."
 mkdir -p "$BIN_DIR"
 mkdir -p "$LIB_DIR"
 
-cp /home/lecus/code/quarzum/out/build/preset/quarzum "$BIN_DIR"
-cp --recursive /home/lecus/code/quarzum/lib/std "$LIB_DIR"
+cp ../out/build/preset/quarzum "$BIN_DIR"
+cp --recursive ../lib/std "$LIB_DIR"

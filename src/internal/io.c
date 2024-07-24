@@ -18,10 +18,10 @@ Buffer* readFile(const char* filename){
         err("No such file or directory.",1);
         return NULL;
     }
-    Buffer* b = createBuffer(256);
+    Buffer* b = init_buffer(256);
     int c;
     while ((c = fgetc(file)) != EOF) {
-        addToBuffer(b,c);
+        add_buffer(b,c);
     }
     fclose(file);
     return b;

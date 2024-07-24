@@ -12,14 +12,14 @@
  */
 #include "../../include/core/path.h"
 
-char* getCWD(){
+char* get_cwd(){
     if(getcwd(PATH,sizeof(PATH)) != NULL){
         return PATH;
     }
     return NULL;
 }
 
-char* deleteQuotes(char* string){
+char* delete_quotes(char* string){
     char* newString = (char*)malloc(sizeof(char) *  (strlen(string) - 2));
     for(unsigned int i = 0; i < strlen(string) - 2; ++i){
        newString[i] = string[i + 1];
@@ -27,9 +27,9 @@ char* deleteQuotes(char* string){
     return newString;
 }
 
-char* resolvePath(char* _path){
+char* resolve_path(char* _path){
     char* newPath;
-    char* path = deleteQuotes(_path);
+    char* path = delete_quotes(_path);
     if(path[0] == '@'){
         // newPath has the length of the path, deleting the @ and
         // the quotes, and adding the LIBRARY_PATH length.

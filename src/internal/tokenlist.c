@@ -12,7 +12,7 @@
  */
 #include "../../include/quarzum/tokenlist.h"
 
-tlist_t createTokenList(unsigned long size){
+tlist_t init_tokenlist(unsigned long size){
     tlist_t list = (tlist_t) malloc(sizeof(TokenList));
     list->content = (Token*) malloc(size * sizeof(Token));
     list->size = 0;

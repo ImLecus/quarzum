@@ -23,12 +23,12 @@ static char PATH[PATH_MAX];
 /**
  * @brief Returns the current working directory.
  */
-char* getCWD();
+char* get_cwd();
 /**
  * @brief Detects when a route starting with '@' and
  * transforms it into the library route. Also removes the
  * quotes.
  */
-char* resolvePath(char* path);
+char* resolve_path(char* path);
 
 #endif

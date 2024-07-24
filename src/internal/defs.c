@@ -13,7 +13,7 @@
 #include "../../include/quarzum/defs.h"
 
 const TokenType keywordToType(const char* keyword){
-    int search = binarySearch(keyword, keywords, KEYWORDS_SIZE);
+    int search = binary_search(keyword, keywords, KEYWORDS_SIZE);
     if(search == -1){
         return Identifier;
     }
@@ -21,7 +21,7 @@ const TokenType keywordToType(const char* keyword){
 }
 
 const TokenType symbolToType(const char* symbol){
-    int search = binarySearch(symbol, symbols, SYMBOLS_SIZE);
+    int search = binary_search(symbol, symbols, SYMBOLS_SIZE);
     if(search == -1){
         return TokenError;
     }

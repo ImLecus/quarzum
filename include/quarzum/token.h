@@ -12,9 +12,7 @@
  */
 #ifndef TOKEN_H
 #define TOKEN_H
-#ifndef NULL
-#define NULL ((void*)0)
-#endif
+#include "../core/defines.h"
 
 /**
  * @brief Defines a Token type.
@@ -86,8 +84,7 @@ typedef enum {
  * created.
  */
 typedef struct {
-    unsigned int line;
-    unsigned int column;
+    uint32 line, column;
     char* file;
 } TokenInfo;
 

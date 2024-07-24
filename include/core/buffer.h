@@ -12,53 +12,46 @@
  */
 #ifndef BUFFER_H
 #define BUFFER_H
-#include <stdlib.h>
 #include <string.h>
-typedef unsigned long b_size_t;
+#include <stdlib.h>
+#include "defines.h"
 /**
  * @brief Defines a buffer with limited size.
  */
 typedef struct {
-    u_int64_t size;
-    u_int64_t len;
+    uint64 size;
+    uint64 len;
     char* value;
 } Buffer;
-
-/**
- * @brief Allocates new memory for a larger buffer of size `newSize`.
- * @return `-1` if the allocation goes wrong, `0` otherwise.
- * Complexity: O(n)
- */
-void resizeBuffer(Buffer* b, const b_size_t newSize);
 /**
  * @brief Creates a new `Buffer`.
  * Complexity: O(1)
  */
-Buffer* createBuffer(const b_size_t size);
+Buffer* init_buffer(const uint64 size);
 /**
  * @brief Deletes a `Buffer` and free the allocated memory.
  * Complexity: O(1)
  */
-void deleteBuffer(Buffer* buffer);
+void delete_buffer(Buffer* buffer);
 /**
  * @brief Adds a new `char` at the last avaliable position.
  * If the `Buffer` is full, it will be resized.
  * Complexity: O(1), O(n) if it needs to resize.s
  */
-void addToBuffer(Buffer* b, const char c);
+void add_buffer(Buffer* b, const char c);
 /**
  * @brief Deletes the last `char` and returns it.
  * Complexity: O(1)
  */
-void popFromBuffer(Buffer* b);
+void pop_buffer(Buffer* b);
 /**
  * @brief Fills the `Buffer` with null characters (\0) and resets the length.
  * Complexity: O(n)
  */
-void clearBuffer(Buffer* b);
+void clear_buffer(Buffer* b);
 /**
  * @brief Returns a copy of the `Buffer` value. 
  * Complexity: O(n)
  */
-char* getBuffer(const Buffer *b);
+char* get_buffer(const Buffer *b);
 #endif

@@ -19,7 +19,7 @@
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10
 
-#define ADD_TOKEN(t) addToTokenList(tokens, t);clearBuffer(buffer);
+#define ADD_TOKEN(t) addToTokenList(tokens, t);clear_buffer(buffer);
 
 #define TOKEN_INFO {lineNumber, columnNumber, file}
 
@@ -27,13 +27,13 @@
  * @brief Reads a comment line and discards its text. 
  * Complexity: O(n)
  */
-void readComment(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
+void read_comment(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
 /**
  * @brief Reads a comment block. Will throw an error if the
  * comment block is not closed.
  * Complexity: O(n)
  */
-void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
+void read_comment_block(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
 /**
  * @brief Reads a string literal between double quotes ("").
  * Will throw an error if the string is not closed.
@@ -41,7 +41,7 @@ void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber);
  * espace character does not exist.
  * Complexity: O(n)
  */
-void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber);
+void read_string_literal(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber);
 /**
  * @brief Reads a numeric literal (integer or decimal).
  * Will throw an error if the number has two or more points.

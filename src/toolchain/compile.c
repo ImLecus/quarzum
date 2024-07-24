@@ -13,20 +13,20 @@
 #include "../../include/toolchain/compile.h"
 
 void compile(char* file){
-    Process* task = startProcess("Task");
+    Process* task = start_process("Task");
     debug("Starting the compiler...");
     // Lexical analisys
-    Process* lex = startProcess("Lex phase");
+    Process* lex = start_process("Lex phase");
     TokenList* t = tokenize(file);
-    endProcess(lex);
+    end_Process(lex);
     // Syntax analisys
-    Process* parsing = startProcess("Parse phase");
+    Process* parsing = start_process("Parse phase");
     node_t ast = parse(t);
-    endProcess(parsing);
+    end_Process(parsing);
     // Semantic analisys
-    Process* checking = startProcess("Check phase");
+    Process* checking = start_process("Check phase");
     checkAST(ast);
-    endProcess(checking);
+    end_Process(checking);
     // Intermediate representation
     InstructionList* ir = createInstructionList();
     generateIR(ast, ir);
@@ -36,24 +36,24 @@ void compile(char* file){
     // free memory
     deleteTokenList(t);
     deleteInstructionList(ir);
-    endProcess(task);
+    end_Process(task);
 }
 
 node_t getAST(char* file){
-    Process* task = startProcess("Import");
-    Process* lex = startProcess("Lex phase");
+    Process* task = start_process("Import");
+    Process* lex = start_process("Lex phase");
     TokenList* t = tokenize(file);
-    endProcess(lex);
+    end_Process(lex);
     if(t != NULL){
-        Process* parsing = startProcess("Parse phase");
+        Process* parsing = start_process("Parse phase");
         node_t ast = parse(t);
         deleteTokenList(t);
-        endProcess(parsing);
-        endProcess(task);
+        end_Process(parsing);
+        end_Process(task);
         return ast;
     }
     deleteTokenList(t);
-    endProcess(task);
+    end_Process(task);
     return NULL;
     
 }

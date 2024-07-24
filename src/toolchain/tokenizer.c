@@ -12,7 +12,7 @@
  */
 #include "../include/toolchain/tokenizer.h"
 
-inline void readComment(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
+inline void read_comment(Buffer* src, uint64* index, uint32* lineNumber){
     while(*index < src->len && src->value[*index] != '\n'){
         if(src->value[*index] == '\0'){
             return;
@@ -22,7 +22,7 @@ inline void readComment(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
     ++(*lineNumber);
 }
 
-inline void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumber){
+inline void read_comment_block(Buffer* src, uint64* index, uint32* lineNumber){
     while(*index < src->len){
         if(src->value[*index] == '\n'){
             ++(*lineNumber);
@@ -37,13 +37,13 @@ inline void readCommentBlock(Buffer* src, u_int64_t* index, u_int32_t* lineNumbe
     err("Unclosed comment block",0);
 }
 
-void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber){
-    addToBuffer(target, '"');
+void read_string_literal(Buffer* src, Buffer* target, uint64* index, uint32* lineNumber){
+    add_buffer(target, '"');
      
     ++(*index);
     while(*index < src->len){
         if(src->value[*index] == '"'){
-            addToBuffer(target, '"');
+            add_buffer(target, '"');
             ++(*index);
             return;
         }
@@ -56,31 +56,31 @@ void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t*
             switch (src->value[++(*index)])
             {
             case 'n':
-                addToBuffer(target, '\n');
+                add_buffer(target, '\n');
                 break;
             case 'r':
-                addToBuffer(target, '\r');
+                add_buffer(target, '\r');
                 break;
             case 'b':
-                addToBuffer(target, '\b');
+                add_buffer(target, '\b');
                 break;
             case 'f':
-                addToBuffer(target, '\f');
+                add_buffer(target, '\f');
                 break;
             case '0':
-                addToBuffer(target, '\0');
+                add_buffer(target, '\0');
                 break;
             case 't':
-                addToBuffer(target, '\t');
+                add_buffer(target, '\t');
                 break;
             case '"':
-                addToBuffer(target, '"');
+                add_buffer(target, '"');
                 break;
             case '\'':
-                addToBuffer(target, '\'');
+                add_buffer(target, '\'');
                 break;
             case '\\':
-                addToBuffer(target, '\\');
+                add_buffer(target, '\\');
                 break;
             default:
                 err("Undefined escape character",0);
@@ -88,19 +88,19 @@ void readStringLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t*
             }
             continue;
         }
-        addToBuffer(target, src->value[*index]);
+        add_buffer(target, src->value[*index]);
         ++(*index);
     }
     err("Unclosed string literal",0);
 }
 
-inline int readNumberLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber){
+inline int readNumberLiteral(Buffer* src, Buffer* target, uint64* index, uint32* lineNumber){
     int points = 0;
     while(*index < src->len && (isDigit(src->value[*index]) || src->value[*index] == '.')){
         if(src->value[*index] == '.'){
             ++points;
         }
-        addToBuffer(target, src->value[(*index)]);
+        add_buffer(target, src->value[(*index)]);
         ++(*index);
     }
     return points > 1? -1 : points;
@@ -112,12 +112,12 @@ TokenList* tokenize(char* file){
     if(src == NULL){
         return NULL;
     }
-    TokenList* tokens = createTokenList(src->len);
-    Buffer* buffer = createBuffer(DEFAULT_TOKENIZER_BUFFER_SIZE);
+    TokenList* tokens = init_tokenlist(src->len);
+    Buffer* buffer = init_buffer(DEFAULT_TOKENIZER_BUFFER_SIZE);
     
-    u_int64_t i = 0;
-    u_int32_t lineNumber = 1;
-    u_int32_t columnNumber = 1;
+    uint64 i = 0;
+    uint32 lineNumber = 1;
+    uint32 columnNumber = 1;
 
     while(i < src->len && src->value[i] != '\0'){
         if(src->value[i] == '\n'){
@@ -128,26 +128,26 @@ TokenList* tokenize(char* file){
         }
         if(src->value[i] == '/' && src->value[i + 1] == '*'){
             i += 2;
-            readCommentBlock(src,&i,&lineNumber);
+            read_comment_block(src,&i,&lineNumber);
             continue;
         }
         if(src->value[i] == '/' && src->value[i + 1] == '/'){
             i += 2;
-            readComment(src,&i,&lineNumber);
+            read_comment(src,&i,&lineNumber);
             continue;
         }
         if(src->value[i] == '"'){
-            readStringLiteral(src, buffer, &i, &lineNumber);
-            Token tok = {StringLiteral, getBuffer(buffer), TOKEN_INFO};
+            read_string_literal(src, buffer, &i, &lineNumber);
+            Token tok = {StringLiteral, get_buffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
         if(isAlpha(src->value[i])){
             while(isAlphaNumeric(src->value[i])){
-                addToBuffer(buffer, src->value[i++]);
+                add_buffer(buffer, src->value[i++]);
             }
             TokenType t = keywordToType(buffer->value);
-            Token tok = {t, getBuffer(buffer),TOKEN_INFO};
+            Token tok = {t, get_buffer(buffer),TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
@@ -155,31 +155,29 @@ TokenList* tokenize(char* file){
             int number = readNumberLiteral(src,buffer,&i,&lineNumber);
             if(number == -1){
                 lexicalErr("Non valid numeric literal",file,buffer->value,lineNumber);
-                clearBuffer(buffer);
+                clear_buffer(buffer);
                 continue;
             }
-            Token tok = {number == 1? NumericLiteral : IntLiteral, getBuffer(buffer), TOKEN_INFO};
+            Token tok = {number == 1? NumericLiteral : IntLiteral, get_buffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
         if(isSymbol(src->value[i])){
-            addToBuffer(buffer, src->value[i++]);
+            add_buffer(buffer, src->value[i++]);
             if(i <= src->len && isSymbol(src->value[i])){
-                addToBuffer(buffer, src->value[i]);
-                TokenType t = symbolToType(buffer->value);
-                if(t != TokenError){
-                    Token tok = {t, getBuffer(buffer),TOKEN_INFO};
-                    ADD_TOKEN(tok);
-                    continue;
-                }
-                popFromBuffer(buffer);
+
+                add_buffer(buffer, src->value[i]);
             }
             TokenType t = symbolToType(buffer->value);
+            if(t == TokenError && buffer->len > 1){
+                pop_buffer(buffer);
+                t = symbolToType(buffer->value);
+            }
             if(t == TokenError){
                 lexicalErr("Unexpected token", file, buffer->value, lineNumber);
                 continue;
             }
-            Token tok = {t, getBuffer(buffer), TOKEN_INFO};
+            Token tok = {t, get_buffer(buffer), TOKEN_INFO};
             ADD_TOKEN(tok);
             continue;
         }
@@ -192,7 +190,7 @@ TokenList* tokenize(char* file){
         ++columnNumber;
         ++i;
     }
-    deleteBuffer(src);
-    deleteBuffer(buffer);
+    delete_buffer(src);
+    delete_buffer(buffer);
     return tokens;
 }

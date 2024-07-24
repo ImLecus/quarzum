@@ -12,22 +12,22 @@
  */
 #include "../../include/core/char.h"
 
-inline bool_t isAlpha(char c){
+inline bool isAlpha(char c){
     return c >= 'A' && (c <= 'Z' || c >= 'a' && c <= 'z');
 }
 
-inline bool_t isDigit(char c) {
+inline bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
-inline bool_t isSymbol(char c){
+inline bool isSymbol(char c){
     return (c >= '!' && c <= '~') && !isAlphaNumeric(c);
 }
 
-inline bool_t isAlphaNumeric(char c){
+inline bool isAlphaNumeric(char c){
     return isAlpha(c) || isDigit(c) || c == '_';
 }
 
-inline bool_t isSpace(char c){
+inline bool isSpace(char c){
     return c == ' ';
 }

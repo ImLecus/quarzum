@@ -31,18 +31,18 @@ node_t parseStatement(PARSING_POS){
     node_t stmt = NULL;
     switch (get_token(tokens,*i)->type)
     {
-    case Break:
-        EXPECT(Semicolon, "Expected semicolon")
+    case T_BREAK:
+        EXPECT(T_SEMICOLON, "Expected semicolon")
         return createNode(BreakStmt,0);
-    case Continue:
-        EXPECT(Semicolon, "Expected semicolon")
+    case T_CONTINUE:
+        EXPECT(T_SEMICOLON, "Expected semicolon")
         return createNode(ContinueStmt,0);
-    case TypeKeyword:
+    case T_TYPE_KEYWORD:
         return parseDeclaration(tokens, i);
-    case Import:
+    case T_IMPORT:
         return parseImport(tokens, i);
-    case Identifier:
-        if(get_token(tokens, *i + 1)->type == LeftPar){
+    case T_IDENTIFIER:
+        if(get_token(tokens, *i + 1)->type == T_LEFT_PAR){
             return parseFunctionCall(tokens,i);
         }
     default:
@@ -51,14 +51,14 @@ node_t parseStatement(PARSING_POS){
 }
 
 node_t parseFunctionCall(PARSING_POS){
-    Token* id = get_token(tokens, *i);
+    struct token* id = get_token(tokens, *i);
     pass;
     pass;
     node_t call = createNode(CallStmt,0);
     call->data = id->value;
     // args
     while(*i < tokens->size){
-        if(get_token(tokens, *i)->type == RightPar){
+        if(get_token(tokens, *i)->type == T_RIGHT_PAR){
             pass;
             break;
         }
@@ -68,12 +68,12 @@ node_t parseFunctionCall(PARSING_POS){
             pass;
         }
         addChildNode(call, expr);
-        if(get_token(tokens, *i)->type == Comma){
+        if(get_token(tokens, *i)->type == T_COMMA){
             pass;
             continue;
         }
     }
-    EXPECT(Semicolon, "Expected semicolon");
+    EXPECT(T_SEMICOLON, "Expected semicolon");
     pass;
     return call;
 }
@@ -81,15 +81,15 @@ node_t parseFunctionCall(PARSING_POS){
 node_t parseDeclaration(PARSING_POS){
     node_t decl = NULL;
     // to-do: add types into declarations
-    Token* type = get_token(tokens, *i);
-    EXPECT(TypeKeyword, "Expected type keyword.")
+    struct token* type = get_token(tokens, *i);
+    EXPECT(T_TYPE_KEYWORD, "Expected type keyword.")
     pass;
-    Token* id = get_token(tokens,*i);
-    EXPECT(Identifier, "Expected identifier")
+    struct token* id = get_token(tokens,*i);
+    EXPECT(T_IDENTIFIER, "Expected identifier")
     pass;
     switch (get_token(tokens, *i)->type)
     {
-    case Equal:
+    case T_EQUAL:
         pass;
         node_t expr = parseExpr(tokens, i);
         if(expr ==  NULL){
@@ -100,22 +100,22 @@ node_t parseDeclaration(PARSING_POS){
         decl->data = id->value;
         addChildNode(decl, expr);
         break;
-    case Semicolon:
+    case T_SEMICOLON:
         pass;
         decl = createNode(VarStmt,1);
         decl->data = id->value;
         break;
-    case LeftPar:
+    case T_LEFT_PAR:
         pass;
         // parse arguments
-        EXPECT(RightPar, "Expected ')'");
+        EXPECT(T_RIGHT_PAR, "Expected ')'");
         pass;
         decl = createNode(FunctionStmt,2);
         decl->data = id->value;
         // semicolon for incompletion
-        EXPECT(LeftCurly, "Expected 'function' body");
+        EXPECT(T_LEFT_CURLY, "Expected 'function' body");
         pass;
-        while(get_token(tokens, *i)->type != RightPar){
+        while(get_token(tokens, *i)->type != T_RIGHT_PAR){
             node_t statement = parseStatement(tokens, i);
             if(statement != NULL){
                 addChildNode(decl, statement);
@@ -138,11 +138,11 @@ node_t parseDeclaration(PARSING_POS){
 
 node_t parseImport(PARSING_POS){
     pass;
-    Token* next = get_token(tokens, *i);
+    struct token* next = get_token(tokens, *i);
     pass;
     // Single import, merges the two AST.
-    if(next->type == StringLiteral){
-        EXPECT(Semicolon, "Expected semicolon");
+    if(next->type == T_STRING_LITERAL){
+        EXPECT(T_SEMICOLON, "Expected semicolon");
         print(resolve_path(next->value));
         node_t importedAST = getAST(resolve_path(next->value));
         return importedAST;

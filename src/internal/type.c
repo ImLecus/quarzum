@@ -13,7 +13,7 @@
 #include "../../include/quarzum/type.h"
 #include <stdio.h>
 
-Type* getTypeFromToken(Token t){
+Type* getTypeFromToken(struct token t){
     // if(t.value == NULL){
     //     return NULL;
     // }

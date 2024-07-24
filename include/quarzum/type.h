@@ -12,7 +12,7 @@
  */
 #ifndef TYPE_H
 #define TYPE_H
-#include "token.h"
+#include "defs.h"
 #include "../core/bsearch.h"
 
 typedef enum {
@@ -75,6 +75,6 @@ typedef struct {
 //     "uint8",
 // };
 
-// Type* getTypeFromToken(Token t);
+// Type* getTypeFromToken(token t);
 
 #endif

@@ -21,7 +21,7 @@
 #define EXPECT(t,errMessage) if(get_token(tokens, *i)->type != t){err(errMessage,0); return NULL;}
 
 /**
- * @brief Discards the actual Token to check next.
+ * @brief Discards the actual token to check next.
  */
 #define pass ++(*i)
 /**

@@ -12,97 +12,70 @@
  */
 #ifndef TOKEN_H
 #define TOKEN_H
-#include "../core/defines.h"
 
-/**
- * @brief Defines a Token type.
- */
 enum {
-    // Special tokens
-    TokenError,
-    TypeKeyword,
-    AccessSpecifier,
-    Identifier,
-    Eof,
-    // Keywords
-    Const,
-    Return,
-    Module,
-    Class,
-    If,
-    While,
-    Import,
-    From,
-    Continue,
-    Break,
-    Enum,
-    Foreach,
-    In,
-
-    Setup,
-    Destroy,
-    Do,
-    For,
-    Else,
-    New,
-    Delete,
-    Persist,
-    Typedef,
-    Foreign,
-    // Operators
-    AssignOperator,
-    UnaryOperator,
-    ArithmeticOperator,
-    ComparationOperator,
-    TernaryOperator,
-    TernarySeparator,
-
-    // Symbols
-    Equal,
-    Semicolon,
-    LeftPar,
-    RightPar,
-    LeftCurly,
-    RightCurly,
-    LeftSquare,
-    RightSquare,
-    Comma,
-    Arrow,
-    Point,
-    // literals
-
-    NumericLiteral,
-    StringLiteral,
-    CharLiteral,
-    BoolLiteral,
-    NullLiteral,
-    IntLiteral
+    T_TOKEN_ERROR,
+    T_TYPE_KEYWORD,
+    T_ACCESS_SPECIFIER,
+    T_IDENTIFIER,
+    T_EOF,
+    T_CONST,
+    T_RETURN,
+    T_MODULE,
+    T_CLASS,
+    T_IF,
+    T_WHILE,
+    T_IMPORT,
+    T_FROM,
+    T_CONTINUE,
+    T_BREAK,
+    T_ENUM,
+    T_FOREACH,
+    T_IN,
+    T_SETUP,
+    T_DESTROY,
+    T_DO,
+    T_FOR,
+    T_ELSE,
+    T_NEW,
+    T_DELETE,
+    T_PERSIST,
+    T_TYPEDEF,
+    T_FOREIGN,
+    T_ASSIGN_OPERATOR,
+    T_UNARY_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_COMPARATION_OPERATOR,
+    T_TERNARY_OPERATOR,
+    T_TERNARY_SEPARATOR,
+    T_EQUAL,
+    T_SEMICOLON,
+    T_LEFT_PAR,
+    T_RIGHT_PAR,
+    T_LEFT_CURLY,
+    T_RIGHT_CURLY,
+    T_LEFT_SQUARE,
+    T_RIGHT_SQUARE,
+    T_COMMA,
+    T_ARROW,
+    T_POINT,
+    T_NUMERIC_LITERAL,
+    T_STRING_LITERAL,
+    T_CHAR_LITERAL,
+    T_BOOL_LITERAL,
+    T_NULL_LITERAL,
+    T_INT_LITERAL
 };
-typedef u_int8_t TokenType;
 
-/**
- * @brief Defines the extra information that contains a Token. It
- * includes the line, column and file name where the Token was
- * created.
- */
-typedef struct {
-    u_int32_t line, column;
+struct token_info {
+    unsigned int line, column;
     char* file;
-} TokenInfo;
+};
 
-/**
- * @brief Defines a Token. Used as basic interpretation structure 
- * by the compiler. 
- */
-typedef struct {
-    TokenType type;
+struct token {
+    int type;
     char* value;
-    TokenInfo* info;
-} Token;
+    struct token_info* info;
+};
 
-/**
- * @brief Defines an error as a Token. 
- * Used to not interrumpt by force the toolchain.
- */
-static Token ERROR_TOKEN = {TokenError, NULL, &(TokenInfo){0,0,NULL}};
 #endif

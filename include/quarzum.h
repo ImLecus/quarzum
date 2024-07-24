@@ -14,7 +14,6 @@
 #include "core/process.h"
 
 #include "quarzum/defs.h"
-#include "quarzum/token.h"
 #include "quarzum/io.h"
 #include "quarzum/tokenlist.h"
 #include "quarzum/ast.h"

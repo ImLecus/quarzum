@@ -15,22 +15,21 @@
 #include "token.h"
 #include "../core/bsearch.h"
 
+
 #define KEYWORDS_SIZE 54
 #define SYMBOLS_SIZE 39
-
-
 /**
  * @brief Searches in the `keywords` array using binary search.
  * If the element is not a keyword, it will return an `Identifier` type.
  */
-const TokenType keywordToType(const char* keyword);
+const int keywordToType(const char* keyword);
 
 
 /**
  * @brief Converts a symbol string to a TokenType using binary search.
  * If the symbol is not found, it will return a `TokenError`.
  */
-const TokenType symbolToType(const char* symbol);
+const int symbolToType(const char* symbol);
 
 /**
  * @brief Defines the keywords in the Quarzum language.
@@ -94,61 +93,62 @@ static const char* keywords[KEYWORDS_SIZE] = {
     "xor"
 };
 
-static const TokenType keywordTypes[KEYWORDS_SIZE] = {
-    ComparationOperator,
-    TypeKeyword,
-    Break,
-    TokenError, // NOT IMPLEMENTED YET
-    TypeKeyword,
-    Class,
-    Const,
-    Continue,
-    TypeKeyword,
-    Delete,
-    Destroy,
-    Do,
-    Else,
-    Enum,
-    BoolLiteral,
-    For,
-    Foreach,
-    Foreign,
-    From,
-    TypeKeyword,
-    If,
-    Import,
-    In,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    Module,
-    New,
-    ComparationOperator,
-    NullLiteral,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    ComparationOperator,
-    Persist,
-    AccessSpecifier,
-    AccessSpecifier,
-    AccessSpecifier,
-    Return,
-    Setup,
-    TypeKeyword,
-    BoolLiteral,
-    TokenError, // NOT IMPLEMENTED YET
-    Typedef,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    TypeKeyword,
-    While,
-    ComparationOperator
+static const int keywordTypes[KEYWORDS_SIZE] = {
+    T_COMPARATION_OPERATOR,
+    T_TYPE_KEYWORD,
+    T_BREAK,
+    T_TOKEN_ERROR, // NOT IMPLEMENTED YET
+    T_TYPE_KEYWORD,
+    T_CLASS,
+    T_CONST,
+    T_CONTINUE,
+    T_TYPE_KEYWORD,
+    T_DELETE,
+    T_DESTROY,
+    T_DO,
+    T_ELSE,
+    T_ENUM,
+    T_BOOL_LITERAL,
+    T_FOR,
+    T_FOREACH,
+    T_FOREIGN,
+    T_FROM,
+    T_TYPE_KEYWORD,
+    T_IF,
+    T_IMPORT,
+    T_IN,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_MODULE,
+    T_NEW,
+    T_COMPARATION_OPERATOR,
+    T_NULL_LITERAL,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_COMPARATION_OPERATOR,
+    T_PERSIST,
+    T_ACCESS_SPECIFIER,
+    T_ACCESS_SPECIFIER,
+    T_ACCESS_SPECIFIER,
+    T_RETURN,
+    T_SETUP,
+    T_TYPE_KEYWORD,
+    T_BOOL_LITERAL,
+    T_TOKEN_ERROR, // NOT IMPLEMENTED YET
+    T_TYPEDEF,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_TYPE_KEYWORD,
+    T_WHILE,
+    T_COMPARATION_OPERATOR
+
 };
 /**
  * @brief Defines the symbols in the Quarzum language.
@@ -196,46 +196,47 @@ static const char* symbols[SYMBOLS_SIZE] = {
     "|=",
     "}"
 };
-static const TokenType symbolTypes[SYMBOLS_SIZE] = {
-    ArithmeticOperator,
-    ComparationOperator,
-    ArithmeticOperator,
-    AssignOperator,
-    ArithmeticOperator,
-    AssignOperator,
-    ArithmeticOperator,
-    AssignOperator,
-    LeftPar,
-    RightPar,
-    ArithmeticOperator,
-    AssignOperator,
-    ArithmeticOperator,
-    ArithmeticOperator,
-    AssignOperator,
-    Comma,
-    ArithmeticOperator,
-    ArithmeticOperator,
-    AssignOperator,
-    Point,
-    ArithmeticOperator,
-    AssignOperator,
-    TernarySeparator,
-    Semicolon,
-    ComparationOperator,
-    ComparationOperator,
-    Equal,
-    ComparationOperator,
-    ComparationOperator,
-    ComparationOperator,
-    TernaryOperator,
-    LeftSquare,
-    RightSquare,
-    ArithmeticOperator,
-    AssignOperator,
-    LeftCurly,
-    ArithmeticOperator,
-    AssignOperator,
-    RightCurly
+static const int symbolTypes[SYMBOLS_SIZE] = {
+    T_ARITHMETIC_OPERATOR,
+    T_COMPARATION_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_LEFT_PAR,
+    T_RIGHT_PAR,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_COMMA,
+    T_ARITHMETIC_OPERATOR,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_POINT,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_TERNARY_SEPARATOR,
+    T_SEMICOLON,
+    T_COMPARATION_OPERATOR,
+    T_COMPARATION_OPERATOR,
+    T_EQUAL,
+    T_COMPARATION_OPERATOR,
+    T_COMPARATION_OPERATOR,
+    T_COMPARATION_OPERATOR,
+    T_TERNARY_OPERATOR,
+    T_LEFT_SQUARE,
+    T_RIGHT_SQUARE,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_LEFT_CURLY,
+    T_ARITHMETIC_OPERATOR,
+    T_ASSIGN_OPERATOR,
+    T_RIGHT_CURLY
+
 };
 
 #endif

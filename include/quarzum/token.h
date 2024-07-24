@@ -17,7 +17,7 @@
 /**
  * @brief Defines a Token type.
  */
-typedef enum {
+enum {
     // Special tokens
     TokenError,
     TypeKeyword,
@@ -77,7 +77,8 @@ typedef enum {
     BoolLiteral,
     NullLiteral,
     IntLiteral
-} TokenType;
+};
+typedef u_int8_t TokenType;
 
 /**
  * @brief Defines the extra information that contains a Token. It
@@ -96,12 +97,12 @@ typedef struct {
 typedef struct {
     TokenType type;
     char* value;
-    TokenInfo info;
+    TokenInfo* info;
 } Token;
 
 /**
  * @brief Defines an error as a Token. 
  * Used to not interrumpt by force the toolchain.
  */
-static Token ERROR_TOKEN = {TokenError, NULL, {0,0,NULL}};
+static Token ERROR_TOKEN = {TokenError, NULL, &(TokenInfo){0,0,NULL}};
 #endif

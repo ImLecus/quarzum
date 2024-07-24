@@ -34,7 +34,7 @@ void compile(char* file){
     // ASM and output file
 
     // free memory
-    deleteTokenList(t);
+    delete_tlist(t);
     //deleteInstructionList(ir);
     end_process(task);
 }
@@ -47,12 +47,12 @@ node_t getAST(char* file){
     if(t != NULL){
         Process* parsing = start_process("Parse phase");
         node_t ast = parse(t);
-        deleteTokenList(t);
+        delete_tlist(t);
         end_process(parsing);
         end_process(task);
         return ast;
     }
-    deleteTokenList(t);
+    delete_tlist(t);
     end_process(task);
     return NULL;
     

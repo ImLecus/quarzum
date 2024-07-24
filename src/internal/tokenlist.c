@@ -12,20 +12,20 @@
  */
 #include "../../include/quarzum/tokenlist.h"
 
-tlist_t init_tokenlist(unsigned long size){
-    tlist_t list = (tlist_t) malloc(sizeof(TokenList));
-    list->content = (Token*) malloc(size * sizeof(Token));
+tlist_t* init_tlist(u_int64_t size){
+    tlist_t* list = (tlist_t*) malloc(sizeof(TokenList));
+    list->content = _create_array(Token*, size);
     list->size = 0;
     list->capacity = size;
     return list;
 } 
 
-inline void deleteTokenList(tlist_t list){
+inline void delete_tlist(tlist_t* list){
     free(list->content);
     free(list);
 }
 
-void addToTokenList(tlist_t list, Token token){
+void push_tlist(tlist_t* list, Token* token){
     if(list->size < list->capacity){
         list->content[list->size++] = token;
         return;
@@ -33,8 +33,8 @@ void addToTokenList(tlist_t list, Token token){
     // realloc
 }
 
-inline Token getToken(tlist_t list, unsigned int i){
+inline Token* get_token(tlist_t* list, u_int32_t i){
     return  i <= list->size? 
             list->content[i]: 
-            ERROR_TOKEN;
+            &ERROR_TOKEN;
 }

@@ -13,35 +13,32 @@
 #ifndef TOKENLIST_H
 #define TOKENLIST_H
 #include "token.h"
-#include <stdlib.h>
-
-
 /**
  * @brief Defines a list of tokens.
  * Used by the tokenizer and the parser.
  */
 typedef struct {
-    Token* content;
-    unsigned long size;
-    unsigned long capacity;
+    Token** content;
+    u_int64_t size;
+    u_int64_t capacity;
 } TokenList;
-typedef TokenList* tlist_t;
+typedef TokenList tlist_t;
 
 /**
  * @brief Creates a new `TokenList` with a determined size.
  */
-tlist_t init_tokenlist(unsigned long size);
+tlist_t* init_tlist(u_int64_t size);
 /**
  * @brief Deletes a `TokenList`.
  */
-void deleteTokenList(tlist_t list);
+void delete_tlist(tlist_t* list);
 /**
  * @brief Adds a new `Token` into the list.
  */
-void addToTokenList(tlist_t list, Token token);
+void push_tlist(tlist_t* list, Token* token);
 /**
  * @brief Returns the token at the list[i] position.
  * If the position is out of bounds, it will return an ErrorToken.
  */
-Token getToken(tlist_t list, unsigned int i);
+Token* get_token(tlist_t* list, u_int32_t i);
 #endif

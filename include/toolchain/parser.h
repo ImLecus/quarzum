@@ -18,7 +18,7 @@
 #include "../core/debug.h"
 #include "compile.h"
 
-#define EXPECT(t,errMessage) if(getToken(tokens, *i).type != t){err(errMessage,0); return NULL;}
+#define EXPECT(t,errMessage) if(get_token(tokens, *i)->type != t){err(errMessage,0); return NULL;}
 
 /**
  * @brief Discards the actual Token to check next.

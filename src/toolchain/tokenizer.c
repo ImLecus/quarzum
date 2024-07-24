@@ -112,7 +112,7 @@ TokenList* tokenize(char* file){
     if(src == NULL){
         return NULL;
     }
-    TokenList* tokens = init_tokenlist(src->len);
+    TokenList* tokens = init_tlist(src->len);
     Buffer* buffer = init_buffer(DEFAULT_TOKENIZER_BUFFER_SIZE);
     
     u_int64_t i = 0;

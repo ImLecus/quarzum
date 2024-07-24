@@ -17,6 +17,10 @@
 #define QUARZUM_VERSION "1.0"
 #define VERSION_TYPE "experimental"
 
+#define _create_object(object) (object)malloc(sizeof(object))
+
+#define _create_array(object, size) (object*)malloc(sizeof(object) * size)
+
 // boolean
 typedef unsigned char bool;
 

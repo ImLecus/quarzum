@@ -15,14 +15,14 @@
 node_t parseExpr(PARSING_POS){
     node_t left = parsePrimaryExpr(tokens, i);
     
-    while (getToken(tokens, *i).value != NULL)
+    while (get_token(tokens, *i)->value != NULL)
     {
-        Token op = getToken(tokens, *i);
+        Token* op = get_token(tokens, *i);
 
-        if(strcmp(op.value,"?") == 0){
+        if(strcmp(op->value,"?") == 0){
             ++(*i);
             node_t ifTrue = parseExpr(tokens,i);
-            if(getToken(tokens, (*i)++).type != TernarySeparator){
+            if(get_token(tokens, (*i)++)->type != TernarySeparator){
                 err("Expected ternary expression.",0);
                 return NULL;
             }
@@ -34,14 +34,14 @@ node_t parseExpr(PARSING_POS){
             return expr;        
         }
         
-        if(op.type != ArithmeticOperator && op.type != ComparationOperator){
+        if(op->type != ArithmeticOperator && op->type != ComparationOperator){
             break;
         }
 
         ++(*i);
         node_t right = parseExpr(tokens, i);
         node_t expr = createNode(BinaryExpr, 2);
-        expr->data = op.value;
+        expr->data = op->value;
         addChildNode(expr, left);
         addChildNode(expr, right);
     }
@@ -52,7 +52,7 @@ node_t parseParenExpr(PARSING_POS){
 
     node_t expr = parseExpr(tokens,i);
 
-    if(getToken(tokens, *i).type != RightPar){
+    if(get_token(tokens, *i)->type != RightPar){
         err("Expected ')'",0);
         return NULL;
     }
@@ -62,33 +62,33 @@ node_t parseParenExpr(PARSING_POS){
 }
 
 node_t parsePrimaryExpr(PARSING_POS){
-    Token t = getToken(tokens,(*i)++);
-    if(t.type == ArithmeticOperator && 
-    (strcmp(t.value, "+") == 0 || strcmp(t.value, "-") == 0 || strcmp(t.value, "++") == 0 || strcmp(t.value, "--") == 0) ){
-        if(strcmp(t.value, "++") == 0 || strcmp(t.value, "--") == 0){
-            Token next = getToken(tokens,*i);
-            if(getToken(tokens, *i + 1).type != Identifier){
+    Token* t = get_token(tokens,(*i)++);
+    if(t->type == ArithmeticOperator && 
+    (strcmp(t->value, "+") == 0 || strcmp(t->value, "-") == 0 || strcmp(t->value, "++") == 0 || strcmp(t->value, "--") == 0) ){
+        if(strcmp(t->value, "++") == 0 || strcmp(t->value, "--") == 0){
+            Token* next = get_token(tokens,*i);
+            if(get_token(tokens, *i + 1)->type != Identifier){
                 err("Increment or decrement operators are only compatible with identifiers", 0);
                 return NULL;
             }
             node_t unaryExpr = createNode(UnaryExpr,1);
-            unaryExpr->data = t.value;
+            unaryExpr->data = t->value;
             node_t id = createNode(IdentifierNode, 0);
-            id->data = next.value;
+            id->data = next->value;
             addChildNode(unaryExpr, id);
             return unaryExpr;
         }
         node_t unaryExpr = createNode(UnaryExpr,1);
-        unaryExpr->data = t.value;
+        unaryExpr->data = t->value;
         addChildNode(unaryExpr, parsePrimaryExpr(tokens,i));
         return unaryExpr;
     }
     node_t expr = NULL;
-    switch (t.type)
+    switch (t->type)
     {
     case Identifier:
         expr = createNode(IdentifierNode,0);
-        expr->data = t.value;
+        expr->data = t->value;
         break;
     case IntLiteral:
     case StringLiteral:
@@ -97,7 +97,7 @@ node_t parsePrimaryExpr(PARSING_POS){
     case BoolLiteral:
     case NullLiteral:
         expr = createNode(Literal,0);
-        expr->data = t.value;
+        expr->data = t->value;
         break;
     case LeftPar:
         expr = parseParenExpr(tokens,i);
@@ -105,17 +105,17 @@ node_t parsePrimaryExpr(PARSING_POS){
     default:
         return NULL;
     }
-    Token suffix = getToken(tokens, *i);
-    if(suffix.type == ArithmeticOperator && (suffix.value == "--" || suffix.value == "++")){
+    Token* suffix = get_token(tokens, *i);
+    if(suffix->type == ArithmeticOperator && (suffix->value == "--" || suffix->value == "++")){
         ++(*i);
-        if(t.type != Identifier){
+        if(t->type != Identifier){
             err("Increment or decrement operators are only compatible with identifiers", 0);
             return NULL;
         }
         node_t unaryExpr = createNode(UnaryExpr, 1);
-        unaryExpr->data = suffix.value;
+        unaryExpr->data = suffix->value;
         node_t id = createNode(Identifier, 0);
-        id->data = suffix.value;
+        id->data = suffix->value;
         addChildNode(unaryExpr, id);
         return unaryExpr;
     }

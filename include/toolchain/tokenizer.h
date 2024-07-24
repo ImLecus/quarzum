@@ -19,7 +19,7 @@
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10
 
-#define ADD_TOKEN(t) addToTokenList(tokens, (Token){t, get_buffer(buffer), {lineNumber, columnNumber, file}});clear_buffer(buffer);
+#define ADD_TOKEN(t) push_tlist(tokens, &(Token){t, get_buffer(buffer), &(TokenInfo){lineNumber, columnNumber, file}});clear_buffer(buffer);
 
 #define t_ch src->value[i]
 #define t_next src->value[i + 1]

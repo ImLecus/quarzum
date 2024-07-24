@@ -19,15 +19,15 @@
  * @brief Defines a buffer with limited size.
  */
 typedef struct {
-    uint64 size;
-    uint64 len;
+    u_int64_t size;
+    u_int64_t len;
     char* value;
 } Buffer;
 /**
  * @brief Creates a new `Buffer`.
  * Complexity: O(1)
  */
-Buffer* init_buffer(const uint64 size);
+Buffer* init_buffer(const u_int64_t size);
 /**
  * @brief Deletes a `Buffer` and free the allocated memory.
  * Complexity: O(1)

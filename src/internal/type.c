@@ -28,16 +28,16 @@ Type* getTypeFromToken(Token t){
     // case 2:
     //     return &int16;
     // case 4:
-    //     return &int64;
+    //     return &int64_t;
     // case 5:
     //     return &int8;
     // case 6:
     // case 8:
-    //     return &uint32;
+    //     return &u_int32_t;
     // case 7:
     //     return &uint16;
     // case 9:
-    //     return &uint64;
+    //     return &u_int64_t;
     // case 10:
     //     return &uint8;
 

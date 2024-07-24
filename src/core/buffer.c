@@ -11,7 +11,7 @@
  * For full details, see LICENSE.
  */
 #include "../include/core/buffer.h"
-inline Buffer* init_buffer(const uint64 size){
+inline Buffer* init_buffer(const u_int64_t size){
     Buffer* b = (Buffer*) malloc(sizeof(Buffer));
     if(b == NULL){
         return NULL;

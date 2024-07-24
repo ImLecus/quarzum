@@ -12,7 +12,7 @@
  */
 #include "../../include/quarzum/io.h"
 
-Buffer* readFile(const char* filename){
+inline Buffer* read_file(const char* filename){
     FILE* file = fopen(filename, "r");
     if(file == NULL){
         err("No such file or directory.",1);
@@ -27,12 +27,12 @@ Buffer* readFile(const char* filename){
     return b;
 }
 
-FILE* createFile(const char* filename){
+inline FILE* createFile(const char* filename){
     FILE* file = fopen(filename, "rw");
     return file;
 }
 
-void writeFile(FILE* file, char* content){
+inline void writeFile(FILE* file, char* content){
     if(file == NULL){
         return;
     }

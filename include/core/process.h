@@ -24,8 +24,8 @@
  */
 typedef struct {
     const char* name;
-    int64 start;
-    int64 end;
+    int64_t start;
+    int64_t end;
 } Process;
 
 /**
@@ -35,6 +35,6 @@ Process* start_process(const char* name);
 /**
  * @brief Ends a `Process` and prints a debug message with the time interval.
  */
-void end_Process(Process* process);
+void end_process(Process* process);
 
 #endif

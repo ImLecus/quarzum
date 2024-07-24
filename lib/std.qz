@@ -18,7 +18,7 @@ foreign function out(const string message, const char separator = '\n');
 foreign string input(const string message = "");
 
 // Returns the length of a string.
-foreign uint64 len(const string message);
+foreign u_int64_t len(const string message);
 
 // Finishes the execution with an error code. 
 foreign function exit(uint8 errorCode);

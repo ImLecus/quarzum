@@ -19,7 +19,7 @@ inline Process* start_process(const char* name){
     return process;
 }
 
-inline void end_Process(Process* process){
+inline void end_process(Process* process){
     process->end = clock();
     char buffer[100];
     sprintf(buffer,"%s finished in %f seconds.", process->name,  (float)(process->end - process->start)/CLOCKS_PER_SEC);

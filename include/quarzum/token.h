@@ -23,6 +23,7 @@ typedef enum {
     TypeKeyword,
     AccessSpecifier,
     Identifier,
+    Eof,
     // Keywords
     Const,
     Return,
@@ -84,7 +85,7 @@ typedef enum {
  * created.
  */
 typedef struct {
-    uint32 line, column;
+    u_int32_t line, column;
     char* file;
 } TokenInfo;
 

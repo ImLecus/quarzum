@@ -1,6 +1,6 @@
 /*
  * Quarzum Compiler - tokenizer.c
- * Version 1.0, 06/07/2024
+ * Version 1.0, 24/07/2024
  *
  * This file is part of the Quarzum project, a proprietary software.
  *
@@ -19,10 +19,11 @@
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10
 
-#define ADD_TOKEN(t) addToTokenList(tokens, t);clear_buffer(buffer);
+#define ADD_TOKEN(t) addToTokenList(tokens, (Token){t, get_buffer(buffer), {lineNumber, columnNumber, file}});clear_buffer(buffer);
 
-#define TOKEN_INFO {lineNumber, columnNumber, file}
-
+#define t_ch src->value[i]
+#define t_next src->value[i + 1]
+#define t_advance ++i;++columnNumber
 /**
  * @brief Reads a comment line and discards its text. 
  * Complexity: O(n)
@@ -49,7 +50,7 @@ void read_string_literal(Buffer* src, Buffer* target, u_int64_t* index, u_int32_
  * -1 if is not valid.
  * Complexity: O(n)
  */
-int readNumberLiteral(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber);
+int read_number_literal(Buffer* src, Buffer* target, u_int64_t* index, u_int32_t* lineNumber);
 /**
  * @brief Reads a file and converts the source file text into a TokenList.
  * It will return NULL if something goes wrong.

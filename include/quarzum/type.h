@@ -42,12 +42,12 @@ typedef struct {
 // static Type int8 =  {Integer, 1};
 // static Type int16 = {Integer, 2};
 // static Type int32 = {Integer, 4};
-// static Type int64 = {Integer, 8};
+// static Type int64_t = {Integer, 8};
 
 // static Type uint8 =  {UInteger, 1};
 // static Type uint16 = {UInteger, 2};
-// static Type uint32 = {UInteger, 4};
-// static Type uint64 = {UInteger, 8};
+// static Type u_int32_t = {UInteger, 4};
+// static Type u_int64_t = {UInteger, 8};
 
 // static Type character = {Character, 1};
 
@@ -66,12 +66,12 @@ typedef struct {
 //     "int",
 //     "int16",
 //     "int32",
-//     "int64",
+//     "int64_t",
 //     "int8",
 //     "uint",
 //     "uint16",
-//     "uint32", 
-//     "uint64",
+//     "u_int32_t", 
+//     "u_int64_t",
 //     "uint8",
 // };
 

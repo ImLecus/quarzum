@@ -11,9 +11,9 @@
  * For full details, see LICENSE.
  */
 #include "../../include/quarzum/type.h"
-#include <stdio.h>
+#include "../quarzum.h"
 
-Type* getTypeFromToken(struct token t){
+Type* getTypeFromToken(token t){
     // if(t.value == NULL){
     //     return NULL;
     // }

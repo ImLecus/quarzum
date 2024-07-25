@@ -7,24 +7,21 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 include_directories(include)
 set(SOURCES
     main.c
-    src/core/buffer.c
+    src/core/string.c
     src/core/bsearch.c
-    src/core/process.c
+    src/process.c
     src/core/debug.c
     src/core/char.c 
     src/core/path.c
 
     src/internal/io.c
-    src/internal/tokenlist.c
-    src/internal/defs.c
-    src/internal/ast.c
-    src/internal/expr.c
+    src/vector.c
     src/internal/type.c
     src/internal/symbol.c
     src/internal/ir.c
-    src/toolchain/tokenizer.c
+    src/tokenize.c
     src/toolchain/compile.c
-    src/toolchain/parser.c
+  
     src/toolchain/checker.c
 )
 add_executable(quarzum ${SOURCES})

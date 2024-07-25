@@ -12,16 +12,16 @@
  */
 #include "../../include/quarzum/io.h"
 
-inline Buffer* read_file(const char* filename){
+inline string* read_file(const char* filename){
     FILE* file = fopen(filename, "r");
     if(file == NULL){
         err("No such file or directory.",1);
         return NULL;
     }
-    Buffer* b = init_buffer(256);
+    struct string* b = init_string(256);
     int c;
     while ((c = fgetc(file)) != EOF) {
-        add_buffer(b,c);
+        string_push(b,c);
     }
     fclose(file);
     return b;

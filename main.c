@@ -11,6 +11,7 @@
  * For full details, see LICENSE.
  */
 #include "include/quarzum.h"
+#include "quarzum.h"
 
 int main(int argc, char** argv) {
     flags |= debugMode;

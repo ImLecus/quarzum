@@ -10,7 +10,7 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#include "../../include/core/bsearch.h"
+#include "../../include/core/utils.h"
 
 int binary_search(const char* symbol, const char** list, unsigned int size){
     int left = 0;

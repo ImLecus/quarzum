@@ -13,12 +13,12 @@
 #ifndef IO_H
 #define IO_H
 #include <stdio.h>
-#include "../core/buffer.h"
+#include "../core/string.h"
 
 /**
  * @brief Returns the content of a file as a `Buffer`.
  */
-Buffer* read_file(const char* filename);
+string* read_file(const char* filename);
 /**
  * @brief Creates a new file in read+write mode.
  */

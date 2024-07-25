@@ -14,7 +14,6 @@
 #define DEBUG_H
 #include <stdio.h>
 #include "../quarzum/config.h"
-#include "../quarzum/defs.h"
 
 /**
  * STYLE DEFINITIONSs

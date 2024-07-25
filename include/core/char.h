@@ -12,7 +12,7 @@
  */
 #ifndef CHAR_H
 #define CHAR_H
-#include "defines.h"
+#include "utils.h"
 /**
  * @brief Returns 1 if the character is alphabetic (a-zA-Z),
  * 0 otherwise.

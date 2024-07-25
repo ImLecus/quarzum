@@ -11,14 +11,13 @@
  * For full details, see LICENSE.
  */
 #include "core/debug.h"
-#include "core/process.h"
+#include "core/utils.h"
 
-#include "quarzum/defs.h"
 #include "quarzum/io.h"
-#include "quarzum/tokenlist.h"
 #include "quarzum/ast.h"
 #include "quarzum/type.h"
 
-#include "toolchain/tokenizer.h"
-#include "toolchain/parser.h"
+//#include "toolchain/parser.h"
 #include "toolchain/compile.h"
+
+#include "../src/quarzum.h"

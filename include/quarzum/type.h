@@ -12,8 +12,7 @@
  */
 #ifndef TYPE_H
 #define TYPE_H
-#include "defs.h"
-#include "../core/bsearch.h"
+#include "../core/utils.h"
 
 typedef enum {
     Integer,

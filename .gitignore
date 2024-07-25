@@ -5,3 +5,5 @@ tests/
 test/
 asm/
 example/
+install/
+builtins/

@@ -3,18 +3,33 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "../include/core/char.h"
+
+//
+//  map.c
+//
+typedef struct {
+    char** keys;
+    int* values;
+
+    unsigned int size;
+} map;
+
+map* init_map(unsigned int size);
+void map_add(map* map, char* key, int value);
+int map_search(map* map, char* key);
 
 //
 //  string.c
 //
 typedef struct {
-    unsigned long size;
-    unsigned long len;
+    unsigned int size;
+    unsigned int len;
     char* value;
 } string;
 
-string* init_string(const unsigned long size);
+string* init_string(const unsigned int size);
 void free_string(string* s);
 void string_push(string* s, const char c);
 void string_pop(string* s);
@@ -84,7 +99,7 @@ typedef struct {
     struct token_info* info;
 } token;
 
-#define KEYWORDS_SIZE 57
+#define KEYWORDS_SIZE 58
 #define SYMBOLS_SIZE 39
 
 static const char* keywords[KEYWORDS_SIZE] = {
@@ -104,6 +119,7 @@ static const char* keywords[KEYWORDS_SIZE] = {
     "do",
     "else",
     "enum",
+    "exit",
     "false",
     "for",
     "foreach",
@@ -151,9 +167,6 @@ static const char* symbols[SYMBOLS_SIZE] = {
     "!","!=","#","#=","%","%=","&","&=","(",")","*","*=","+","++","+=",",","-","--","-=",
     ".","/","/=",":",";","<","<=","=","==",">",">=","?","[","]","^","^=","{","|","|=","}"
 };
-
-int is_keyword(char* keyword);
-int is_symbol(char* symbol);
 vector* tokenize(char* file);
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10
@@ -164,6 +177,23 @@ vector* tokenize(char* file);
 #define t_next src->value[i + 1]
 #define t_advance ++i;++columnNumber
 #define is_zero(n) n == '0'
+
+
+// new tokenize implementation
+
+typedef struct {
+    char* input;
+    unsigned int line;
+    unsigned int column;
+    unsigned int pos;
+    string* buffer;
+} lexer;
+
+lexer* init_lexer(char* input);
+
+token* new_token(int type, lexer* lexer);
+
+token* next_token(lexer* lexer);
 
 //
 //  ast.c

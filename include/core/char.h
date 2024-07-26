@@ -31,9 +31,5 @@ bool isSymbol(char c);
  * alphabetic (a-zA-Z), 0 otherwise.
  */
 bool isAlphaNumeric(char c);
-/**
- * @brief Returns 1 if the character is a whitespace (' ');
- */
-bool isSpace(char c);
 
 #endif

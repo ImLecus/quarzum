@@ -1,277 +1,204 @@
 #include "quarzum.h"
 
-inline int is_keyword(char* keyword){
-    return binary_search(keyword, keywords, KEYWORDS_SIZE) == -1 ? 
-    T_IDENTIFIER : T_KEYWORD;
+lexer* init_lexer(char* input){
+    lexer* lex = (lexer*)malloc(sizeof(lexer));
+    lex->input = input;
+    lex->line = 1;
+    lex->column = 1;
+    lex->pos = 0;
+    lex->buffer = init_string(10);
+    return lex;
 }
 
-inline int is_symbol(char* symbol){
-    return binary_search(symbol, symbols, SYMBOLS_SIZE) == -1? 
-    T_TOKEN_ERROR: T_SYMBOL;
+static inline void lexer_advance(lexer* lexer){
+    if(lexer->input[lexer->pos] == '\n'){
+        ++lexer->line;
+        lexer->column = 1;
+    }
+    ++lexer->pos;
 }
 
-inline static void read_comment(string* src, u_int64_t* index, u_int32_t* lineNumber){
-    while(*index < src->len && src->value[*index] != '\n'){
-        if(src->value[*index] == '\0'){
+static inline char lexer_peek(lexer* lexer){
+    return lexer->input[lexer->pos];
+}
+
+static inline char lexer_consume(lexer* lexer){
+    return lexer->input[lexer->pos++];
+}
+
+token* new_token(int type, lexer* lexer){
+    token* tok = (token*)malloc(sizeof(token));
+    tok->type = type;
+    tok->value = string_copy(lexer->buffer);
+    //tok->info->line = lexer->line;
+    //tok->info->column = lexer->column;
+
+    //tok->info->file = "none.qz"; // placeholder
+    return tok;
+}
+
+static void read_escape_char(lexer* lexer){
+    // the first char is the inverse bar
+    lexer_advance(lexer);
+    char c = lexer_peek(lexer);
+    switch (c)
+    {
+    case 'n':
+        string_push(lexer->buffer, '\n');
+        break;
+    case 't':
+        string_push(lexer->buffer, '\t');
+        break;
+    default:
+        // err
+        break;
+    }
+    lexer_advance(lexer);
+}
+
+static void read_char_literal(lexer* lexer){
+    string_push(lexer->buffer, lexer_consume(lexer));
+    char c = lexer_peek(lexer);
+    if(c == '\\'){
+        read_escape_char(lexer);
+    }
+    if(c != '\''){
+        string_push(lexer->buffer, lexer_consume(lexer));
+    }
+    if(lexer_peek(lexer) != '\''){
+        // err
+        return;
+    }
+    string_push(lexer->buffer, lexer_consume(lexer));
+}
+
+static void read_string_literal(lexer* lexer){
+    string_push(lexer->buffer, lexer_consume(lexer));
+    char c = lexer_peek(lexer);
+    while(c != '"'){
+        if(c == 0){
+            // err
             return;
         }
-        ++(*index);
+        if(c == '\\'){
+            read_escape_char(lexer);
+        }
+        else {
+            string_push(lexer->buffer, c);
+            lexer_advance(lexer);
+        }
+        c = lexer_peek(lexer);
     }
-    ++(*lineNumber);
+    string_push(lexer->buffer, lexer_consume(lexer));
 }
 
-inline static void read_comment_block(string* src, u_int64_t* index, u_int32_t* lineNumber){
-    while(*index < src->len){
-        if(src->value[*index] == '\n'){
-            ++(*lineNumber);
-        }
-        if(src->value[*index] == '*' && src->value[*index + 1] == '/'){
-            ++(*index);
-            ++(*index);
-            return;
-        }
-        ++(*index);
-    }
-    err("Unclosed comment block",0);
-}
-
-static void read_string_literal(string* src, string* target, u_int64_t* index, u_int32_t* lineNumber){
-    string_push(target, '"');
-     
-    ++(*index);
-    while(*index < src->len){
-        if(src->value[*index] == '"'){
-            string_push(target, '"');
-            ++(*index);
-            return;
-        }
-        if(src->value[*index] == '\n'){
-            ++(*index);
-            ++(*lineNumber);
-            continue;
-        }
-        if(src->value[*index] == '\\'){
-            switch (src->value[++(*index)])
-            {
-            case 'n':
-                string_push(target, '\n');
-                break;
-            case 'r':
-                string_push(target, '\r');
-                break;
-            case 'b':
-                string_push(target, '\b');
-                break;
-            case 'f':
-                string_push(target, '\f');
-                break;
-            case '0':
-                string_push(target, '\0');
-                break;
-            case 't':
-                string_push(target, '\t');
-                break;
-            case '"':
-                string_push(target, '"');
-                break;
-            case '\'':
-                string_push(target, '\'');
-                break;
-            case '\\':
-                string_push(target, '\\');
-                break;
-            default:
-                err("Undefined escape character",0);
-                break;
-            }
-            continue;
-        }
-        string_push(target, src->value[*index]);
-        ++(*index);
-    }
-    err("Unclosed string literal",0);
-}
-
-static void read_digit_chain(string* src, string* target, u_int64_t* index, char base){
-    while(*index < src->len && isDigit(src->value[*index],base)){
-        string_push(target, src->value[*index]);
-        ++(*index);
+static void read_digit_chain(lexer* lexer){
+    while(isdigit(lexer_peek(lexer))){
+        string_push(lexer->buffer, lexer_consume(lexer));
     }
 }
 
-static int read_number_literal(string* src, string* target, u_int64_t* index, u_int32_t* lineNumber){
-    string_push(target, src->value[*index]);
-    if(is_zero(src->value[*index])){
-        ++(*index);
-        switch (src->value[*index])
-        {
-        case 'x':
-            string_push(target, src->value[*index]);
-            read_digit_chain(src, target, index, src->value[(*index)++]);
+static int read_numeric_literal(lexer* lexer){
+    string_push(lexer->buffer, lexer_peek(lexer));
+    char c = lexer_consume(lexer);
+    if(c != '0'){
+        read_digit_chain(lexer);
+        if(lexer_peek(lexer) == '.'){
+            string_push(lexer->buffer, lexer_consume(lexer));
+            read_digit_chain(lexer);
+        }
+        else{
             return 0;
-        case 'b':
-            string_push(target, src->value[*index]);
-            read_digit_chain(src, target, index, src->value[(*index)++]);
-            return 0 ;
-        case 'o':
-            string_push(target, src->value[*index]);
-            read_digit_chain(src, target, index, src->value[(*index)++]);
+        }
+        if(lexer_peek(lexer) == '.'){
+           // err
+        }
+        return 1;
+    }
+    switch (lexer_peek(lexer))
+    {
+    case 'b':
+        string_push(lexer->buffer, lexer_consume(lexer));
+        read_digit_chain(lexer);
+        return 0;
+    case 'o':
+        string_push(lexer->buffer, lexer_consume(lexer));
+        read_digit_chain(lexer);
+        return 0;
+    case 'x':
+        string_push(lexer->buffer, lexer_consume(lexer));
+        read_digit_chain(lexer);
+        return 0;
+    default:
+        read_digit_chain(lexer);
+        if(lexer_peek(lexer) == '.'){
+            string_push(lexer->buffer, lexer_consume(lexer));
+            read_digit_chain(lexer);
+        }
+        else{
             return 0;
-        default:
-            break;
         }
-        ++(*index);
-    }
-    
-    int points = 0;
-    while(*index < src->len && (isDigit(src->value[*index], 'd') || src->value[*index] == '.')){
-        if(src->value[*index] == '.'){
-            ++points;
+        if(lexer_peek(lexer) == '.'){
+           // err
         }
-        string_push(target, src->value[(*index)]);
-        ++(*index);
+        return 1;
     }
-    return points > 1? -1 : points;
 }
 
-vector* tokenize(char* file){
-    
-    string* src = read_file(file);
-    if(src == NULL){
-        return NULL;
+static int read_id_or_keyword(lexer* lexer){
+    while(isalnum(lexer_peek(lexer)) || lexer_peek(lexer) == '_'){
+        string_push(lexer->buffer, lexer_consume(lexer));
     }
+    return binary_search(lexer->buffer->value, keywords, KEYWORDS_SIZE) != -1;
+}
 
-    vector* tokens = init_vector(src->len);
-
-    string* buffer = init_string(DEFAULT_TOKENIZER_BUFFER_SIZE);
-    
-    unsigned long i = 0;
-    unsigned int lineNumber = 1;
-    unsigned int columnNumber = 1;
-
-    while(t_ch){
-        if(t_ch == 0){
-            ADD_TOKEN(T_EOF);
-            break;
+static void read_symbol(lexer* lexer){
+    string_push(lexer->buffer, lexer_consume(lexer));
+    if(ispunct(lexer_peek(lexer))){
+        string_push(lexer->buffer, lexer_peek(lexer));
+        int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
+        if(search != -1){
+            return;
         }
-        if(t_ch == '\n'){
-            ++lineNumber;
-            columnNumber = 1;
-            ++i;
-            continue;
-        }
-        if(t_ch == '/' && t_next == '*'){
-            t_advance;
-            t_advance;
-            read_comment_block(src,&i,&lineNumber);
-            continue;
-        }
-        if(t_ch == '/' && t_next == '/'){
-            read_comment(src,&i,&lineNumber);
-            continue;
-        }
-        if(t_ch == '"'){
-            read_string_literal(src, buffer, &i, &lineNumber);
-            ADD_TOKEN(T_STRING_LITERAL);
-            continue;
-        }
-        if(t_ch == '\''){
-            string_push(buffer, '\'');
-            t_advance;
-            if(t_ch == '\''){
-                string_push(buffer, '\'');
-                t_advance;
-            }
-            else if(t_ch == '\\'){
-                switch (src->value[++i])
-                {
-                case 'n':
-                    string_push(buffer, '\n');
-                    break;
-                case 'r':
-                    string_push(buffer, '\r');
-                    break;
-                case 'b':
-                    string_push(buffer, '\b');
-                    break;
-                case 'f':
-                    string_push(buffer, '\f');
-                    break;
-                case '0':
-                    string_push(buffer, '\0');
-                    break;
-                case 't':
-                    string_push(buffer, '\t');
-                    break;
-                case '"':
-                    string_push(buffer, '"');
-                    break;
-                case '\'':
-                    string_push(buffer, '\'');
-                    break;
-                case '\\':
-                    string_push(buffer, '\\');
-                    break;
-                default:
-                    err("Undefined escape character",0);
-                    break;
-                }
-            }
-            else{
-                string_push(buffer, t_ch);
-                t_advance;
-            }    
-            ADD_TOKEN(T_CHAR_LITERAL);
-            continue;
-        }
-        if(isAlpha(t_ch)){
-            while(isAlphaNumeric(t_ch)){
-                string_push(buffer, t_ch);
-                t_advance;
-            }
-            ADD_TOKEN(is_keyword(buffer->value));
-            continue;
-        }
-        if(isDigit(t_ch, 'd')){
-            int number = read_number_literal(src,buffer,&i,&lineNumber);
-            if(number == -1){
-                lexicalErr("Non valid numeric literal",file,buffer->value,lineNumber);
-                string_clear(buffer);
-                continue;
-            }
-            ADD_TOKEN(number == 1? T_NUMERIC_LITERAL : T_INT_LITERAL);
-            continue;
-        }
-        if(isSymbol(t_ch)){
-            string_push(buffer, t_ch);
-            t_advance;
-            if(i <= src->len && isSymbol(t_ch)){
-                string_push(buffer, t_ch);
-                t_advance;
-            }
-            int t = is_symbol(buffer->value);
-            if(t == T_TOKEN_ERROR && buffer->len > 1){
-                string_pop(buffer);
-                --i;
-                --columnNumber;
-                t = is_symbol(buffer->value);
-            }
-            if(t == T_TOKEN_ERROR){
-                lexicalErr("Unexpected token", file, buffer->value, lineNumber);
-                t_advance;
-                continue;
-            }
-            ADD_TOKEN(t);
-            continue;
-        }
-        if(isSpace(t_ch)){
-            t_advance;
-            continue;
-        }
-        lexicalErr("Unexpected token", file, &t_ch, lineNumber);
-        t_advance;
     }
-    free_string(src);
-    free_string(buffer);
-    return tokens;
+    int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
+    if(search != -1){
+        // err
+    }
+}
+
+token* next_token(lexer* lexer){
+    while (isspace(lexer_peek(lexer)))
+    {
+        lexer_advance(lexer);
+    }
+    char c = lexer_peek(lexer);
+    if(isalpha(c) || c == '_'){
+       int is_kw = read_id_or_keyword(lexer);
+       return new_token(is_kw == 1? T_KEYWORD : T_IDENTIFIER, lexer);
+    }
+    else if(c == '"'){
+        read_string_literal(lexer);
+        return new_token(T_STRING_LITERAL, lexer);
+    }
+    else if(c == '\''){
+        read_char_literal(lexer);
+        return new_token(T_CHAR_LITERAL, lexer);
+    }
+    else if(isdigit(c)){
+        int is_decimal = read_numeric_literal(lexer);
+        return new_token(is_decimal == 1? 
+                            T_NUMERIC_LITERAL :
+                            T_INT_LITERAL, lexer);
+    }
+    else if(ispunct(c)){
+        read_symbol(lexer);
+        return new_token(T_SYMBOL, lexer);
+    }
+    else if(c == 0){
+        return new_token(T_EOF, lexer);
+    }
+    // lexical err
+    lexer_advance(lexer);
+    return new_token(T_TOKEN_ERROR, lexer);
 }

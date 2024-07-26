@@ -1,17 +1,5 @@
-/*
- * Quarzum Compiler - buffer.c
- * Version 1.0, 06/07/2024
- *
- * This file is part of the Quarzum project, a proprietary software.
- *
- * Quarzum Project License
- * ------------------------
- *
- * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
- * For full details, see LICENSE.
- */
 #include "quarzum.h"
-inline string* init_string(const unsigned long size){
+inline string* init_string(const unsigned int size){
     string* s = (string*) malloc(sizeof(string));
     if(s == NULL){
         return NULL;

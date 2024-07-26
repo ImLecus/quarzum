@@ -39,7 +39,3 @@ inline bool isSymbol(char c){
 inline bool isAlphaNumeric(char c){
     return isAlpha(c) || isDigit(c, 'd') || c == '_';
 }
-
-inline bool isSpace(char c){
-    return c == ' ';
-}

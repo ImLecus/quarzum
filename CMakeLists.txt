@@ -13,6 +13,7 @@ set(SOURCES
     src/core/debug.c
     src/core/char.c 
 
+    src/map.c
     src/io.c
     src/vector.c
     src/parse.c

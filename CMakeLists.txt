@@ -7,22 +7,21 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 include_directories(include)
 set(SOURCES
     main.c
-    src/core/string.c
+    src/string.c
     src/core/bsearch.c
     src/process.c
     src/core/debug.c
     src/core/char.c 
-    src/core/path.c
 
-    src/internal/io.c
+    src/io.c
     src/vector.c
+    src/parse.c
     src/internal/type.c
     src/internal/symbol.c
     src/internal/ir.c
     src/tokenize.c
-    src/toolchain/compile.c
   
-    src/toolchain/checker.c
+    src/check.c
 )
 add_executable(quarzum ${SOURCES})
 set(CMAKE_C_FLAGS_RELEASE "-O3")

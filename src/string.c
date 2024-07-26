@@ -10,9 +10,9 @@
  * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
  * For full details, see LICENSE.
  */
-#include "../include/core/string.h"
+#include "quarzum.h"
 inline string* init_string(const unsigned long size){
-    string* s = (struct string*) malloc(sizeof(string));
+    string* s = (string*) malloc(sizeof(string));
     if(s == NULL){
         return NULL;
     }

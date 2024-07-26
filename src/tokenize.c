@@ -92,9 +92,39 @@ static void read_string_literal(string* src, string* target, u_int64_t* index, u
     err("Unclosed string literal",0);
 }
 
-inline static int read_number_literal(string* src, string* target, u_int64_t* index, u_int32_t* lineNumber){
+static void read_digit_chain(string* src, string* target, u_int64_t* index, char base){
+    while(*index < src->len && isDigit(src->value[*index],base)){
+        string_push(target, src->value[*index]);
+        ++(*index);
+    }
+}
+
+static int read_number_literal(string* src, string* target, u_int64_t* index, u_int32_t* lineNumber){
+    string_push(target, src->value[*index]);
+    if(is_zero(src->value[*index])){
+        ++(*index);
+        switch (src->value[*index])
+        {
+        case 'x':
+            string_push(target, src->value[*index]);
+            read_digit_chain(src, target, index, src->value[(*index)++]);
+            return 0;
+        case 'b':
+            string_push(target, src->value[*index]);
+            read_digit_chain(src, target, index, src->value[(*index)++]);
+            return 0 ;
+        case 'o':
+            string_push(target, src->value[*index]);
+            read_digit_chain(src, target, index, src->value[(*index)++]);
+            return 0;
+        default:
+            break;
+        }
+        ++(*index);
+    }
+    
     int points = 0;
-    while(*index < src->len && (isDigit(src->value[*index]) || src->value[*index] == '.')){
+    while(*index < src->len && (isDigit(src->value[*index], 'd') || src->value[*index] == '.')){
         if(src->value[*index] == '.'){
             ++points;
         }
@@ -202,7 +232,7 @@ vector* tokenize(char* file){
             ADD_TOKEN(is_keyword(buffer->value));
             continue;
         }
-        if(isDigit(t_ch)){
+        if(isDigit(t_ch, 'd')){
             int number = read_number_literal(src,buffer,&i,&lineNumber);
             if(number == -1){
                 lexicalErr("Non valid numeric literal",file,buffer->value,lineNumber);

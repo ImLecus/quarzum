@@ -13,11 +13,7 @@
 #include "core/debug.h"
 #include "core/utils.h"
 
-#include "quarzum/io.h"
 #include "quarzum/ast.h"
 #include "quarzum/type.h"
-
-//#include "toolchain/parser.h"
-#include "toolchain/compile.h"
 
 #include "../src/quarzum.h"

@@ -21,7 +21,7 @@ bool isAlpha(char c);
 /**
  * @brief Returns 1 if the character is a digit (0-9), 0 otherwise.
  */
-bool isDigit(char c);
+bool isDigit(char c, char base);
 /**
  * @brief Returns 1 if the character is a symbol, 0 otherwise.
  */

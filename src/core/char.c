@@ -16,8 +16,20 @@ inline bool isAlpha(char c){
     return c >= 'A' && (c <= 'Z' || c >= 'a' && c <= 'z');
 }
 
-inline bool isDigit(char c) {
-    return c >= '0' && c <= '9';
+inline bool isDigit(char c, char base) {
+    switch (base)
+    {
+    case 'd':
+        return c >= '0' && c <= '9';
+    case 'b':
+        return c == '0' || c == '1';
+    case 'o':
+       return c >= '0' && c <= '7';
+    case 'x':
+       return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
+    default: return false;
+    }
+    
 }
 
 inline bool isSymbol(char c){
@@ -25,7 +37,7 @@ inline bool isSymbol(char c){
 }
 
 inline bool isAlphaNumeric(char c){
-    return isAlpha(c) || isDigit(c) || c == '_';
+    return isAlpha(c) || isDigit(c, 'd') || c == '_';
 }
 
 inline bool isSpace(char c){

@@ -1,0 +1,16 @@
+import "@std/console.qz";
+import List from "@std/collections.qz";
+
+function main(){
+    List<uint8> numbers = new List();
+
+    while(true){
+        string i = input("Write a number between 0 and 255: ");
+        uint8 number = toUint8(i);
+        if(number == null){
+            break;
+        }
+        numbers.add(number);
+        out(toString(number.size));
+    }
+}

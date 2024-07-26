@@ -14,7 +14,34 @@
 #include "quarzum.h"
 
 int main(int argc, char** argv) {
+
     flags |= debugMode;
-    compile(argv[1]);
+
+    struct process task = start_process("Task");
+    debug("Starting the compiler...");
+    // Lexical analisys
+    struct process lex = start_process("Lex phase");
+    vector* t = tokenize(argv[1]);
+    end_process(&lex);
+    // Syntax analisys
+    struct process parsing = start_process("Parse phase");
+    node* ast = parse(t);
+    end_process(&parsing);
+
+    // // Semantic analisys
+    // Process* checking = start_process("Check phase");
+    // checkAST(ast);
+    // end_process(checking);
+    // // Intermediate representation
+    // InstructionList* ir = createInstructionList();
+    // generateIR(ast, ir);
+    // printf("%d",ir->size);
+    // ASM and output file
+
+    // free memory
+    free_vector(t);
+    //deleteInstructionList(ir);
+    end_process(&task);
+
     return 0;
 }

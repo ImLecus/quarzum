@@ -3,13 +3,34 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-#include "../include/core/string.h"
 #include "../include/core/char.h"
-#include "../include/quarzum/io.h"
+
+//
+//  string.c
+//
+typedef struct {
+    unsigned long size;
+    unsigned long len;
+    char* value;
+} string;
+
+string* init_string(const unsigned long size);
+void free_string(string* s);
+void string_push(string* s, const char c);
+void string_pop(string* s);
+void string_clear(string* s);
+char* string_copy(string* s);
+
+//
+// io.c
+//
+string* read_file(const char* filename);
+FILE* create_file(const char* filename);
+void write_file(FILE* file, char* content);
+
 //
 //  process.c
 //
-
 struct process {
     char* name;
     int start;
@@ -63,19 +84,21 @@ typedef struct {
     struct token_info* info;
 } token;
 
-#define KEYWORDS_SIZE 54
+#define KEYWORDS_SIZE 57
 #define SYMBOLS_SIZE 39
 
 static const char* keywords[KEYWORDS_SIZE] = {
     "and",
     "bool",
     "break",
+    "case",
     "catch",
     "char",
     "class",
     "const",
     "continue",
     "decimal",
+    "default",
     "delete",
     "destroy",
     "do",
@@ -111,6 +134,7 @@ static const char* keywords[KEYWORDS_SIZE] = {
     "return",
     "setup",
     "string",
+    "switch",
     "true",
     "try",
     "typedef",
@@ -139,5 +163,46 @@ vector* tokenize(char* file);
 #define t_ch src->value[i]
 #define t_next src->value[i + 1]
 #define t_advance ++i;++columnNumber
+#define is_zero(n) n == '0'
+
+//
+//  ast.c
+//
+
+enum {
+    N_ROOT,
+    N_IF,
+    N_WHILE,
+    N_VAR,
+    N_MODULE,
+    N_BREAK,
+    N_CONTINUE,
+    N_FUNCTION,
+    N_CALL,
+    N_IDENTIFIER,
+    N_TYPE,
+    N_UNARY_EXPR,
+    N_BINARY_EXPR,
+    N_PAREN_EXPR,
+    N_TERNARY_EXPR,
+    N_LITERAL
+};
+
+typedef struct {
+    int type;
+    vector* children;
+    unsigned int children_count;
+    unsigned int size;
+} node;
+//inline int match(token* tok, char* value);
+node* parse_statement(vector* tokens, unsigned int* pos);
+node* parse(vector* tokens);
+
+//
+//  check.c
+//
+
+void checkAST(node* ast);
+void checkNode(node* node, vector* symbols);
 
 #endif

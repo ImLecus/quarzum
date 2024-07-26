@@ -14,6 +14,5 @@
 #include "core/utils.h"
 
 #include "quarzum/ast.h"
-#include "quarzum/type.h"
 
 #include "../src/quarzum.h"

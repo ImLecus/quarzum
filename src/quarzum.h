@@ -4,8 +4,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "../include/core/char.h"
-
+#include <string.h>
+#include "../include/quarzum.h"
 //
 //  map.c
 //
@@ -85,7 +85,8 @@ enum {
     T_NUMERIC_LITERAL,
     T_STRING_LITERAL,
     T_CHAR_LITERAL,
-    T_INT_LITERAL
+    T_INT_LITERAL,
+    T_NULL_LITERAL
 };
 
 struct token_info {
@@ -99,7 +100,7 @@ typedef struct {
     struct token_info* info;
 } token;
 
-#define KEYWORDS_SIZE 58
+#define KEYWORDS_SIZE 59
 #define SYMBOLS_SIZE 39
 
 static const char* keywords[KEYWORDS_SIZE] = {
@@ -150,6 +151,7 @@ static const char* keywords[KEYWORDS_SIZE] = {
     "return",
     "setup",
     "string",
+    "struct",
     "switch",
     "true",
     "try",
@@ -196,11 +198,12 @@ token* new_token(int type, lexer* lexer);
 token* next_token(lexer* lexer);
 
 //
-//  ast.c
+//  parse.c
 //
 
 enum {
     N_ROOT,
+    N_STRUCT,
     N_IF,
     N_WHILE,
     N_VAR,
@@ -222,11 +225,44 @@ typedef struct {
     int type;
     vector* children;
     unsigned int children_count;
-    unsigned int size;
 } node;
-//inline int match(token* tok, char* value);
-node* parse_statement(vector* tokens, unsigned int* pos);
-node* parse(vector* tokens);
+
+node* init_node(unsigned int children);
+
+node* parse();
+
+//
+//  expr.c
+//
+
+node* parse_expr(lexer* lexer);
+
+//
+//  type.c
+//
+
+enum {
+    TY_BOOL,
+    TY_CHAR,
+    TY_STRING,
+    TY_FUNCTION,
+    TY_INT,
+    TY_UINT,
+    TY_NUM,
+    TY_DECIMAL,
+    TY_VAR,
+    TY_CUSTOM,
+    TY_NULL
+};
+
+typedef struct {
+    int type;
+    int align;
+    unsigned int size;
+    bool is_unsigned;
+    bool is_const;
+
+} type;
 
 //
 //  check.c
@@ -234,5 +270,7 @@ node* parse(vector* tokens);
 
 void checkAST(node* ast);
 void checkNode(node* node, vector* symbols);
+
+int binary_search(const char* symbol, const char** list, unsigned int size);
 
 #endif

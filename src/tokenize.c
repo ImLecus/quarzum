@@ -34,6 +34,8 @@ token* new_token(int type, lexer* lexer){
     //tok->info->column = lexer->column;
 
     //tok->info->file = "none.qz"; // placeholder
+
+    string_clear(lexer->buffer);
     return tok;
 }
 

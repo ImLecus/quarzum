@@ -1,1 +1,3 @@
-hello
+struct str {
+    int size;
+}

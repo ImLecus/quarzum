@@ -19,11 +19,9 @@ int main(int argc, char** argv) {
     struct process task = start_process("Task");
     debug("Starting the compiler...");
     // Lexical analisys
-    struct process lex = start_process("Lex phase");
-    lexer* lexer = init_lexer(read_file("code.qz")->value);
+    struct process lex = start_process("Parse phase");
 
-    token* tok = next_token(lexer);
-    printf(lexer->buffer->value);
+    node* ast = parse();
 
     end_process(&lex);
     // Syntax analisys
@@ -42,7 +40,6 @@ int main(int argc, char** argv) {
     // ASM and output file
 
     // free memory
-    free(lexer);
     end_process(&task);
 
     return 0;

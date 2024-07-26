@@ -11,17 +11,15 @@ set(SOURCES
     src/core/bsearch.c
     src/process.c
     src/core/debug.c
-    src/core/char.c 
 
     src/map.c
     src/io.c
     src/vector.c
     src/parse.c
-    src/internal/type.c
-    src/internal/symbol.c
+    src/type.c
     src/internal/ir.c
-    src/tokenize.c
-  
+    src/tokenize.c 
+    src/expr.c
     src/check.c
 )
 add_executable(quarzum ${SOURCES})

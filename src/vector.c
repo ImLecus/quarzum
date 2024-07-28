@@ -14,8 +14,8 @@ inline void free_vector(vector* v){
 }
 
 inline void vector_push(vector* v, void* element){
-    if(v->len >= v->size){
-        v->value = (void**)realloc(v->value,v->size*VECTOR_SIZE_INCREMENT);
+    if(v->len + 1 >= v->size){
+        v->value = (void**)realloc(v->value,sizeof(void*)*v->size*VECTOR_SIZE_INCREMENT);
         v->size *= 2;
     }
     v->value[v->len++] = element;

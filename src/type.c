@@ -18,6 +18,6 @@ type* ty_num16 =    &(type){TY_NUM, 2, 2};
 type* ty_num32 =    &(type){TY_NUM, 4, 4};
 type* ty_num64 =    &(type){TY_NUM, 8, 8};
 
-type* ty_decimal =    &(type){TY_DECIMAL, 8, 8};
+type* ty_decimal =  &(type){TY_DECIMAL, 8, 8};
 
 type* ty_null =    &(type){TY_NULL, 1, 1, true};

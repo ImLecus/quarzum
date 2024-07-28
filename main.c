@@ -1,23 +1,9 @@
-/*
- * Quarzum Compiler - main.c
- * Version 1.0, 11/07/2024
- *
- * This file is part of the Quarzum project, a proprietary software.
- *
- * Quarzum Project License
- * ------------------------
- *
- * For Contributions License Agreement (CLA), see CONTRIBUTING.md.
- * For full details, see LICENSE.
- */
-#include "include/quarzum.h"
-#include "quarzum.h"
+#include "src/quarzum.h"
 
 int main(int argc, char** argv) {
-    flags |= debugMode;
 
     struct process task = start_process("Task");
-    debug("Starting the compiler...");
+    printf(DEBUG_MSG("Starting the compiler..."));
     // Lexical analisys
     struct process lex = start_process("Parse phase");
 

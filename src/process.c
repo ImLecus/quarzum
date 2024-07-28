@@ -10,5 +10,5 @@ inline void end_process(struct process* process){
     process->end = clock();
     char buffer[100];
     sprintf(buffer,"%s finished in %f seconds.", process->name,  (float)(process->end - process->start)/CLOCKS_PER_SEC);
-    debug(buffer);
+    printf(DEBUG_MSG(buffer));
 }

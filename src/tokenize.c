@@ -6,7 +6,7 @@ lexer* init_lexer(char* input){
     lex->line = 1;
     lex->column = 1;
     lex->pos = 0;
-    lex->buffer = init_string(10);
+    lex->buffer = init_string(DEFAULT_TOKENIZER_BUFFER_SIZE);
     return lex;
 }
 
@@ -30,10 +30,9 @@ token* new_token(int type, lexer* lexer){
     token* tok = (token*)malloc(sizeof(token));
     tok->type = type;
     tok->value = string_copy(lexer->buffer);
-    //tok->info->line = lexer->line;
-    //tok->info->column = lexer->column;
-
-    //tok->info->file = "none.qz"; // placeholder
+    tok->line = lexer->line;
+    tok->column = lexer->column;
+    tok->file = "none.qz"; // placeholder
 
     string_clear(lexer->buffer);
     return tok;
@@ -151,22 +150,26 @@ static int read_id_or_keyword(lexer* lexer){
     while(isalnum(lexer_peek(lexer)) || lexer_peek(lexer) == '_'){
         string_push(lexer->buffer, lexer_consume(lexer));
     }
-    return binary_search(lexer->buffer->value, keywords, KEYWORDS_SIZE) != -1;
+    int search = binary_search(lexer->buffer->value, keywords, KEYWORDS_SIZE);
+
+    return search == -1 ? T_IDENTIFIER : keyword_types[search];
+            
 }
 
-static void read_symbol(lexer* lexer){
+static int read_symbol(lexer* lexer){
     string_push(lexer->buffer, lexer_consume(lexer));
     if(ispunct(lexer_peek(lexer))){
         string_push(lexer->buffer, lexer_peek(lexer));
         int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
         if(search != -1){
-            return;
-        }
+            return symbol_types[search];
+        } 
     }
     int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
     if(search != -1){
-        // err
+        return symbol_types[search];
     }
+    return T_TOKEN_ERROR;
 }
 
 token* next_token(lexer* lexer){
@@ -176,8 +179,8 @@ token* next_token(lexer* lexer){
     }
     char c = lexer_peek(lexer);
     if(isalpha(c) || c == '_'){
-       int is_kw = read_id_or_keyword(lexer);
-       return new_token(is_kw == 1? T_KEYWORD : T_IDENTIFIER, lexer);
+       int type = read_id_or_keyword(lexer);
+       return new_token(type, lexer);
     }
     else if(c == '"'){
         read_string_literal(lexer);
@@ -194,8 +197,8 @@ token* next_token(lexer* lexer){
                             T_INT_LITERAL, lexer);
     }
     else if(ispunct(c)){
-        read_symbol(lexer);
-        return new_token(T_SYMBOL, lexer);
+        int search = read_symbol(lexer);
+        return new_token(search, lexer);
     }
     else if(c == 0){
         return new_token(T_EOF, lexer);
@@ -203,4 +206,8 @@ token* next_token(lexer* lexer){
     // lexical err
     lexer_advance(lexer);
     return new_token(T_TOKEN_ERROR, lexer);
+}
+
+void read_next(lexer* lexer){
+    lexer->tok = next_token(lexer);
 }

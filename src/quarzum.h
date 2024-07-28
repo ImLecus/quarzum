@@ -5,20 +5,41 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include "../include/quarzum.h"
-//
-//  map.c
-//
-typedef struct {
-    char** keys;
-    int* values;
 
-    unsigned int size;
-} map;
 
-map* init_map(unsigned int size);
-void map_add(map* map, char* key, int value);
-int map_search(map* map, char* key);
+#define QUARZUM_COMPILER_VERSION "1.0"
+#define QUARZUM_VERSION "1.0"
+#define VERSION_TYPE "experimental"
+
+typedef int bool;
+#define true 1
+#define false 0
+
+//
+//  bsearch.c
+//
+int binary_search(const char* symbol, const char** list, unsigned int size);
+
+//
+//  debug
+//
+#define RESET "\e[0m"
+
+#define RED "\e[31m"
+#define YELLOW "\e[33m"
+#define GREEN "\e[32m"
+#define CYAN "\e[36m"
+#define MAGENTA "\e[35m"
+#define GRAY "\e[90m"
+#define ORANGE "\e[38;5;214m"
+
+#define UNDERLINE "\e[4m"
+#define BOLD "\e[1m"
+
+#define ERROR_MSG(msg) RED"[ERROR] "RESET"%s\n",msg
+#define LOG_MSG(msg) CYAN"[LOG] "RESET"%s\n",msg
+#define WARN_MSG(msg) ORANGE"[WARNING] "RESET"%s\n",msg
+#define DEBUG_MSG(msg) MAGENTA"[DEBUG] "RESET"%s\n",msg
 
 //
 //  string.c
@@ -78,7 +99,14 @@ void* vector_get(vector* v, unsigned int index);
 
 enum {
     T_TOKEN_ERROR,
-    T_KEYWORD,
+    T_LOGICAL_OP,
+    T_SPECIFIER,
+    T_UNARY,
+    T_ACCESS,
+    T_TYPE,
+    T_BITWISE_OP,
+    T_ARITHMETIC_OP,
+    T_ASSIGN_OP,
     T_IDENTIFIER,
     T_EOF,
     T_SYMBOL,
@@ -86,102 +114,109 @@ enum {
     T_STRING_LITERAL,
     T_CHAR_LITERAL,
     T_INT_LITERAL,
-    T_NULL_LITERAL
+    T_NULL_LITERAL,
+    T_KEYWORD_BREAK,
+    T_KEYWORD_CASE,
+    T_KEYWORD_CATCH,
+    T_KEYWORD_CLASS,
+    T_KEYWORD_CONTINUE,
+    T_KEYWORD_DEFAULT,
+    T_KEYWORD_DELETE,
+    T_KEYWORD_DO,
+    T_KEYWORD_ELSE,
+    T_KEYWORD_ENUM,
+    T_KEYWORD_EXIT,
+    T_KEYWORD_FALSE,
+    T_KEYWORD_FOR,
+    T_KEYWORD_FOREACH,
+    T_KEYWORD_FROM,
+    T_KEYWORD_IF,
+    T_KEYWORD_IMPORT,
+    T_KEYWORD_IN,
+    T_KEYWORD_MODULE,
+    T_KEYWORD_NEW,
+    T_KEYWORD_PERSIST,
+    T_KEYWORD_RETURN,
+    T_KEYWORD_STRUCT,
+    T_KEYWORD_SWITCH,
+    T_KEYWORD_TRUE,
+    T_KEYWORD_TRY,
+    T_KEYWORD_TYPEDEF,
+    T_KEYWORD_WHILE,
+    T_LEFT_PAR,
+    T_RIGHT_PAR,
+    T_COMMA,
+    T_DOT,
+    T_COLON,
+    T_SEMICOLON,
+    T_COMPARATION_OP,
+    T_TERNARY_OP,
+    T_LEFT_SQUARE,
+    T_RIGHT_SQUARE,
+    T_LEFT_CURLY,
+    T_RIGHT_CURLY,
+    T_ARROW
 };
 
-struct token_info {
-    unsigned int line, column;
-    char* file;
-};
 
 typedef struct {
     int type;
     char* value;
-    struct token_info* info;
+    unsigned int line;
+    unsigned int column;
+    char* file;
 } token;
 
-#define KEYWORDS_SIZE 59
-#define SYMBOLS_SIZE 39
+#define KEYWORDS_SIZE 57
+#define SYMBOLS_SIZE 40
 
-static const char* keywords[KEYWORDS_SIZE] = {
-    "and",
-    "bool",
-    "break",
-    "case",
-    "catch",
-    "char",
-    "class",
-    "const",
-    "continue",
-    "decimal",
-    "default",
-    "delete",
-    "destroy",
-    "do",
-    "else",
-    "enum",
-    "exit",
-    "false",
-    "for",
-    "foreach",
-    "foreign",
-    "from",
-    "function",
-    "if",
-    "import",
-    "in",
-    "int",
-    "int16",
-    "int32",
-    "int64",
-    "int8",
-    "module",
-    "new",
-    "not",
-    "null",
-    "num",
-    "num16",
-    "num32",
-    "num64",
-    "or",
-    "persist",
-    "private",
-    "protected",
-    "public",
-    "return",
-    "setup",
-    "string",
-    "struct",
-    "switch",
-    "true",
-    "try",
-    "typedef",
-    "uint",
-    "uint16",
-    "uint32",
-    "uint64",
-    "uint8",
-    "while",
-    "xor"
+static const const char* keywords[KEYWORDS_SIZE] = {
+    "and","bool","break","case","catch",
+    "char","class","const","continue","decimal","default",
+    "delete","do","else","enum","exit",
+    "false","for","foreach","foreign","from","function",
+    "if","import","in","int","int16","int32","int64","int8",
+    "module","new","not","null","num","num16","num32","num64",
+    "or","persist","private","protected","public",
+    "return","string","struct","switch",
+    "true","try","typedef","uint","uint16",
+    "uint32","uint64","uint8","while","xor"
 };
 
-static const char* symbols[SYMBOLS_SIZE] = {
+// There are 27 keywords in the Quarzum language, but internally,
+// primitive type names are keywords.
+static const int keyword_types[KEYWORDS_SIZE] = {
+    T_LOGICAL_OP, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CATCH,
+    T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONTINUE, T_TYPE, T_KEYWORD_DEFAULT,
+    T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM,
+    T_KEYWORD_EXIT, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
+    T_KEYWORD_FROM, T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
+    T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
+    T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_LOGICAL_OP,
+    T_KEYWORD_PERSIST, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
+    T_TYPE, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
+    T_KEYWORD_TRY, T_KEYWORD_TYPEDEF, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
+    T_TYPE, T_KEYWORD_WHILE, T_LOGICAL_OP
+
+};
+
+static const const char* symbols[SYMBOLS_SIZE] = {
     "!","!=","#","#=","%","%=","&","&=","(",")","*","*=","+","++","+=",",","-","--","-=",
-    ".","/","/=",":",";","<","<=","=","==",">",">=","?","[","]","^","^=","{","|","|=","}"
+    ".","/","/=",":",";","<","<=","=","==","=>",">",">=","?","[","]","^","^=","{","|","|=","}"
 };
-vector* tokenize(char* file);
+
+static const int symbol_types[SYMBOLS_SIZE] = {
+    T_BITWISE_OP, T_ASSIGN_OP, T_BITWISE_OP, T_ASSIGN_OP, T_ARITHMETIC_OP,
+    T_ASSIGN_OP, T_BITWISE_OP, T_ASSIGN_OP, T_LEFT_PAR, T_RIGHT_PAR, T_ARITHMETIC_OP,
+    T_ASSIGN_OP, T_ARITHMETIC_OP, T_UNARY, T_ASSIGN_OP, T_COMMA, T_ARITHMETIC_OP,
+    T_UNARY, T_ASSIGN_OP, T_DOT, T_ARITHMETIC_OP, T_ASSIGN_OP, T_COLON, T_SEMICOLON,
+    T_COMPARATION_OP, T_COMPARATION_OP, T_ASSIGN_OP, T_COMPARATION_OP,T_ARROW ,T_COMPARATION_OP,
+    T_COMPARATION_OP, T_TERNARY_OP, T_LEFT_SQUARE, T_RIGHT_SQUARE, T_ARITHMETIC_OP,
+    T_ASSIGN_OP, T_LEFT_CURLY, T_BITWISE_OP, T_ASSIGN_OP, T_RIGHT_CURLY
+
+};
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10
-
-#define ADD_TOKEN(t) vector_push(tokens, &(token){t, string_copy(buffer), &(struct token_info){lineNumber, columnNumber, file}});string_clear(buffer);
-
-#define t_ch src->value[i]
-#define t_next src->value[i + 1]
-#define t_advance ++i;++columnNumber
-#define is_zero(n) n == '0'
-
-
-// new tokenize implementation
 
 typedef struct {
     char* input;
@@ -189,6 +224,7 @@ typedef struct {
     unsigned int column;
     unsigned int pos;
     string* buffer;
+    token* tok;
 } lexer;
 
 lexer* init_lexer(char* input);
@@ -196,6 +232,8 @@ lexer* init_lexer(char* input);
 token* new_token(int type, lexer* lexer);
 
 token* next_token(lexer* lexer);
+
+void read_next(lexer* lexer);
 
 //
 //  parse.c
@@ -214,20 +252,23 @@ enum {
     N_CALL,
     N_IDENTIFIER,
     N_TYPE,
+
     N_UNARY_EXPR,
     N_BINARY_EXPR,
     N_PAREN_EXPR,
     N_TERNARY_EXPR,
-    N_LITERAL
+    N_MEMBER_EXPR,
+
+    N_LITERAL,
+    N_CLASS
 };
 
 typedef struct {
     int type;
     vector* children;
-    unsigned int children_count;
 } node;
 
-node* init_node(unsigned int children);
+node* init_node(unsigned int children, int type);
 
 node* parse();
 
@@ -255,14 +296,31 @@ enum {
     TY_NULL
 };
 
+#define CONST_FLAG      0b000001
+#define UNSIGNED_FLAG   0b000010
+#define FOREIGN_FLAG    0b000100
+#define STRUCT_FLAG     0b001000
+#define POINTER_FLAG    0b010000
+#define ARRAY_FLAG      0b100000
+
 typedef struct {
     int type;
     int align;
     unsigned int size;
-    bool is_unsigned;
-    bool is_const;
-
+    unsigned int flags;
 } type;
+
+
+// 
+//  symbol.c
+//
+
+typedef struct {
+    char* name;
+    type* type;
+} symbol;
+
+char* mangle_name(char* module_name);
 
 //
 //  check.c

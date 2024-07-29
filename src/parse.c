@@ -20,7 +20,30 @@ static void parse_import(lexer* lexer){
     }
 }
 
+static node* parse_return_statement(lexer* lexer){
+    // assuming lexer->tok is T_KEYWORD_RETURN
+    printf(LOG_MSG("RETURN"));
+    node* return_node = init_node(1,N_RETURN);
+    read_next(lexer);
+    if(lexer->tok->type == T_SEMICOLON){
+        // add to return_node a null expr
+    }
+    node* expr = parse_expr(lexer);
+    read_next(lexer);
+    expect(lexer->tok, T_SEMICOLON, "semicolon");
+    vector_push(return_node->children, expr);
+    return return_node;
+}
+
 static node* parse_statement(lexer* lexer){
+    switch (lexer->tok->type)
+    {
+    case T_KEYWORD_RETURN:
+        return parse_return_statement(lexer);
+    
+    default:
+        break;
+    }
     return NULL;
 }
 
@@ -139,8 +162,23 @@ static node* parse_global_decl(lexer* lexer){
         break;
 
     case '(':
-        // func_decl
-        break;
+        read_next(lexer);
+        while(lexer->tok->type != T_RIGHT_PAR){
+            symbol* arg = parse_symbol(lexer);
+            read_next(lexer);
+            if(lexer->tok->type == T_COMMA){
+                read_next(lexer);
+            }
+            else{
+                expect(lexer->tok, T_RIGHT_PAR, "')'");
+            }
+        }
+        read_next(lexer);
+
+        node* func_decl_node = init_node(2,N_FUNCTION);
+        // only for function definitions
+        expect(lexer->tok, T_SEMICOLON, "semicolon");
+        return func_decl_node;
 
     default:
         break;

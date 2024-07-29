@@ -39,7 +39,7 @@ int binary_search(const char* symbol, const char** list, unsigned int size);
 #define ERROR_MSG(msg) RED"[ERROR] "RESET"%s\n",msg
 #define LOG_MSG(msg) CYAN"[LOG] "RESET"%s\n",msg
 #define WARN_MSG(msg) ORANGE"[WARNING] "RESET"%s\n",msg
-#define DEBUG_MSG(msg) MAGENTA"[DEBUG] "RESET"%s\n",msg
+#define DEBUG_MSG(msg) GREEN"[DEBUG] "RESET"%s\n",msg
 
 //
 //  string.c
@@ -252,6 +252,7 @@ enum {
     N_CALL,
     N_IDENTIFIER,
     N_TYPE,
+    N_RETURN,
 
     N_UNARY_EXPR,
     N_BINARY_EXPR,
@@ -296,18 +297,22 @@ enum {
     TY_NULL
 };
 
-#define CONST_FLAG      0b000001
-#define UNSIGNED_FLAG   0b000010
-#define FOREIGN_FLAG    0b000100
-#define STRUCT_FLAG     0b001000
-#define POINTER_FLAG    0b010000
-#define ARRAY_FLAG      0b100000
+#define CONST_FLAG      0b00000001
+#define UNSIGNED_FLAG   0b00000010
+#define FOREIGN_FLAG    0b00000100
+#define STRUCT_FLAG     0b00001000
+#define POINTER_FLAG    0b00010000
+#define ARRAY_FLAG      0b00100000
+#define FUNCTION_FLAG   0b01000000
+#define DEFINITION_FLAG 0b10000000
 
 typedef struct {
     int type;
     int align;
     unsigned int size;
     unsigned int flags;
+    // Functions
+    unsigned int args;
 } type;
 
 
@@ -329,6 +334,16 @@ char* mangle_name(char* module_name);
 void checkAST(node* ast);
 void checkNode(node* node, vector* symbols);
 
-int binary_search(const char* symbol, const char** list, unsigned int size);
+//
+//  codegen.c
+//
+
+typedef struct {
+    char* data_section;
+    char* bss_section;
+    char* text_section;
+} asm_code;
+
+void code_gen(node* ast);
 
 #endif

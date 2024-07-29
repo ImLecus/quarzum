@@ -8,15 +8,14 @@ int main(int argc, char** argv) {
     struct process lex = start_process("Parse phase");
     node* ast = parse();
     end_process(&lex);
-    // // Semantic analisys
-    // Process* checking = start_process("Check phase");
+    // Semantic analisys
+    struct process checking = start_process("Check phase");
     // checkAST(ast);
-    // end_process(checking);
-    // // Intermediate representation
-    // InstructionList* ir = createInstructionList();
-    // generateIR(ast, ir);
-    // printf("%d",ir->size);
-    // ASM and output filed
+    end_process(&checking);
+    // Code generation
+    struct process codegn = start_process("Code generation phase");
+    
+    end_process(&codegn);
 
     // free memory
     end_process(&task);

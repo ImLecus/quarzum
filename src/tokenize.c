@@ -164,19 +164,44 @@ static int read_symbol(lexer* lexer){
         if(search != -1){
             return symbol_types[search];
         } 
+        string_pop(lexer->buffer);
     }
     int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
-    if(search != -1){
-        return symbol_types[search];
+    if(search == -1){
+        return T_TOKEN_ERROR;
     }
-    return T_TOKEN_ERROR;
+    return symbol_types[search];
+}
+
+static void ignore_comment(lexer* lexer){
+    while(lexer_peek(lexer) && lexer_peek(lexer) != '\n'){
+        lexer_advance(lexer);
+    }
+}
+
+static void ignore_multi_comment(lexer* lexer){
+    // TO-DO: multi comment support
 }
 
 token* next_token(lexer* lexer){
+    if(lexer_peek(lexer) == '/'){
+        lexer_advance(lexer);
+        if(lexer_peek(lexer) == '/'){
+            ignore_comment(lexer);
+        }
+        else if(lexer_peek(lexer) == '*'){
+            ignore_multi_comment(lexer);
+        }
+        else{
+            --lexer->pos;
+            --lexer->column;
+        }
+    }
     while (isspace(lexer_peek(lexer)))
     {
         lexer_advance(lexer);
     }
+    
     char c = lexer_peek(lexer);
     if(isalpha(c) || c == '_'){
        int type = read_id_or_keyword(lexer);

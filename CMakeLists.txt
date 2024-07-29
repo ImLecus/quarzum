@@ -15,6 +15,7 @@ set(SOURCES
     src/tokenize.c 
     src/expr.c
     src/check.c
+    src/codegen.c
 )
 add_executable(quarzum ${SOURCES})
 set(CMAKE_C_FLAGS_RELEASE "-O3")

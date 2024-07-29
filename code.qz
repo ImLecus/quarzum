@@ -1,3 +1,2 @@
 import "@std/console.qz"
 int j = 0;
-foreign const int i = 5;

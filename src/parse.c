@@ -26,19 +26,19 @@ static node* parse_statement(lexer* lexer){
 
 static node* parse_module(lexer* lexer){
     node* module_node = init_node(3, N_MODULE);
-    token* next;
-
-    next = next_token(lexer);
-    expect(next, T_IDENTIFIER, "identifier");
-    vector_push(module_node->children, next->value);
+    read_next(lexer);
+    expect(lexer->tok, T_IDENTIFIER, "identifier");
+    vector_push(module_node->children, lexer->tok->value);
     // symbol table check
-    expect(next_token(lexer), T_LEFT_CURLY, "'{'");
+    read_next(lexer);
+    
+    expect(lexer->tok, T_LEFT_CURLY, "'{'");
 
-    while(next->type != T_RIGHT_CURLY){
-        next = next_token(lexer);
+    while(lexer->tok->type != T_RIGHT_CURLY){
+        read_next(lexer);
         vector_push(module_node->children, parse_statement(lexer) );
     }
-    expect(next, T_RIGHT_CURLY, "'}'");
+    expect(lexer->tok, T_RIGHT_CURLY, "'}'");
 
     return module_node;
 }
@@ -50,7 +50,7 @@ static type* parse_type(lexer* lexer){
     }
     else{
         // int8 as placeholder
-        t = &(type){TY_INT, 1, 1};;
+        t = &(type){TY_INT, 1, 1};
     }
 
     read_next(lexer);
@@ -60,11 +60,6 @@ static type* parse_type(lexer* lexer){
 
     return t;
 }
-
-static node* parse_function_decl(lexer* lexer, type* t){
-    return NULL;
-}
-
 static node* parse_class(lexer* lexer){
     node* class_node = init_node(3, N_CLASS);
     token* next;
@@ -118,6 +113,40 @@ static symbol* parse_symbol(lexer* lexer){
     return s;
 }
 
+static node* parse_global_decl(lexer* lexer){
+    symbol* s = parse_symbol(lexer);
+    // if s is a struct, return the struct
+    read_next(lexer);
+    switch (lexer->tok->value[0])
+    {
+    case '=':
+        // if(s->type->flags &= FOREIGN_FLAG == FOREIGN_FLAG){
+        //     printf(ERROR_MSG("'foreign' variables can't be initialized."));
+        //     return NULL;
+        // }
+        read_next(lexer);
+        node* expr = parse_expr(lexer);
+        read_next(lexer);
+        expect(lexer->tok, T_SEMICOLON, "semicolon");
+
+        node* var_decl_node = init_node(2,N_VAR);
+        vector_push(var_decl_node->children, s);
+        vector_push(var_decl_node->children, expr);
+        return var_decl_node;
+    
+    case ';':
+        // var_decl (null value)
+        break;
+
+    case '(':
+        // func_decl
+        break;
+
+    default:
+        break;
+    }
+}
+
 node* parse(){
     lexer* lexer = init_lexer(read_file("code.qz")->value);
     read_next(lexer);
@@ -137,13 +166,11 @@ node* parse(){
                 vector_push(ast->children, parse_class(lexer));  
                 printf(LOG_MSG("CLASS "));
                 break;
-
             case T_SPECIFIER:
             case T_TYPE:
-                symbol* s = parse_symbol(lexer);
-                printf(LOG_MSG("SYMBOL"));
+                vector_push(ast->children, parse_global_decl(lexer));
+                printf(LOG_MSG("GLOBAL"));
                 break;
-
             default:
                 break;
         } 
@@ -151,5 +178,5 @@ node* parse(){
     }
     
     free(lexer);
-    return NULL;
+    return ast;
 }

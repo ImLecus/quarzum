@@ -4,17 +4,10 @@ int main(int argc, char** argv) {
 
     struct process task = start_process("Task");
     printf(DEBUG_MSG("Starting the compiler..."));
-    // Lexical analisys
+    // Lexical & Syntax analisys
     struct process lex = start_process("Parse phase");
-
     node* ast = parse();
-
     end_process(&lex);
-    // Syntax analisys
-    // struct process parsing = start_process("Parse phase");
-    // node* ast = parse(t);
-    // end_process(&parsing);
-
     // // Semantic analisys
     // Process* checking = start_process("Check phase");
     // checkAST(ast);
@@ -23,7 +16,7 @@ int main(int argc, char** argv) {
     // InstructionList* ir = createInstructionList();
     // generateIR(ast, ir);
     // printf("%d",ir->size);
-    // ASM and output file
+    // ASM and output filed
 
     // free memory
     end_process(&task);

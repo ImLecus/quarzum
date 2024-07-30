@@ -52,3 +52,19 @@ inline char* string_copy(string* s){
     strcpy(result, s->value);
     return result;
 }
+
+void string_append(string* s, char* c){
+    int len = strlen(c);
+    for(unsigned int i = 0; i < len; ++i){
+        string_push(s,c[i]);
+    }
+}
+
+char* delete_quotes(char* c){
+    int len = strlen(c);
+    char* new_str = (char*)malloc(sizeof(char) * (len - 2));
+    for(int i = 1; i < len - 1; ++i){
+        new_str[i - 1] = c[i];
+    }
+    return new_str;
+}

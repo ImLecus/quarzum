@@ -56,7 +56,8 @@ void string_push(string* s, const char c);
 void string_pop(string* s);
 void string_clear(string* s);
 char* string_copy(string* s);
-
+void string_append(string* s, char* c);
+char* delete_quotes(char* c);
 //
 // io.c
 //
@@ -271,7 +272,7 @@ typedef struct {
 
 node* init_node(unsigned int children, int type);
 
-node* parse();
+node* parse(char* file);
 
 //
 //  expr.c
@@ -320,9 +321,17 @@ typedef struct {
 //  symbol.c
 //
 
+enum {
+    S_GLOBAL,
+    S_LOCAL,
+    S_PARAMETER
+};
+
 typedef struct {
     char* name;
     type* type;
+    int scope;
+
 } symbol;
 
 char* mangle_name(char* module_name);
@@ -339,11 +348,31 @@ void checkNode(node* node, vector* symbols);
 //
 
 typedef struct {
-    char* data_section;
-    char* bss_section;
-    char* text_section;
+    string* data_section;
+    string* bss_section;
+    string* text_section;
 } asm_code;
 
-void code_gen(node* ast);
+asm_code* code_gen(node* ast);
+
+//
+//  ir.c
+//
+enum {
+    I_GLOBAL,
+    I_ASSIGN,
+    I_EXIT,
+    I_FUNCTION
+};
+
+#define INSTRUCTION_LIST_DEFAULT_SIZE 32
+typedef struct {
+    int type;
+    char* dest;
+    char* arg1;
+    char* arg2;
+} instruction;
+
+vector* generate_ir(node* ast);
 
 #endif

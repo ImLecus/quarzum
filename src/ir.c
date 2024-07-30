@@ -12,6 +12,18 @@ instruction* init_instruction(int type, char* dest, char* arg1, char* arg2){
 static void generate_instruction(vector* ir_list,node* n){
     switch (n->type)
     {
+    case N_VAR:
+        symbol* sy = n->children->value[0];
+        node* expr = n->children->value[1];
+        if(expr->type == N_LITERAL){
+            char* value = expr->children->value[0];
+            printf("ASSIGN %s, %s (%d)\n",sy->name,value, sy->type->size);
+            vector_push(ir_list, 
+                init_instruction(I_ASSIGN, sy->name, value,sy->type->size)
+            );
+        }
+        break;
+    
     case N_CALL:
         for(unsigned int i = 1; i < n->children->len; ++i){
             node* param = (node*)(n->children->value[i]);

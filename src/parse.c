@@ -15,20 +15,27 @@ static void expect(token* t, int type, char* what){
 
 static void parse_import(lexer* lexer, node* ast){
     read_next(lexer);
-
-    // import "path"
     if(lexer->tok->type == T_STRING_LITERAL){
         char* path = delete_quotes(lexer->tok->value);
+        char* as = NULL; 
+        read_next(lexer);
+        if(lexer->tok->type == T_KEYWORD_AS){
+            read_next(lexer);
+            expect(lexer->tok, T_IDENTIFIER, "identifier");
+            as = lexer->tok->value;
+        }
         struct process importing = start_process("File import");
         node* imported_file_ast = parse(path);
+        if(as){
+            // create a virtual module with name {as}
+            // maybe transforming the root node?
+        }
         for(unsigned int i = 0; i < imported_file_ast->children->len; ++i){
             vector_push(ast->children, imported_file_ast->children->value[i]);
         }
         end_process(&importing);
         return;
     }
-
-    // import a, b from "path"
 }
 
 static node* parse_return_statement(lexer* lexer){
@@ -118,7 +125,7 @@ static type* parse_type(lexer* lexer){
     }
     else{
         // int8 as placeholder
-        t = &(type){TY_INT, 1, 1, 0, 0};
+        t = ty_int8;
     }
 
     read_next(lexer);

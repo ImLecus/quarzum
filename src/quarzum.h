@@ -115,6 +115,7 @@ enum {
     T_CHAR_LITERAL,
     T_INT_LITERAL,
     T_NULL_LITERAL,
+    T_KEYWORD_AS,
     T_KEYWORD_BREAK,
     T_KEYWORD_CASE,
     T_KEYWORD_CATCH,
@@ -129,7 +130,6 @@ enum {
     T_KEYWORD_FALSE,
     T_KEYWORD_FOR,
     T_KEYWORD_FOREACH,
-    T_KEYWORD_FROM,
     T_KEYWORD_IF,
     T_KEYWORD_IMPORT,
     T_KEYWORD_IN,
@@ -171,10 +171,10 @@ typedef struct {
 #define SYMBOLS_SIZE 40
 
 static const const char* keywords[KEYWORDS_SIZE] = {
-    "and","bool","break","case","catch",
+    "and","as","bool","break","case","catch",
     "char","class","const","continue","decimal","default",
     "delete","do","else","enum","exit",
-    "false","for","foreach","foreign","from","function",
+    "false","for","foreach","foreign","function",
     "if","import","in","int","int16","int32","int64","int8",
     "module","new","not","null","num","num16","num32","num64",
     "or","persist","private","protected","public",
@@ -186,11 +186,11 @@ static const const char* keywords[KEYWORDS_SIZE] = {
 // There are 27 keywords in the Quarzum language, but internally,
 // primitive type names are keywords.
 static const int keyword_types[KEYWORDS_SIZE] = {
-    T_LOGICAL_OP, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CATCH,
+    T_LOGICAL_OP, T_KEYWORD_AS, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CATCH,
     T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONTINUE, T_TYPE, T_KEYWORD_DEFAULT,
     T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM,
     T_KEYWORD_EXIT, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
-    T_KEYWORD_FROM, T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
+    T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
     T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
     T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_LOGICAL_OP,
     T_KEYWORD_PERSIST, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,

@@ -1,0 +1,5 @@
+const int READ_MODE = 1;
+
+foreign int openFile(string name, int flags, int mode);
+foreign int closeFile(int fd);
+foreign string readFile(int fd);

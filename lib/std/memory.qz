@@ -1,0 +1,3 @@
+foreign function malloc(uint64 size);
+
+foreign function free(var ptr);

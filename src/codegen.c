@@ -8,22 +8,32 @@ static char* get_type_by_size(unsigned int size){
     case 2: return ".word ";
     case 4: return ".long ";
     case 8: return ".quad ";
-    default: return ".space ";
+    default: return ".string ";
     }
 }
 
 static void node_gen(instruction* instruction, asm_code* code){
     switch (instruction->type)
     {
-    case I_LEAVERET:
-        string_append(code->text_section, "leave\nret\n");
-        break;
     case I_ASSIGN:
+        string_append(code->data_section, ".global ");
         string_append(code->data_section, instruction->dest);
-        string_append(code->data_section, ": .string ");
+        string_push(code->data_section, '\n');
+        string_append(code->data_section, instruction->dest);
+        string_append(code->data_section, ": ");
+        string_append(code->data_section, get_type_by_size(instruction->arg2));
         string_append(code->data_section, instruction->arg1);
         string_push(code->data_section, '\n');
         break;
+    case I_LEAVERET:
+        string_append(code->text_section, "leave\nret\n");
+        break;
+    // case I_ASSIGN:
+    //     string_append(code->data_section, instruction->dest);
+    //     string_append(code->data_section, ": .string ");
+    //     string_append(code->data_section, instruction->arg1);
+    //     string_push(code->data_section, '\n');
+    //     break;
     case I_FUNCTION:
         string_append(code->text_section, instruction->dest);
         string_append(code->text_section, ":\n");

@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 
     system("read");
     system("as out.asm -o out.o");
-    system("ld out.o ./builtins/x86_64.o -o code");
+    system("ld ./builtins/x86_64/__base__.o ./builtins/x86_64/console.o out.o -o code");
     system("rm out.o");
     system("rm out.asm");
     system("clear");

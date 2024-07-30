@@ -1,10 +1,6 @@
 out/
 output/
-tests/
 .vscode/
-test/
-asm/
 example/
 install/
-builtins/
 docs/

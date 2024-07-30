@@ -1,23 +1,29 @@
 #include "quarzum.h"
 
+static node* literal_expr(lexer* lexer, type* type){
+    node* lit_expr = init_node(2, N_LITERAL);
+    vector_push(lit_expr->children, lexer->tok->value);
+    // int8 is the second child
+    vector_push(lit_expr->children, type);
+    return lit_expr;
+}
+
 static node* parse_primary_expr(lexer* lexer){
     switch (lexer->tok->type)
     {
     case T_INT_LITERAL:
+        return literal_expr(lexer, ty_int32);
     case T_NUMERIC_LITERAL:
+        return literal_expr(lexer, ty_num32);
     case T_CHAR_LITERAL:
+        return literal_expr(lexer, ty_char);
     case T_STRING_LITERAL:
+        return literal_expr(lexer, ty_string);
     case T_KEYWORD_TRUE:
     case T_KEYWORD_FALSE:
+        return literal_expr(lexer, ty_bool);
     case T_NULL_LITERAL:
-        node* literal_expr = init_node(2,N_LITERAL);
-
-        // the literal value is the first child
-        vector_push(literal_expr->children, lexer->tok->value);
-        // int8 is the second child
-        vector_push(literal_expr->children, &(type){TY_INT, 1, 1});
-        
-        return literal_expr;
+        return literal_expr(lexer, ty_null);
     
     default:
         printf(ERROR_MSG("Invalid expression"));

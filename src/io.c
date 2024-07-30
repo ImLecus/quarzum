@@ -15,11 +15,6 @@ inline string* read_file(const char* filename){
     return b;
 }
 
-inline FILE* create_file(const char* filename){
-    FILE* file = fopen(filename, "rw");
-    return file;
-}
-
 inline void write_file(FILE* file, char* content){
     if(file == NULL){
         return;

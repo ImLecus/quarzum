@@ -13,25 +13,36 @@ int main(int argc, char** argv) {
     // checkAST(ast);
 
     vector* ir_list = generate_ir(ast);
+    printf("%d\n", ir_list->len);
     end_process(&checking);
 
     // Code generation
-    // struct process codegn = start_process("Code generation phase");
-    // asm_code* assembly = code_gen(ast);
-    // end_process(&codegn);
-
-    // printf("%s\n%s\n%s\n", 
-    // assembly->data_section->value, 
-    // assembly->bss_section->value,
-    // assembly->text_section->value
-    // );
-
+    struct process codegn = start_process("Code generation phase");
+    FILE* asm_file = fopen("./out.asm", "w");
+    asm_code* assembly = code_gen(ir_list);
+    write_file(asm_file, assembly->data_section->value);
+    write_file(asm_file, assembly->bss_section->value);
+    write_file(asm_file, assembly->text_section->value);
+    fclose(asm_file);
+    end_process(&codegn);
 
     // free memory
     free_vector(ir_list);
     free_vector(ast->children);
     free(ast);
+    free_string(assembly->bss_section);
+    free_string(assembly->data_section);
+    free_string(assembly->text_section);
+    free(assembly);
     end_process(&task);
 
+    system("read");
+    system("as out.asm -o out.o");
+    system("ld out.o ./builtins/x86_64.o -o code");
+    system("rm out.o");
+    system("rm out.asm");
+    system("clear");
+    system("./code");
+    
     return 0;
 }

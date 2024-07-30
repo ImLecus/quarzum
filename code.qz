@@ -1,8 +1,3 @@
-import "./math.qz"
-
-int i = 8;
-
 function main(){
     out("Hello world!");
-    return;
 }

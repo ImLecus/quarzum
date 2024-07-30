@@ -62,7 +62,6 @@ char* delete_quotes(char* c);
 // io.c
 //
 string* read_file(const char* filename);
-FILE* create_file(const char* filename);
 void write_file(FILE* file, char* content);
 
 //
@@ -353,7 +352,7 @@ typedef struct {
     string* text_section;
 } asm_code;
 
-asm_code* code_gen(node* ast);
+asm_code* code_gen(vector* ir);
 
 //
 //  ir.c
@@ -362,7 +361,10 @@ enum {
     I_GLOBAL,
     I_ASSIGN,
     I_EXIT,
-    I_FUNCTION
+    I_FUNCTION,
+    I_CALL,
+    I_PARAM,
+    I_LEAVERET
 };
 
 #define INSTRUCTION_LIST_DEFAULT_SIZE 32

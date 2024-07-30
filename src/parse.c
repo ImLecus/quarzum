@@ -15,6 +15,8 @@ static void expect(token* t, int type, char* what){
 
 static void parse_import(lexer* lexer, node* ast){
     read_next(lexer);
+
+    // import "path"
     if(lexer->tok->type == T_STRING_LITERAL){
         char* path = delete_quotes(lexer->tok->value);
         struct process importing = start_process("File import");
@@ -23,7 +25,10 @@ static void parse_import(lexer* lexer, node* ast){
             vector_push(ast->children, imported_file_ast->children->value[i]);
         }
         end_process(&importing);
+        return;
     }
+
+    // import a, b from "path"
 }
 
 static node* parse_return_statement(lexer* lexer){
@@ -42,12 +47,45 @@ static node* parse_return_statement(lexer* lexer){
     return return_node;
 }
 
+static node* parse_function_call(lexer* lexer, char* id){
+    node* call_node = init_node(1, N_CALL);
+    vector_push(call_node->children, id);
+    read_next(lexer);
+    while(lexer->tok->type != T_RIGHT_PAR){
+        node* argument = parse_expr(lexer);
+        vector_push(call_node->children, argument);
+        read_next(lexer);
+        if(lexer->tok->type == T_COMMA){
+            read_next(lexer);
+        }
+        else{
+            expect(lexer->tok, T_RIGHT_PAR, "')'");
+            break;
+        }
+    }
+    read_next(lexer);
+    expect(lexer->tok, T_SEMICOLON, "semicolon");
+    return call_node;
+}
+
 static node* parse_statement(lexer* lexer){
     switch (lexer->tok->type)
     {
     case T_KEYWORD_RETURN:
         return parse_return_statement(lexer);
-    
+
+    case T_IDENTIFIER:
+        char* id = lexer->tok->value;
+        read_next(lexer);
+        switch (lexer->tok->type)
+        {
+        case T_LEFT_PAR:
+            return parse_function_call(lexer, id);
+        
+        default:
+            break;
+        }
+
     default:
         break;
     }
@@ -223,20 +261,16 @@ node* parse(char* file){
         switch(lexer->tok->type){
             case T_KEYWORD_IMPORT:
                 parse_import(lexer, ast);
-                printf(LOG_MSG("IMPORT "));
                 break;
             case T_KEYWORD_MODULE:
                 vector_push(ast->children, parse_module(lexer));  
-                printf(LOG_MSG("MODULE "));
                 break;
             case T_KEYWORD_CLASS:
                 vector_push(ast->children, parse_class(lexer));  
-                printf(LOG_MSG("CLASS "));
                 break;
             case T_SPECIFIER:
             case T_TYPE:
                 vector_push(ast->children, parse_global_decl(lexer));
-                printf(LOG_MSG("GLOBAL"));
                 break;
             default:
                 break;

@@ -2,6 +2,5 @@ foreign function out(const string message, const char separator = '\n');
 
 foreign string input(const string message = "");
 
-foreign uint64 len(const string message);
-
 foreign function error(const string message, bool fatal = false);
+

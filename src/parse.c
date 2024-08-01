@@ -1,4 +1,6 @@
 #include "quarzum.h"
+static node* parse_statement(lexer* lexer);
+
 
 node* init_node(unsigned int children, int type){
     node* n = (node*)malloc(sizeof(node));
@@ -7,7 +9,7 @@ node* init_node(unsigned int children, int type){
     return n;
 }
 
-static void expect(token* t, int type, char* what){
+void expect(token* t, int type, char* what){
     if(t->type != type){
         printf(RED "[ERROR]" RESET " Expected %s at line %d.\n", what, t->line);
     }
@@ -39,8 +41,6 @@ static void parse_import(lexer* lexer, node* ast){
 }
 
 static node* parse_return_statement(lexer* lexer){
-    // assuming lexer->tok is T_KEYWORD_RETURN
-    printf(LOG_MSG("RETURN"));
     node* return_node = init_node(1,N_RETURN);
     read_next(lexer);
     if(lexer->tok->type == T_SEMICOLON){
@@ -48,7 +48,6 @@ static node* parse_return_statement(lexer* lexer){
         return return_node;
     }
     node* expr = parse_expr(lexer);
-    read_next(lexer);
     expect(lexer->tok, T_SEMICOLON, "semicolon");
     vector_push(return_node->children, expr);
     return return_node;
@@ -61,7 +60,6 @@ static node* parse_function_call(lexer* lexer, char* id){
     while(lexer->tok->type != T_RIGHT_PAR){
         node* argument = parse_expr(lexer);
         vector_push(call_node->children, argument);
-        read_next(lexer);
         if(lexer->tok->type == T_COMMA){
             read_next(lexer);
         }
@@ -73,6 +71,28 @@ static node* parse_function_call(lexer* lexer, char* id){
     read_next(lexer);
     expect(lexer->tok, T_SEMICOLON, "semicolon");
     return call_node;
+}
+
+static node* parse_if_statement(lexer* lexer){
+    node* if_stmt = init_node(2,N_IF);
+    read_next(lexer);
+    expect(lexer->tok, T_LEFT_PAR, "'(");
+    read_next(lexer);
+    node* condition = parse_expr(lexer);
+    if(condition){
+        vector_push(if_stmt->children, condition);
+    }
+    expect(lexer->tok, T_RIGHT_PAR, "')");
+    read_next(lexer);
+    expect(lexer->tok, T_LEFT_CURLY, "'if' body");
+    read_next(lexer);
+    while(lexer->tok->type != T_RIGHT_CURLY){
+        node* stmt = parse_statement(lexer);
+        vector_push(if_stmt->children, stmt);
+        read_next(lexer);
+    }
+    // skip '}' ?
+    return if_stmt;
 }
 
 static node* parse_statement(lexer* lexer){
@@ -92,6 +112,8 @@ static node* parse_statement(lexer* lexer){
         default:
             break;
         }
+    case T_KEYWORD_IF:
+        return parse_if_statement(lexer);
 
     default:
         break;
@@ -124,8 +146,15 @@ static type* parse_type(lexer* lexer){
         // custom type
     }
     else{
-        // int8 as placeholder
-        t = ty_int8;
+
+        if(strcmp(lexer->tok->value, "string") == 0){
+            t = ty_string;
+        }
+        else{
+            // int8 as placeholder
+            t = ty_int8;
+        }
+        
     }
 
     read_next(lexer);
@@ -211,7 +240,6 @@ static node* parse_global_decl(lexer* lexer){
         // }
         read_next(lexer);
         node* expr = parse_expr(lexer);
-        read_next(lexer);
         expect(lexer->tok, T_SEMICOLON, "semicolon");
 
         node* var_decl_node = init_node(2,N_VAR);

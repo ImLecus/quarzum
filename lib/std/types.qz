@@ -1,0 +1,8 @@
+foreign string toString(int n);
+string toString(bool b){
+    return b == true ? "true" : "false";
+}
+foreign string toString(num n);
+string toString(char c){
+    return &c;
+}

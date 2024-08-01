@@ -1,27 +1,59 @@
 #include "quarzum.h"
 
 
-static char* get_type_by_size(unsigned int size){
-    switch (size)
-    {
-    case 1: return ".byte ";
-    case 2: return ".word ";
-    case 4: return ".long ";
-    case 8: return ".quad ";
-    default: return ".string ";
+static char* get_type(type* type){
+    if(type->size == 1){
+        return ".byte ";
     }
+    if(type->type == TY_STRING){
+        return ".string ";
+    }
+    if(type == ty_int16 || type == ty_uint16){
+        return ".word ";
+    }
+    if(type == ty_int32 || ty_bool == ty_uint32){
+        return ".long ";
+    }
+    if(type == ty_num32){
+        return ".float ";
+    }
+    if(type == ty_int64 || type == ty_uint64){
+        return ".quad ";
+    }
+    if(type == ty_num64){
+        return ".double";
+    }
+    return ".space ";
 }
 
 static void node_gen(instruction* instruction, asm_code* code){
     switch (instruction->type)
     {
+    case I_BRANCH:
+        string_append(code->text_section, instruction->dest);
+        string_append(code->text_section, ":\n");
+        break;
+    case I_JMP:
+        string_append(code->text_section, "jmp ");
+        string_append(code->text_section, instruction->dest);
+        string_push(code->text_section, '\n');
+        break;
+    case I_IF:
+        string_append(code->text_section, "cmpb $1, ");
+        string_append(code->text_section, instruction->dest);
+        string_append(code->text_section, "\nje ");
+        string_append(code->text_section, instruction->arg1);
+        string_push(code->text_section, '\n');
+        break;
+
     case I_ASSIGN:
+        type* assign_type = (type*)instruction->data;
         string_append(code->data_section, ".global ");
         string_append(code->data_section, instruction->dest);
         string_push(code->data_section, '\n');
         string_append(code->data_section, instruction->dest);
         string_append(code->data_section, ": ");
-        string_append(code->data_section, get_type_by_size(instruction->arg2));
+        string_append(code->data_section, get_type(assign_type));
         string_append(code->data_section, instruction->arg1);
         string_push(code->data_section, '\n');
         break;

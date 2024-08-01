@@ -270,7 +270,7 @@ typedef struct {
 } node;
 
 node* init_node(unsigned int children, int type);
-
+void expect(token* t, int type, char* what);
 node* parse(char* file);
 
 //
@@ -302,13 +302,10 @@ enum {
 #define FOREIGN_FLAG    0b00000100
 #define STRUCT_FLAG     0b00001000
 #define POINTER_FLAG    0b00010000
-#define ARRAY_FLAG      0b00100000
-#define FUNCTION_FLAG   0b01000000
-#define DEFINITION_FLAG 0b10000000
 
 typedef struct {
     int type;
-    int align;
+    unsigned int align;
     unsigned int size;
     unsigned int flags;
     // Functions
@@ -316,7 +313,7 @@ typedef struct {
 } type;
 
 static type* ty_function = &(type){TY_FUNCTION, 1, 1};
-static type* ty_bool =     &(type){TY_BOOL, 1, 1, true};
+static type* ty_bool =     &(type){TY_BOOL, 1, 1, UNSIGNED_FLAG};
 static type* ty_char =     &(type){TY_CHAR, 1, 1};
 
 static type* ty_int8 =     &(type){TY_INT, 1, 1};
@@ -324,18 +321,18 @@ static type* ty_int16 =    &(type){TY_INT, 2, 2};
 static type* ty_int32 =    &(type){TY_INT, 4, 4};
 static type* ty_int64 =    &(type){TY_INT, 8, 8};
 
-static type* ty_uint8 =     &(type){TY_UINT, 1, 1, true};
-static type* ty_uint16 =    &(type){TY_UINT, 2, 2, true};
-static type* ty_uint32 =    &(type){TY_UINT, 4, 4, true};
-static type* ty_uint64 =    &(type){TY_UINT, 8, 8, true};
+static type* ty_uint8 =     &(type){TY_UINT, 1, 1, UNSIGNED_FLAG};
+static type* ty_uint16 =    &(type){TY_UINT, 2, 2, UNSIGNED_FLAG};
+static type* ty_uint32 =    &(type){TY_UINT, 4, 4, UNSIGNED_FLAG};
+static type* ty_uint64 =    &(type){TY_UINT, 8, 8, UNSIGNED_FLAG};
 
 static type* ty_num16 =    &(type){TY_NUM, 2, 2};
 static type* ty_num32 =    &(type){TY_NUM, 4, 4};
 static type* ty_num64 =    &(type){TY_NUM, 8, 8};
 
 static type* ty_decimal =  &(type){TY_DECIMAL, 8, 8};
-static type* ty_string =   &(type){TY_STRING, 12, 4, true};
-static type* ty_null =    &(type){TY_NULL, 1, 1, true};
+static type* ty_string =   &(type){TY_STRING, 4, 4, POINTER_FLAG};
+static type* ty_null =    &(type){TY_NULL, 1, 1};
 
 
 // 
@@ -386,7 +383,11 @@ enum {
     I_FUNCTION,
     I_CALL,
     I_PARAM,
-    I_LEAVERET
+    I_LEAVERET,
+    I_BRANCH,
+    I_CMPTRUE,
+    I_IF,
+    I_JMP
 };
 
 #define INSTRUCTION_LIST_DEFAULT_SIZE 32
@@ -395,6 +396,7 @@ typedef struct {
     char* dest;
     char* arg1;
     char* arg2;
+    void* data;
 } instruction;
 
 vector* generate_ir(node* ast);

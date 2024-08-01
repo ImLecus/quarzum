@@ -1,3 +1,5 @@
 function main(){
-    out("Hello world!");
+    if(true){
+        out("Hello world!");    
+    }
 }

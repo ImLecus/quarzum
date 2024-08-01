@@ -1,3 +1,5 @@
+foreign int time();
+
 class Date {
     private uint8 day;
     private uint8 month;

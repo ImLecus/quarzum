@@ -1,7 +1,7 @@
 #include "quarzum.h"
 
 lexer* init_lexer(char* input){
-    if(!input){return NULL;}
+    if(input == NULL){return NULL;}
     lexer* lex = (lexer*)malloc(sizeof(lexer));
     lex->input = input;
     lex->line = 1;

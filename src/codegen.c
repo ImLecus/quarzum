@@ -45,6 +45,13 @@ static void node_gen(instruction* instruction, asm_code* code){
         string_append(code->text_section, instruction->arg1);
         string_push(code->text_section, '\n');
         break;
+    case I_NIF:
+        string_append(code->text_section, "cmpb $1, ");
+        string_append(code->text_section, instruction->dest);
+        string_append(code->text_section, "\njne ");
+        string_append(code->text_section, instruction->arg1);
+        string_push(code->text_section, '\n');
+        break;
 
     case I_ASSIGN:
         type* assign_type = (type*)instruction->data;
@@ -71,7 +78,7 @@ static void node_gen(instruction* instruction, asm_code* code){
         string_append(code->text_section, ":\n");
         break;  
     case I_PARAM:
-        string_append(code->text_section, "movq ");
+        string_append(code->text_section, "movq $");
         string_append(code->text_section, instruction->dest);
         string_append(code->text_section, ",%rdi\n");
         break;

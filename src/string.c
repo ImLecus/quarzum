@@ -68,3 +68,15 @@ char* delete_quotes(char* c){
     }
     return new_str;
 }
+
+char* resolve_path(char* path){
+    if(path && path[0] == '@'){
+        char* lib_path = (char*)malloc(sizeof(char) * (LIB_PATH_LEN + strlen(path) - 1));
+        strcat(lib_path, LIB_PATH);
+        for(unsigned int i = 0; i < strlen(path); ++i){
+            lib_path[LIB_PATH_LEN + i] = path[i + 1];
+        }
+        return lib_path;
+    }
+    return path;
+}

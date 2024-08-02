@@ -1,5 +1,8 @@
+import "math.qz"
+import "@std/console.qz"
+
 function main(){
-    if(true){
-        out("Hello world!");    
+    while(true){
+        out("a");  
     }
 }

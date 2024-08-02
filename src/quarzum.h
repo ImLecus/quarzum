@@ -58,6 +58,12 @@ void string_clear(string* s);
 char* string_copy(string* s);
 void string_append(string* s, char* c);
 char* delete_quotes(char* c);
+
+// Temporal library path
+#define LIB_PATH "./lib/"
+#define LIB_PATH_LEN 6
+
+char* resolve_path(char* c);
 //
 // io.c
 //
@@ -387,6 +393,7 @@ enum {
     I_BRANCH,
     I_CMPTRUE,
     I_IF,
+    I_NIF,
     I_JMP
 };
 
@@ -400,5 +407,8 @@ typedef struct {
 } instruction;
 
 vector* generate_ir(node* ast);
+
+#define JMP(dest) vector_push(ir_list, init_instruction(I_JMP, dest, NULL , NULL, NULL))
+#define BRANCH(dest) vector_push(ir_list, init_instruction(I_BRANCH, dest, NULL , NULL, NULL))
 
 #endif

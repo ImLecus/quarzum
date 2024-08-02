@@ -17,45 +17,46 @@ static char* get_index(char type, unsigned int index){
 }
 
 static void generate_instruction(vector* ir_list,node* n){
-    static unsigned int b_index = 0;
-    static unsigned int t_index = 0;
-    static unsigned int c_index = 0;
-
+    static unsigned int b_index = 0; // branch index
+    static unsigned int t_index = 0; // temporal expression index 
+    static unsigned int c_index = 0; // close branch index
+    static unsigned int s_index = 0; // string index
+    if(!n){
+        printf(ERROR_MSG("no node?"));
+        return;
+    }
     switch (n->type)
     {
+    case N_WHILE:
+        node* c = n->children->value[0];
+
+        BRANCH(get_index('b', b_index));
+        // eval expr
+        vector_push(ir_list, 
+            init_instruction(I_NIF, "true", get_index('c', c_index), NULL, NULL)
+        );        
+        for(unsigned int i = 1; i < n->children->len && n->children->value[i]; ++i){
+            generate_instruction(ir_list, n->children->value[i]);
+        }
+        JMP(get_index('b', b_index++));
+        BRANCH(get_index('c', c_index++));
+
+        break;
     case N_IF:
-        // operate the condition
-        // compare the result with true (1)
-        // je b(x)
-        // [else]
-        // jmp c(x)x
-        // b(x):
-        // [if]
-        // c(x):
-
-
         node* condition = n->children->value[0];
-        printf("IF [condition] JMP b0\n");
+        // eval expr
         vector_push(ir_list, 
             init_instruction(I_IF, "true", get_index('b', b_index), NULL, NULL)
         );
         // else zone
-
-        vector_push(ir_list, 
-            init_instruction(I_JMP, get_index('c', c_index), NULL , NULL, NULL)
-        );
-        vector_push(ir_list, 
-            init_instruction(I_BRANCH, get_index('b', b_index), NULL , NULL, NULL)
-        );
-        printf("JMP c0\nb0:\n");
-        for(unsigned int i = 1; i < n->children->len; ++i){
+        unsigned int first_c_index = c_index;
+        JMP(get_index('c', c_index++));
+        BRANCH(get_index('b', b_index++));
+        for(unsigned int i = 1; i < n->children->len && n->children->value[i]; ++i){
             generate_instruction(ir_list, n->children->value[i]);
         }
-        vector_push(ir_list, 
-            init_instruction(I_BRANCH, get_index('c', c_index), NULL , NULL, NULL)
-        );
-        printf("c0:\n");
-    break;
+        BRANCH(get_index('c', first_c_index));
+        break;
 
 
     case N_VAR:
@@ -77,11 +78,11 @@ static void generate_instruction(vector* ir_list,node* n){
             if(param_name[0] == '"'){
                 printf("ASSIGN _s0, %s\n",param_name);
                 vector_push(ir_list, 
-                    init_instruction(I_ASSIGN, "_s0", param_name, NULL,ty_string)
+                    init_instruction(I_ASSIGN, get_index('s',s_index), param_name, NULL,ty_string)
                 );
                 printf("PARAM %s\n","$_s0");
                 vector_push(ir_list, 
-                    init_instruction(I_PARAM, "$_s0", NULL, NULL,NULL)
+                    init_instruction(I_PARAM,get_index('s',s_index++), NULL, NULL,NULL)
                 );
                 break;
             }

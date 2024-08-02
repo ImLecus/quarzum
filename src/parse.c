@@ -18,7 +18,7 @@ void expect(token* t, int type, char* what){
 static void parse_import(lexer* lexer, node* ast){
     read_next(lexer);
     if(lexer->tok->type == T_STRING_LITERAL){
-        char* path = delete_quotes(lexer->tok->value);
+        char* path = resolve_path(delete_quotes(lexer->tok->value));
         char* as = NULL; 
         read_next(lexer);
         if(lexer->tok->type == T_KEYWORD_AS){
@@ -28,6 +28,10 @@ static void parse_import(lexer* lexer, node* ast){
         }
         struct process importing = start_process("File import");
         node* imported_file_ast = parse(path);
+        if(!imported_file_ast){
+            return;
+        }
+
         if(as){
             // create a virtual module with name {as}
             // maybe transforming the root node?
@@ -36,6 +40,7 @@ static void parse_import(lexer* lexer, node* ast){
             vector_push(ast->children, imported_file_ast->children->value[i]);
         }
         end_process(&importing);
+
         return;
     }
 }
@@ -95,6 +100,28 @@ static node* parse_if_statement(lexer* lexer){
     return if_stmt;
 }
 
+static node* parse_while_statement(lexer* lexer){
+    node* while_stmt = init_node(2,N_WHILE);
+    read_next(lexer);
+    expect(lexer->tok, T_LEFT_PAR, "'(");
+    read_next(lexer);
+    node* condition = parse_expr(lexer);
+    if(condition){
+        vector_push(while_stmt->children, condition);
+    }
+    expect(lexer->tok, T_RIGHT_PAR, "')");
+    read_next(lexer);
+    expect(lexer->tok, T_LEFT_CURLY, "'while' body");
+    read_next(lexer);
+    while(lexer->tok->type != T_RIGHT_CURLY){
+        node* stmt = parse_statement(lexer);
+        vector_push(while_stmt->children, stmt);
+        read_next(lexer);
+    }
+    // skip '}' ?
+    return while_stmt;
+}
+
 static node* parse_statement(lexer* lexer){
     switch (lexer->tok->type)
     {
@@ -114,8 +141,11 @@ static node* parse_statement(lexer* lexer){
         }
     case T_KEYWORD_IF:
         return parse_if_statement(lexer);
+    case T_KEYWORD_WHILE:
+        return parse_while_statement(lexer);
 
     default:
+        printf(ERROR_MSG("Invalid statement"));
         break;
     }
     return NULL;
@@ -149,6 +179,9 @@ static type* parse_type(lexer* lexer){
 
         if(strcmp(lexer->tok->value, "string") == 0){
             t = ty_string;
+        }
+        if(strcmp(lexer->tok->value, "int") == 0){
+            t = ty_int32;
         }
         else{
             // int8 as placeholder
@@ -267,6 +300,7 @@ static node* parse_global_decl(lexer* lexer){
         node* func_decl_node = init_node(2,N_FUNCTION);
         vector_push(func_decl_node->children, s);
         if(lexer->tok->type == T_LEFT_CURLY){
+            read_next(lexer);
             while(lexer->tok->type != T_RIGHT_CURLY){
                 node* stmt = parse_statement(lexer);
                 if(stmt){
@@ -288,7 +322,14 @@ static node* parse_global_decl(lexer* lexer){
 }
 
 node* parse(char* file){
-    lexer* lexer = init_lexer(read_file(file)->value);
+    string* input = read_file(file);
+    if(!input){
+        return NULL;
+    }
+    lexer* lexer = init_lexer(input->value);
+    if(!lexer){
+        return NULL;
+    }
     read_next(lexer);
     node* ast = init_node(10, N_ROOT);
     while (lexer->tok->type != T_EOF)
@@ -308,9 +349,10 @@ node* parse(char* file){
                 vector_push(ast->children, parse_global_decl(lexer));
                 break;
             default:
+                read_next(lexer);
                 break;
         } 
-        read_next(lexer);
+ 
     }
     
     free(lexer);

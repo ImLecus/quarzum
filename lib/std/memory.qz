@@ -1,3 +1,15 @@
-foreign function malloc(uint64 size);
+foreign function malloc(var* container, uint64 size);
 
-foreign function free(var ptr);
+foreign function free(var* ptr);
+
+class Buffer<T> {
+    private T* elements; 
+
+    setup(uint64 size){
+        this.elements = malloc(this.elements ,sizeof(T) * size);
+    }
+
+    destroy(){
+        free(this.elements);
+    }
+}

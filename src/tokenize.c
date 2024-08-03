@@ -1,6 +1,6 @@
 #include "quarzum.h"
 
-lexer* init_lexer(char* input){
+lexer* init_lexer(char* filename, char* input){
     if(input == NULL){return NULL;}
     lexer* lex = (lexer*)malloc(sizeof(lexer));
     lex->input = input;
@@ -8,11 +8,14 @@ lexer* init_lexer(char* input){
     lex->column = 1;
     lex->pos = 0;
     lex->buffer = init_string(DEFAULT_TOKENIZER_BUFFER_SIZE);
+    lex->file = filename;
+    lex->line_points = init_vector(10);
     return lex;
 }
 
 static inline void lexer_advance(lexer* lexer){
     if(lexer->input[lexer->pos] == '\n'){
+        vector_push(lexer->line_points, &lexer->pos);
         ++lexer->line;
         lexer->column = 1;
     }
@@ -33,7 +36,7 @@ token* new_token(int type, lexer* lexer){
     tok->value = string_copy(lexer->buffer);
     tok->line = lexer->line;
     tok->column = lexer->column;
-    tok->file = "none.qz"; // placeholder
+    tok->file = lexer->file;
 
     string_clear(lexer->buffer);
     return tok;
@@ -113,7 +116,7 @@ static int read_numeric_literal(lexer* lexer){
             return 0;
         }
         if(lexer_peek(lexer) == '.'){
-           // err
+           printf(RED "[ERROR] " RESET "(%s) Too many decimal points on numeric literal at line %d.\n", lexer->file, lexer->line);
         }
         return 1;
     }
@@ -141,7 +144,7 @@ static int read_numeric_literal(lexer* lexer){
             return 0;
         }
         if(lexer_peek(lexer) == '.'){
-           // err
+           printf(RED "[ERROR] " RESET "(%s) Too many decimal points on numeric literal at line %d.\n", lexer->file, lexer->line);
         }
         return 1;
     }
@@ -169,6 +172,7 @@ static int read_symbol(lexer* lexer){
     }
     int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
     if(search == -1){
+        printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d.\n", lexer->file, string_copy(lexer->buffer), lexer->line);
         return T_TOKEN_ERROR;
     }
     return symbol_types[search];
@@ -178,14 +182,29 @@ static void ignore_comment(lexer* lexer){
     while(lexer_peek(lexer) && lexer_peek(lexer) != '\n'){
         lexer_advance(lexer);
     }
+    vector_push(lexer->line_points, &lexer->pos);
+    lexer_advance(lexer);
 }
 
 static void ignore_multi_comment(lexer* lexer){
-    // TO-DO: multi comment support
+    lexer_advance(lexer);
+    char next = lexer->input[lexer->pos + 1];
+    while(lexer_peek(lexer) != '*' && next != '/'){
+        lexer_advance(lexer);
+        if(lexer_peek(lexer) == '\n'){
+            ++lexer->line;
+            lexer->column = 1;
+            vector_push(lexer->line_points, &lexer->pos);
+        }
+        next = lexer->input[lexer->pos + 1];
+    }
+    lexer_advance(lexer);
+    lexer_advance(lexer);
 }
 
-token* next_token(lexer* lexer){
+static void check_comment(lexer* lexer){
     if(lexer_peek(lexer) == '/'){
+        
         lexer_advance(lexer);
         if(lexer_peek(lexer) == '/'){
             ignore_comment(lexer);
@@ -198,12 +217,30 @@ token* next_token(lexer* lexer){
             --lexer->column;
         }
     }
+}
+
+
+// TO-DO: fix this function to create better error messages
+char* get_input_line(unsigned int line, lexer* lexer){
+    unsigned int* pos = (unsigned int*)(lexer->line_points->value[line - 1]);
+    string* line_str = init_string(32);
+    while(lexer->input[*pos] != '\n'){
+        string_push(line_str, lexer->input[(*pos)++]);
+    }
+    return string_copy(line_str);
+}
+
+token* next_token(lexer* lexer){
+    check_comment(lexer);
     while (isspace(lexer_peek(lexer)))
     {
         lexer_advance(lexer);
     }
+    check_comment(lexer);
     
     char c = lexer_peek(lexer);
+
+
     if(isalpha(c) || c == '_'){
        int type = read_id_or_keyword(lexer);
        return new_token(type, lexer);
@@ -229,7 +266,7 @@ token* next_token(lexer* lexer){
     else if(c == 0){
         return new_token(T_EOF, lexer);
     }
-    // lexical err
+    printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d.\n", lexer->file, string_copy(lexer->buffer), lexer->line);
     lexer_advance(lexer);
     return new_token(T_TOKEN_ERROR, lexer);
 }

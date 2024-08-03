@@ -1,6 +1,6 @@
-foreign function out(const string message, const char separator = '\n');
+foreign function out(const string message, const char separator);
 
-foreign string input(const string message = "");
+foreign string input(const string message);
 
-foreign function error(const string message, bool fatal = false);
+foreign function error(const string message, bool fatal);
 

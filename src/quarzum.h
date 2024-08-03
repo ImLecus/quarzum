@@ -25,12 +25,12 @@ int binary_search(const char* symbol, const char** list, unsigned int size);
 //
 #define RESET "\e[0m"
 
-#define RED "\e[31m"
-#define YELLOW "\e[33m"
-#define GREEN "\e[32m"
-#define CYAN "\e[36m"
-#define MAGENTA "\e[35m"
-#define GRAY "\e[90m"
+#define RED "\e[1;31m"
+#define YELLOW "\e[1;33m"
+#define GREEN "\e[1;32m"
+#define CYAN "\e[1;36m"
+#define MAGENTA "\e[1;35m"
+#define GRAY "\e[1;90m"
 #define ORANGE "\e[38;5;214m"
 
 #define UNDERLINE "\e[4m"
@@ -38,8 +38,8 @@ int binary_search(const char* symbol, const char** list, unsigned int size);
 
 #define ERROR_MSG(msg) RED"[ERROR] "RESET"%s\n",msg
 #define LOG_MSG(msg) CYAN"[LOG] "RESET"%s\n",msg
-#define WARN_MSG(msg) ORANGE"[WARNING] "RESET"%s\n",msg
-#define DEBUG_MSG(msg) GREEN"[DEBUG] "RESET"%s\n",msg
+#define WARN_MSG(msg) BOLD ORANGE"[WARNING] "RESET"%s\n",msg
+#define DEBUG_MSG(msg) MAGENTA"[DEBUG] "RESET"%s\n",msg
 
 //
 //  string.c
@@ -231,15 +231,19 @@ typedef struct {
     unsigned int pos;
     string* buffer;
     token* tok;
+    vector* line_points;
+    char* file;
 } lexer;
 
-lexer* init_lexer(char* input);
+lexer* init_lexer(char* filename, char* input);
 
 token* new_token(int type, lexer* lexer);
 
 token* next_token(lexer* lexer);
 
 void read_next(lexer* lexer);
+
+char* get_input_line(unsigned int line, lexer* lexer);
 
 //
 //  parse.c
@@ -278,6 +282,14 @@ typedef struct {
 node* init_node(unsigned int children, int type);
 void expect(token* t, int type, char* what);
 node* parse(char* file);
+
+
+typedef struct {
+    node* ast;
+    bool has_errors;
+    // type table
+    // symbol table
+} parser;
 
 //
 //  expr.c

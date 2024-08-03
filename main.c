@@ -8,12 +8,12 @@ int main(int argc, char** argv) {
     struct process lex = start_process("Parse phase");
     node* ast = parse("code.qz");
     end_process(&lex);
+
     // Semantic analisys
     struct process checking = start_process("Check phase");
     // checkAST(ast);
 
     vector* ir_list = generate_ir(ast);
-    printf("%d\n", ir_list->len);
     end_process(&checking);
 
     // Code generation

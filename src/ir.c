@@ -76,23 +76,18 @@ static void generate_instruction(vector* ir_list,node* n){
             node* param = (node*)(n->children->value[i]);
             char* param_name = param->children->value[0];
             if(param_name[0] == '"'){
-                printf("ASSIGN _s0, %s\n",param_name);
                 vector_push(ir_list, 
                     init_instruction(I_ASSIGN, get_index('s',s_index), param_name, NULL,ty_string)
                 );
-                printf("PARAM %s\n","$_s0");
                 vector_push(ir_list, 
                     init_instruction(I_PARAM,get_index('s',s_index++), NULL, NULL,NULL)
                 );
                 break;
             }
-
-            printf("PARAM %s\n",param->children->value[0]);
             vector_push(ir_list, 
                 init_instruction(I_PARAM, param->children->value[0], NULL, NULL,NULL)
             );
         }
-        printf("CALL %s\n",n->children->value[0]);
         vector_push(ir_list, 
             init_instruction(I_CALL, n->children->value[0], NULL, NULL,NULL)
         );
@@ -101,7 +96,9 @@ static void generate_instruction(vector* ir_list,node* n){
 
     case N_FUNCTION:
         symbol* s =  (symbol*)(n->children->value[0]);
-        printf("FUNCTION %s\n", s->name);
+        if((s->type->flags & FOREIGN_FLAG) > 0){
+            return;
+        }
         vector_push(ir_list, 
             init_instruction(I_FUNCTION,s->name, NULL, NULL,NULL)
         );

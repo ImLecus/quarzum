@@ -11,7 +11,7 @@ node* init_node(unsigned int children, int type){
 
 void expect(token* t, int type, char* what){
     if(t->type != type){
-        printf(RED "[ERROR]" RESET " Expected %s at line %d.\n", what, t->line);
+        printf(RED "[ERROR]" RESET " (%s) Expected %s at line %d.\n", t->file,what, t->line);
     }
 }
 
@@ -176,16 +176,15 @@ static type* parse_type(lexer* lexer){
         // custom type
     }
     else{
-
         if(strcmp(lexer->tok->value, "string") == 0){
-            t = ty_string;
+            memcpy(t, ty_string, sizeof(type));
         }
         if(strcmp(lexer->tok->value, "int") == 0){
-            t = ty_int32;
+            memcpy(t, ty_int32, sizeof(type));
         }
         else{
             // int8 as placeholder
-            t = ty_int8;
+            memcpy(t, ty_int8, sizeof(type));
         }
         
     }
@@ -308,6 +307,7 @@ static node* parse_global_decl(lexer* lexer){
                 }
                 read_next(lexer);
             }
+            read_next(lexer);
         }
         else{
             // only for function definitions
@@ -326,10 +326,11 @@ node* parse(char* file){
     if(!input){
         return NULL;
     }
-    lexer* lexer = init_lexer(input->value);
+    lexer* lexer = init_lexer(file,input->value);
     if(!lexer){
         return NULL;
     }
+
     read_next(lexer);
     node* ast = init_node(10, N_ROOT);
     while (lexer->tok->type != T_EOF)

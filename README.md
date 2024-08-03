@@ -3,7 +3,7 @@
 <img src="./quarzum_logo.svg" width="150">
 <br><br>
 This is a compiled, general-purpose programming language. The
-objective of this language is to offer a newer solution to the
+objective of this language is to offer a modern solution to the
 low-level programming users, generally as an alternative to 
 languages like C or C++.
 
@@ -11,10 +11,9 @@ languages like C or C++.
 
 * Clean and simple syntax
 * Operator Overloading
-* Exception Handling
 * Garbage Collection
 * High performance
-* Supports OOP and functional paradigms
+* Supports OOP paradigm
 
 ## State of the project
 

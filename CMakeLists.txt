@@ -17,6 +17,7 @@ set(SOURCES
     src/check.c
     src/codegen.c
     src/ir.c
+    src/symbol.c
 )
 add_executable(quarzum ${SOURCES})
 set(CMAKE_C_FLAGS_RELEASE "-O3")

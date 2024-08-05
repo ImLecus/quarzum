@@ -1,5 +1,11 @@
 const int READ_MODE = 1;
 
+struct File {
+    int fd;
+    bool isOpen;
+};
+
+foreign int getFileDescriptor(string name, int flags, int mode);
 foreign int openFile(string name, int flags, int mode);
 foreign int closeFile(int fd);
 foreign string readFile(int fd);

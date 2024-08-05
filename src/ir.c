@@ -62,6 +62,10 @@ static void generate_instruction(vector* ir_list,node* n){
     case N_VAR:
         symbol* sy = n->children->value[0];
         node* expr = n->children->value[1];
+        if(sy->scope == S_LOCAL){
+            
+            break;
+        }
         if(expr->type == N_LITERAL){
             char* value = expr->children->value[0];
             printf("ASSIGN %s, %s (%d)\n",sy->name,value, sy->type->size);
@@ -95,14 +99,16 @@ static void generate_instruction(vector* ir_list,node* n){
         break;
 
     case N_FUNCTION:
-        symbol* s =  (symbol*)(n->children->value[0]);
+        symbol* s = (symbol*)(n->children->value[0]);
         if((s->type->flags & FOREIGN_FLAG) > 0){
             return;
         }
         vector_push(ir_list, 
             init_instruction(I_FUNCTION,s->name, NULL, NULL,NULL)
         );
+        
         for(unsigned int i = 1; i < n->children->len; ++i){
+            // TO-DO: check if it's a parameter (symbol*) or a child (node*)
             generate_instruction(ir_list,(node*)(vector_get(n->children,i)));
         }
         vector_push(ir_list, 

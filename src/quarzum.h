@@ -124,7 +124,6 @@ enum {
     T_KEYWORD_AS,
     T_KEYWORD_BREAK,
     T_KEYWORD_CASE,
-    T_KEYWORD_CATCH,
     T_KEYWORD_CLASS,
     T_KEYWORD_CONTINUE,
     T_KEYWORD_DEFAULT,
@@ -143,10 +142,10 @@ enum {
     T_KEYWORD_NEW,
     T_KEYWORD_PERSIST,
     T_KEYWORD_RETURN,
+    T_KEYWORD_SIZEOF,
     T_KEYWORD_STRUCT,
     T_KEYWORD_SWITCH,
     T_KEYWORD_TRUE,
-    T_KEYWORD_TRY,
     T_KEYWORD_TYPEDEF,
     T_KEYWORD_WHILE,
     T_LEFT_PAR,
@@ -176,23 +175,23 @@ typedef struct {
 #define KEYWORDS_SIZE 57
 #define SYMBOLS_SIZE 40
 
-static const const char* keywords[KEYWORDS_SIZE] = {
-    "and","as","bool","break","case","catch",
+static const char* keywords[KEYWORDS_SIZE] = {
+    "and","as","bool","break","case",
     "char","class","const","continue","decimal","default",
     "delete","do","else","enum","exit",
     "false","for","foreach","foreign","function",
     "if","import","in","int","int16","int32","int64","int8",
     "module","new","not","null","num","num16","num32","num64",
     "or","persist","private","protected","public",
-    "return","string","struct","switch",
-    "true","try","typedef","uint","uint16",
-    "uint32","uint64","uint8","while","xor"
+    "return","sizeof","string","struct","switch",
+    "true","typedef","uint","uint16",
+    "uint32","uint64","uint8","var","while","xor"
 };
 
 // There are 27 keywords in the Quarzum language, but internally,
 // primitive type names are keywords.
 static const int keyword_types[KEYWORDS_SIZE] = {
-    T_LOGICAL_OP, T_KEYWORD_AS, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CATCH,
+    T_LOGICAL_OP, T_KEYWORD_AS, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE,
     T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONTINUE, T_TYPE, T_KEYWORD_DEFAULT,
     T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM,
     T_KEYWORD_EXIT, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
@@ -200,13 +199,14 @@ static const int keyword_types[KEYWORDS_SIZE] = {
     T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
     T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_LOGICAL_OP,
     T_KEYWORD_PERSIST, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
+    T_KEYWORD_SIZEOF,
     T_TYPE, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
-    T_KEYWORD_TRY, T_KEYWORD_TYPEDEF, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
-    T_TYPE, T_KEYWORD_WHILE, T_LOGICAL_OP
+    T_KEYWORD_TYPEDEF, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
+    T_TYPE, T_TYPE, T_KEYWORD_WHILE, T_LOGICAL_OP
 
 };
 
-static const const char* symbols[SYMBOLS_SIZE] = {
+static const char* symbols[SYMBOLS_SIZE] = {
     "!","!=","#","#=","%","%=","&","&=","(",")","*","*=","+","++","+=",",","-","--","-=",
     ".","/","/=",":",";","<","<=","=","==","=>",">",">=","?","[","]","^","^=","{","|","|=","}"
 };
@@ -230,9 +230,9 @@ typedef struct {
     unsigned int column;
     unsigned int pos;
     string* buffer;
-    token* tok;
-    vector* line_points;
+    unsigned int line_points[3];
     char* file;
+    token* tok;
 } lexer;
 
 lexer* init_lexer(char* filename, char* input);
@@ -243,7 +243,8 @@ token* next_token(lexer* lexer);
 
 void read_next(lexer* lexer);
 
-char* get_input_line(unsigned int line, lexer* lexer);
+char* get_error_lines(lexer* lexer);
+
 
 //
 //  parse.c
@@ -269,9 +270,11 @@ enum {
     N_PAREN_EXPR,
     N_TERNARY_EXPR,
     N_MEMBER_EXPR,
+    N_CALL_EXPR,
 
     N_LITERAL,
-    N_CLASS
+    N_CLASS,
+    N_INIT_LIST
 };
 
 typedef struct {
@@ -279,17 +282,20 @@ typedef struct {
     vector* children;
 } node;
 
-node* init_node(unsigned int children, int type);
-void expect(token* t, int type, char* what);
-node* parse(char* file);
-
-
 typedef struct {
     node* ast;
+    vector* symbol_table;
     bool has_errors;
     // type table
-    // symbol table
-} parser;
+
+} parse_tree;
+
+node* init_node(unsigned int children, int type);
+void expect(token* t, int type, char* what);
+parse_tree* parse(char* file);
+
+
+
 
 //
 //  expr.c
@@ -371,6 +377,9 @@ typedef struct {
 } symbol;
 
 char* mangle_name(char* module_name);
+int try_add_symbol(vector* table, symbol* s);
+int merge_symbol_tables(vector* dest, vector* add);
+symbol* get_symbol(vector* dest, char* name);
 
 //
 //  check.c

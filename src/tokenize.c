@@ -1,7 +1,7 @@
 #include "quarzum.h"
 
 lexer* init_lexer(char* filename, char* input){
-    if(input == NULL){return NULL;}
+    if(!input){return NULL;}
     lexer* lex = (lexer*)malloc(sizeof(lexer));
     lex->input = input;
     lex->line = 1;
@@ -9,15 +9,20 @@ lexer* init_lexer(char* filename, char* input){
     lex->pos = 0;
     lex->buffer = init_string(DEFAULT_TOKENIZER_BUFFER_SIZE);
     lex->file = filename;
-    lex->line_points = init_vector(10);
     return lex;
+}
+
+static void update_line_points(lexer* lexer, unsigned int new_point){
+    lexer->line_points[0] = lexer->line_points[1];
+    lexer->line_points[1] = lexer->line_points[2];
+    lexer->line_points[2] = new_point;
 }
 
 static inline void lexer_advance(lexer* lexer){
     if(lexer->input[lexer->pos] == '\n'){
-        vector_push(lexer->line_points, &lexer->pos);
         ++lexer->line;
         lexer->column = 1;
+        update_line_points(lexer, lexer->pos);
     }
     ++lexer->pos;
 }
@@ -97,7 +102,7 @@ static void read_string_literal(lexer* lexer){
     string_push(lexer->buffer, lexer_consume(lexer));
 }
 
-static void read_digit_chain(lexer* lexer){
+static inline void read_digit_chain(lexer* lexer){
     while(isdigit(lexer_peek(lexer))){
         string_push(lexer->buffer, lexer_consume(lexer));
     }
@@ -150,14 +155,12 @@ static int read_numeric_literal(lexer* lexer){
     }
 }
 
-static int read_id_or_keyword(lexer* lexer){
+static inline int read_id_or_keyword(lexer* lexer){
     while(isalnum(lexer_peek(lexer)) || lexer_peek(lexer) == '_'){
         string_push(lexer->buffer, lexer_consume(lexer));
     }
     int search = binary_search(lexer->buffer->value, keywords, KEYWORDS_SIZE);
-
-    return search == -1 ? T_IDENTIFIER : keyword_types[search];
-            
+    return search == -1 ? T_IDENTIFIER : keyword_types[search];      
 }
 
 static int read_symbol(lexer* lexer){
@@ -172,7 +175,8 @@ static int read_symbol(lexer* lexer){
     }
     int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
     if(search == -1){
-        printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d.\n", lexer->file, string_copy(lexer->buffer), lexer->line);
+        printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d.\n %s", 
+    lexer->file, string_copy(lexer->buffer), lexer->line, get_error_lines(lexer));
         return T_TOKEN_ERROR;
     }
     return symbol_types[search];
@@ -182,7 +186,7 @@ static void ignore_comment(lexer* lexer){
     while(lexer_peek(lexer) && lexer_peek(lexer) != '\n'){
         lexer_advance(lexer);
     }
-    vector_push(lexer->line_points, &lexer->pos);
+    update_line_points(lexer, lexer->pos);
     lexer_advance(lexer);
 }
 
@@ -194,7 +198,7 @@ static void ignore_multi_comment(lexer* lexer){
         if(lexer_peek(lexer) == '\n'){
             ++lexer->line;
             lexer->column = 1;
-            vector_push(lexer->line_points, &lexer->pos);
+            update_line_points(lexer, lexer->pos);
         }
         next = lexer->input[lexer->pos + 1];
     }
@@ -219,15 +223,9 @@ static void check_comment(lexer* lexer){
     }
 }
 
-
-// TO-DO: fix this function to create better error messages
-char* get_input_line(unsigned int line, lexer* lexer){
-    unsigned int* pos = (unsigned int*)(lexer->line_points->value[line - 1]);
-    string* line_str = init_string(32);
-    while(lexer->input[*pos] != '\n'){
-        string_push(line_str, lexer->input[(*pos)++]);
-    }
-    return string_copy(line_str);
+// TO-DO: FINISH THIS FUNCTION
+char* get_error_lines(lexer* lexer){
+    return "error";
 }
 
 token* next_token(lexer* lexer){
@@ -266,11 +264,12 @@ token* next_token(lexer* lexer){
     else if(c == 0){
         return new_token(T_EOF, lexer);
     }
-    printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d.\n", lexer->file, string_copy(lexer->buffer), lexer->line);
+    printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d.\n %s", 
+    lexer->file, string_copy(lexer->buffer), lexer->line, get_error_lines(lexer));
     lexer_advance(lexer);
     return new_token(T_TOKEN_ERROR, lexer);
 }
 
-void read_next(lexer* lexer){
+inline void read_next(lexer* lexer){
     lexer->tok = next_token(lexer);
 }

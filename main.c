@@ -6,14 +6,17 @@ int main(int argc, char** argv) {
     printf(DEBUG_MSG("Starting the compiler..."));
     // Lexical & Syntax analisys
     struct process lex = start_process("Parse phase");
-    node* ast = parse("code.qz");
+    parse_tree* ast = parse("code.qz");
     end_process(&lex);
 
+    if(!ast){
+        exit(-1);
+    }
     // Semantic analisys
     struct process checking = start_process("Check phase");
     // checkAST(ast);
 
-    vector* ir_list = generate_ir(ast);
+    vector* ir_list = generate_ir(ast->ast);
     end_process(&checking);
 
     // Code generation
@@ -28,7 +31,8 @@ int main(int argc, char** argv) {
 
     // free memory
     free_vector(ir_list);
-    free_vector(ast->children);
+    free_vector(ast->ast->children);
+    free(ast->ast);
     free(ast);
     free_string(assembly->bss_section);
     free_string(assembly->data_section);
@@ -43,6 +47,7 @@ int main(int argc, char** argv) {
     system("rm out.asm");
     system("clear");
     system("./code");
+    system("rm ./code");
     
     return 0;
 }

@@ -1,5 +1,11 @@
 #include "quarzum.h"
 
+static char* registers[6] = {"%r10", "%r11", "%r12", "%r13", "%r14", "%r15"};
+
+static int get_free_reg(){
+    static int i;
+    return i < 6? i++ : -1;
+}
 
 static char* get_type(type* type){
     if(type->size == 1){

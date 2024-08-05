@@ -25,3 +25,10 @@ out:
     pop %rdx
     leave
     ret
+
+.global input
+input:
+    enter $0, $0
+
+    leave
+    ret

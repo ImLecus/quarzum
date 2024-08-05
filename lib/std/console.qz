@@ -3,4 +3,3 @@ foreign function out(const string message, const char separator);
 foreign string input(const string message);
 
 foreign function error(const string message, bool fatal);
-

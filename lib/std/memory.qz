@@ -5,11 +5,11 @@ foreign function free(var* ptr);
 class Buffer<T> {
     private T* elements; 
 
-    setup(uint64 size){
+    constructor(uint64 size){
         this.elements = malloc(this.elements ,sizeof(T) * size);
     }
 
-    destroy(){
+    destructor(){
         free(this.elements);
     }
 }

@@ -1,0 +1,58 @@
+/*
+    PLANNED COLLECTIONS
+    -------------------
+
+    1. List<T>: a dynamic array of type T
+    2. Map<T, U>: a map of type T and U
+    3. Set<T, U>: a set of type T and U
+    4. BitChunk: a space-efficient bool array with 8 elements (1 byte)
+    5. BitArray: a list of BitChunk
+    6. HashMap<T,U>: a hashmap of type T and U
+    7. LinkedList<T>: a linked list of type T
+    8. Stack<T>: a stack of type T
+    9. Queue<T>: a queue of type T
+    10. Deque<T>: a double-ended queue of type T
+    11. BinaryTree<T>: a binary tree of type T
+
+
+*/
+
+class List<T> {
+
+}
+
+class Map<T,U>{
+
+}
+
+class Set<T,U> {
+
+}
+
+class BitChunk {
+
+}
+
+class BitArray {
+
+}
+
+class HashMap<T,U>{
+
+}
+
+class LinkedList<T>{
+
+}
+
+class Stack<T>{
+
+}
+
+class Queue<T>{
+
+}
+
+class Deque<T>{
+    
+}

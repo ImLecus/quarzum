@@ -6,7 +6,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 #define QUARZUM_COMPILER_VERSION "1.0"
 #define QUARZUM_VERSION "1.0"
 #define VERSION_TYPE "experimental"
@@ -229,8 +228,6 @@ typedef struct {
     unsigned int line;
     unsigned int column;
     unsigned int pos;
-    string* buffer;
-    unsigned int line_points[3];
     char* file;
     token* tok;
 } lexer;
@@ -243,7 +240,7 @@ token* next_token(lexer* lexer);
 
 void read_next(lexer* lexer);
 
-char* get_error_lines(lexer* lexer);
+char* get_error_line(lexer* lexer);
 
 
 //
@@ -271,6 +268,7 @@ enum {
     N_TERNARY_EXPR,
     N_MEMBER_EXPR,
     N_CALL_EXPR,
+    N_NULL_EXPR,
 
     N_LITERAL,
     N_CLASS,
@@ -326,37 +324,41 @@ enum {
 #define FOREIGN_FLAG    0b00000100
 #define STRUCT_FLAG     0b00001000
 #define POINTER_FLAG    0b00010000
+#define FUNCTION_FLAG   0b00100000
 
 typedef struct {
     int type;
+    char* name;
     unsigned int align;
     unsigned int size;
     unsigned int flags;
     // Functions
-    unsigned int args;
+    vector* args;
+
+    unsigned int local_variables;
 } type;
 
-static type* ty_function = &(type){TY_FUNCTION, 1, 1};
-static type* ty_bool =     &(type){TY_BOOL, 1, 1, UNSIGNED_FLAG};
-static type* ty_char =     &(type){TY_CHAR, 1, 1};
+static type* ty_function = &(type){TY_FUNCTION,"function", 1, 1};
+static type* ty_bool =     &(type){TY_BOOL,"bool", 1, 1, UNSIGNED_FLAG};
+static type* ty_char =     &(type){TY_CHAR,"char", 1, 1};
 
-static type* ty_int8 =     &(type){TY_INT, 1, 1};
-static type* ty_int16 =    &(type){TY_INT, 2, 2};
-static type* ty_int32 =    &(type){TY_INT, 4, 4};
-static type* ty_int64 =    &(type){TY_INT, 8, 8};
+static type* ty_int8 =     &(type){TY_INT,"int8", 1, 1};
+static type* ty_int16 =    &(type){TY_INT,"int16", 2, 2};
+static type* ty_int32 =    &(type){TY_INT,"int32", 4, 4};
+static type* ty_int64 =    &(type){TY_INT,"int64", 8, 8};
 
-static type* ty_uint8 =     &(type){TY_UINT, 1, 1, UNSIGNED_FLAG};
-static type* ty_uint16 =    &(type){TY_UINT, 2, 2, UNSIGNED_FLAG};
-static type* ty_uint32 =    &(type){TY_UINT, 4, 4, UNSIGNED_FLAG};
-static type* ty_uint64 =    &(type){TY_UINT, 8, 8, UNSIGNED_FLAG};
+static type* ty_uint8 =     &(type){TY_UINT,"uint8", 1, 1, UNSIGNED_FLAG};
+static type* ty_uint16 =    &(type){TY_UINT,"uint16", 2, 2, UNSIGNED_FLAG};
+static type* ty_uint32 =    &(type){TY_UINT,"uint32", 4, 4, UNSIGNED_FLAG};
+static type* ty_uint64 =    &(type){TY_UINT,"uint64", 8, 8, UNSIGNED_FLAG};
 
-static type* ty_num16 =    &(type){TY_NUM, 2, 2};
-static type* ty_num32 =    &(type){TY_NUM, 4, 4};
-static type* ty_num64 =    &(type){TY_NUM, 8, 8};
+static type* ty_num16 =    &(type){TY_NUM,"num16", 2, 2};
+static type* ty_num32 =    &(type){TY_NUM,"num32", 4, 4};
+static type* ty_num64 =    &(type){TY_NUM,"num64", 8, 8};
 
-static type* ty_decimal =  &(type){TY_DECIMAL, 8, 8};
-static type* ty_string =   &(type){TY_STRING, 4, 4, POINTER_FLAG};
-static type* ty_null =    &(type){TY_NULL, 1, 1};
+static type* ty_decimal =  &(type){TY_DECIMAL,"decimal", 8, 8};
+static type* ty_string =   &(type){TY_STRING,"string", 4, 4, POINTER_FLAG};
+static type* ty_null =    &(type){TY_NULL,"null", 1, 1};
 
 
 // 
@@ -376,7 +378,7 @@ typedef struct {
 
 } symbol;
 
-char* mangle_name(char* module_name);
+void mangle_name(symbol* s);
 int try_add_symbol(vector* table, symbol* s);
 int merge_symbol_tables(vector* dest, vector* add);
 symbol* get_symbol(vector* dest, char* name);

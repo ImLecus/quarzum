@@ -1,8 +1,6 @@
 /*
     PLANNED COLLECTIONS
     -------------------
-
-    1. List<T>: a dynamic array of type T
     2. Map<T, U>: a map of type T and U
     3. Set<T, U>: a set of type T and U
     4. BitChunk: a space-efficient bool array with 8 elements (1 byte)

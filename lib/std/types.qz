@@ -1,8 +1,14 @@
-foreign string toString(int n);
-string toString(bool b){
-    return b == true ? "true" : "false";
-}
-foreign string toString(num n);
-string toString(char c){
-    return &c;
-}
+foreign int toInt(num value);
+foreign int toInt(string value);
+
+foreign num toNum(int value);
+foreign num toNum(uint value);
+
+foreign string toString(int value);
+foreign string toString(int64 value);
+foreign string toString(uint value);
+foreign string toString(uint64 value);
+foreign string toString(bool value);
+foreign string toString(num value);
+foreign string toString(num64 value);
+foreign string toString(char value);

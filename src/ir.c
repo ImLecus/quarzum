@@ -27,6 +27,12 @@ static void generate_instruction(vector* ir_list,node* n){
     }
     switch (n->type)
     {
+    case N_BINARY_EXPR:
+        // get a free temporal register (or stack)
+        // put the left expr
+        // operate with the right expr
+        break;
+
     case N_WHILE:
         node* c = n->children->value[0];
 
@@ -103,8 +109,9 @@ static void generate_instruction(vector* ir_list,node* n){
         if((s->type->flags & FOREIGN_FLAG) > 0){
             return;
         }
+
         vector_push(ir_list, 
-            init_instruction(I_FUNCTION,s->name, NULL, NULL,NULL)
+            init_instruction(I_FUNCTION,s->name,NULL, NULL, s->type->local_variables)
         );
         
         for(unsigned int i = 1; i < n->children->len; ++i){

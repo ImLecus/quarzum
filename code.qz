@@ -1,6 +1,7 @@
-import "@std/console.qz"
+int sum(int a, int b) => {a + b}
 
 function main(string* args){
-    int i = 1;
     out("Hello world from Quarzum!");
+
+    // int i = sum(2, 6);
 }

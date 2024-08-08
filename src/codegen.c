@@ -58,7 +58,6 @@ static void node_gen(instruction* instruction, asm_code* code){
         string_append(code->text_section, instruction->arg1);
         string_push(code->text_section, '\n');
         break;
-
     case I_ASSIGN:
         type* assign_type = (type*)instruction->data;
         string_append(code->data_section, ".global ");
@@ -73,15 +72,13 @@ static void node_gen(instruction* instruction, asm_code* code){
     case I_LEAVERET:
         string_append(code->text_section, "leave\nret\n");
         break;
-    // case I_ASSIGN:
-    //     string_append(code->data_section, instruction->dest);
-    //     string_append(code->data_section, ": .string ");
-    //     string_append(code->data_section, instruction->arg1);
-    //     string_push(code->data_section, '\n');
-    //     break;
     case I_FUNCTION:
         string_append(code->text_section, instruction->dest);
-        string_append(code->text_section, ":\n");
+        string_append(code->text_section, ":\nenter $");
+        char local_vars[3];
+        sprintf(local_vars,"%d",instruction->data);
+        string_append(code->text_section, local_vars);
+        string_append(code->text_section, ", $0\n");
         break;  
     case I_PARAM:
         string_append(code->text_section, "movq $");
@@ -94,9 +91,9 @@ static void node_gen(instruction* instruction, asm_code* code){
         string_push(code->text_section, '\n');
         break;
     default:
-    printf("%d\n",instruction->type);
-        break;
-    }
+        printf("%d\n",instruction->type);
+            break;
+        }
 }
 
 asm_code* code_gen(vector* ir){
@@ -112,8 +109,6 @@ asm_code* code_gen(vector* ir){
         instruction* child = (instruction*)(vector_get(ir,i));
         node_gen(child, code);
     }
-
-
     return code;
 }
 

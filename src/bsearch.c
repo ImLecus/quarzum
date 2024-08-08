@@ -5,6 +5,9 @@ int binary_search(const char* symbol, const char** list, unsigned int size){
     int right = size;
     while(left <= right){
         int mid = left + (right - left)/2;
+        if(mid >= size){
+            return -1;
+        }
         int cmp = strcmp(symbol, list[mid]);
 
         if(cmp == 0){

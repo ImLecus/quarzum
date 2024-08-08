@@ -35,6 +35,11 @@ static node* parse_primary_expr(lexer* lexer){
         expect(lexer->tok, T_RIGHT_PAR, "')'");
         return paren_expr(expr);
     
+    case T_IDENTIFIER:
+        node* id_expr = init_node(1,N_IDENTIFIER);
+        vector_push(id_expr->children, lexer->tok->value);
+        return id_expr;
+
     default:
         printf(ERROR_MSG("Invalid expression"));
         break;
@@ -55,6 +60,8 @@ node* parse_expr(lexer* lexer){
     switch (lexer->tok->type)
     {
     case T_ARITHMETIC_OP:
+    case T_LOGICAL_OP:
+    case T_COMPARATION_OP:
         op = lexer->tok->value;
         read_next(lexer);
         node* right = parse_expr(lexer);

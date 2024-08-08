@@ -145,12 +145,14 @@ static node* parse_statement(lexer* lexer){
         return parse_while_statement(lexer);
     case T_TYPE:
     case T_SPECIFIER:
-        return parse_decl(lexer, S_LOCAL); // local decl
+        return parse_decl(lexer, S_LOCAL);
 
     default:
-        printf(ERROR_MSG("Invalid statement"));
-        break;
+        printf(RED"[ERROR]"RESET" (%s) Invalid statement at line %d\n", lexer->file, lexer->line);
+        read_next(lexer);
+        return NULL;
     }
+   
     return NULL;
 }
 
@@ -180,11 +182,16 @@ static type* parse_type(lexer* lexer){
         // custom type
     }
     else{
+        // TO-DO: Create a type table (using a hashmap)
+
         if(strcmp(lexer->tok->value, "string") == 0){
             memcpy(t, ty_string, sizeof(type));
         }
         if(strcmp(lexer->tok->value, "int") == 0){
             memcpy(t, ty_int32, sizeof(type));
+        }
+        if(strcmp(lexer->tok->value, "char") == 0){
+            memcpy(t, ty_char, sizeof(type));
         }
         else{
             // int8 as placeholder
@@ -266,6 +273,23 @@ static symbol* parse_symbol(lexer* lexer, int scope){
     return s;
 }
 
+static node* parse_arrow_function(lexer* lexer,symbol* s){
+    bool inside_curly_brackets = lexer->tok->type == T_LEFT_CURLY;
+    if(inside_curly_brackets){
+        read_next(lexer);
+    }
+    node* expr = parse_expr(lexer);
+    if(inside_curly_brackets){
+        expect(lexer->tok, T_RIGHT_CURLY, "'}'");
+    }
+    else{
+        expect(lexer->tok, T_SEMICOLON, "semicolon");
+    }
+    node* arrow_function = init_node(N_FUNCTION, 1);
+    vector_push(arrow_function->children, expr);
+    return arrow_function;
+}
+
 static node* parse_decl(lexer* lexer, int scope){
     symbol* s = parse_symbol(lexer, scope);
     // if s is a struct, return the struct
@@ -291,9 +315,14 @@ static node* parse_decl(lexer* lexer, int scope){
         break;
 
     case '(':
+        // apply the FUNCTION_FLAG to indicate
+        // it's a callable function
+        s->type->flags |= FUNCTION_FLAG;
         read_next(lexer);
+        s->type->args = init_vector(1);
         while(lexer->tok->type != T_RIGHT_PAR){
             symbol* arg = parse_symbol(lexer, true);
+            vector_push(s->type->args, arg->type);
             read_next(lexer);
             if(lexer->tok->type == T_COMMA){
                 read_next(lexer);
@@ -302,15 +331,25 @@ static node* parse_decl(lexer* lexer, int scope){
             expect(lexer->tok, T_RIGHT_PAR, "')'");
         }
         read_next(lexer);
+        if(lexer->tok->type == T_ARROW){
+            read_next(lexer);
+            return parse_arrow_function(lexer, s);
+        }
+
+
         node* func_decl_node = init_node(2,N_FUNCTION);
         vector_push(func_decl_node->children, s);
         if(lexer->tok->type == T_LEFT_CURLY){
             read_next(lexer);
             while(lexer->tok->type != T_RIGHT_CURLY){
                 node* stmt = parse_statement(lexer);
-                if(stmt){
-                    vector_push(func_decl_node->children, stmt);
+                if(!stmt){
+                    break;
                 }
+                if(stmt->type == N_VAR){
+                    ++s->type->local_variables;
+                }
+                vector_push(func_decl_node->children, stmt);
                 read_next(lexer);
             }
             read_next(lexer);
@@ -319,7 +358,7 @@ static node* parse_decl(lexer* lexer, int scope){
             // only for function definitions
             expect(lexer->tok, T_SEMICOLON, "semicolon");
         }
-        
+        mangle_name(s);
         return func_decl_node;
     default:
         break;

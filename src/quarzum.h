@@ -40,6 +40,34 @@ int binary_search(const char* symbol, const char** list, unsigned int size);
 #define WARN_MSG(msg) BOLD ORANGE"[WARNING] "RESET"%s\n",msg
 #define DEBUG_MSG(msg) MAGENTA"[DEBUG] "RESET"%s\n",msg
 
+
+//
+//  hashmap.c
+//
+#define FNV_OFFSET 14695981039346656037UL
+#define FNV_PRIME 1099511628211UL
+
+typedef struct {
+    char* key;
+    void* value;
+} bucket;
+
+typedef struct {
+    bucket** content;
+    unsigned int size;
+    unsigned int len;
+} hashmap;
+
+hashmap* init_hashmap(unsigned int size);
+
+void free_hashmap(hashmap* map);
+
+int hash(char* key);
+
+void* hashmap_get(hashmap* map, char* key);
+
+void hashmap_add(hashmap* map, char* key, void* value);
+
 //
 //  string.c
 //
@@ -130,7 +158,6 @@ enum {
     T_KEYWORD_DO,
     T_KEYWORD_ELSE,
     T_KEYWORD_ENUM,
-    T_KEYWORD_EXIT,
     T_KEYWORD_FALSE,
     T_KEYWORD_FOR,
     T_KEYWORD_FOREACH,
@@ -171,13 +198,13 @@ typedef struct {
     char* file;
 } token;
 
-#define KEYWORDS_SIZE 57
+#define KEYWORDS_SIZE 55
 #define SYMBOLS_SIZE 40
 
 static const char* keywords[KEYWORDS_SIZE] = {
     "and","as","bool","break","case",
-    "char","class","const","continue","decimal","default",
-    "delete","do","else","enum","exit",
+    "char","class","const","continue","default",
+    "delete","do","else","enum",
     "false","for","foreach","foreign","function",
     "if","import","in","int","int16","int32","int64","int8",
     "module","new","not","null","num","num16","num32","num64",
@@ -191,9 +218,8 @@ static const char* keywords[KEYWORDS_SIZE] = {
 // primitive type names are keywords.
 static const int keyword_types[KEYWORDS_SIZE] = {
     T_LOGICAL_OP, T_KEYWORD_AS, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE,
-    T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONTINUE, T_TYPE, T_KEYWORD_DEFAULT,
-    T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM,
-    T_KEYWORD_EXIT, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
+    T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT,
+    T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
     T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
     T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
     T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_LOGICAL_OP,
@@ -261,7 +287,8 @@ enum {
     N_IDENTIFIER,
     N_TYPE,
     N_RETURN,
-
+    N_LAMBDA,
+    // Expression nodes
     N_UNARY_EXPR,
     N_BINARY_EXPR,
     N_PAREN_EXPR,
@@ -292,7 +319,7 @@ node* init_node(unsigned int children, int type);
 void expect(token* t, int type, char* what);
 parse_tree* parse(char* file);
 
-
+node* null_expr();
 
 
 //
@@ -313,7 +340,6 @@ enum {
     TY_INT,
     TY_UINT,
     TY_NUM,
-    TY_DECIMAL,
     TY_VAR,
     TY_CUSTOM,
     TY_NULL
@@ -325,6 +351,7 @@ enum {
 #define STRUCT_FLAG     0b00001000
 #define POINTER_FLAG    0b00010000
 #define FUNCTION_FLAG   0b00100000
+#define LAMBDA_FLAG     0b01000000
 
 typedef struct {
     int type;
@@ -332,10 +359,7 @@ typedef struct {
     unsigned int align;
     unsigned int size;
     unsigned int flags;
-    // Functions
-    vector* args;
-
-    unsigned int local_variables;
+    void* info;
 } type;
 
 static type* ty_function = &(type){TY_FUNCTION,"function", 1, 1};
@@ -356,7 +380,6 @@ static type* ty_num16 =    &(type){TY_NUM,"num16", 2, 2};
 static type* ty_num32 =    &(type){TY_NUM,"num32", 4, 4};
 static type* ty_num64 =    &(type){TY_NUM,"num64", 8, 8};
 
-static type* ty_decimal =  &(type){TY_DECIMAL,"decimal", 8, 8};
 static type* ty_string =   &(type){TY_STRING,"string", 4, 4, POINTER_FLAG};
 static type* ty_null =    &(type){TY_NULL,"null", 1, 1};
 
@@ -377,6 +400,14 @@ typedef struct {
     int scope;
 
 } symbol;
+
+typedef struct {
+    vector* args;
+    unsigned int local_variables_len;
+    unsigned int local_variables_size;
+    unsigned int align;
+    symbol** local_variables; 
+} function_info;
 
 void mangle_name(symbol* s);
 int try_add_symbol(vector* table, symbol* s);
@@ -417,7 +448,9 @@ enum {
     I_CMPTRUE,
     I_IF,
     I_NIF,
-    I_JMP
+    I_JMP,
+
+    I_ADD
 };
 
 #define INSTRUCTION_LIST_DEFAULT_SIZE 32

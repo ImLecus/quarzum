@@ -1,10 +1,10 @@
 #include "quarzum.h"
 
 vector* init_vector(unsigned int size){
-    vector* vec = (vector *)malloc(sizeof(vector));
+    vector* vec = malloc(sizeof(vector));
     vec->size = size;
     vec->len = 0;
-    vec->value = (void**)malloc(sizeof(void*)*size);
+    vec->value = malloc(sizeof(void*)*size);
     return vec;
 }
 

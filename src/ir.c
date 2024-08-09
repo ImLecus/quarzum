@@ -1,7 +1,9 @@
 #include "quarzum.h"
 
+static string* last_literal;
+
 instruction* init_instruction(int type, char* dest, char* arg1, char* arg2, void* data){
-    instruction* i = (instruction*)malloc(sizeof(instruction));
+    instruction* i = malloc(sizeof(instruction));
     i->type = type;
     i->dest = dest;
     i->arg1 = arg1;
@@ -27,10 +29,21 @@ static void generate_instruction(vector* ir_list,node* n){
     }
     switch (n->type)
     {
+    case N_NULL_EXPR:
+        break;
+    case N_LITERAL:
+        last_literal->value = n->children->value[0];
+        break;
     case N_BINARY_EXPR:
-        // get a free temporal register (or stack)
-        // put the left expr
-        // operate with the right expr
+        generate_instruction(ir_list,n->children->value[0]);
+        char* left = string_copy(last_literal);
+        generate_instruction(ir_list,n->children->value[1]);
+        char* right = string_copy(last_literal);
+        printf("%s + %s\n", left, right);
+        vector_push(ir_list, 
+            init_instruction(I_ADD, get_index('t', t_index), left, right, NULL)
+        ); 
+        last_literal->value = get_index('t', t_index++);
         break;
 
     case N_WHILE:
@@ -79,6 +92,12 @@ static void generate_instruction(vector* ir_list,node* n){
                 init_instruction(I_ASSIGN, sy->name, value, NULL,sy->type)
             );
         }
+        else{
+            generate_instruction(ir_list, expr);
+            vector_push(ir_list, 
+                init_instruction(I_ASSIGN, sy->name, "0", NULL,sy->type)
+            );
+        }
         break;
     
     case N_CALL:
@@ -109,9 +128,12 @@ static void generate_instruction(vector* ir_list,node* n){
         if((s->type->flags & FOREIGN_FLAG) > 0){
             return;
         }
-
+        function_info* info = s->type->info;
+        int size = info->align * info->local_variables_len;
+        char* size_str = malloc(3 * sizeof(char));
+        sprintf(size_str,"%d",size);
         vector_push(ir_list, 
-            init_instruction(I_FUNCTION,s->name,NULL, NULL, s->type->local_variables)
+            init_instruction(I_FUNCTION,s->name,size_str, NULL,info->local_variables)
         );
         
         for(unsigned int i = 1; i < n->children->len; ++i){
@@ -129,6 +151,7 @@ static void generate_instruction(vector* ir_list,node* n){
 }
 
 vector* generate_ir(node* ast){
+    last_literal = init_string(10);
     vector* list = init_vector(INSTRUCTION_LIST_DEFAULT_SIZE);
     for(unsigned int i = 0; i < ast->children->len; ++i){
         generate_instruction(list,(node*)(vector_get(ast->children,i)));

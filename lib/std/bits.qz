@@ -1,0 +1,21 @@
+class BitChunk {
+    private int chunk;
+
+    constructor(){
+        chunk = 0;
+    }
+    constructor(bool[] values){
+        uint l = len(values);
+        for(uint i = 0; i < l && i < 32; ++i){
+            chunk += values[i] << i;
+        }
+    }
+
+    public bool get(uint8 pos) => chunk & (1 << pos);
+
+
+}
+
+class BitArray {
+    
+}

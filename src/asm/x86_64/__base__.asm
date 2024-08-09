@@ -21,3 +21,13 @@ len:
     pop %rsi
     leave
     ret
+
+
+.global exit
+exit:
+    enter $0, $0
+    movq $60, %rax
+    movq %rdi, %rdi
+    syscall
+    leave
+    ret

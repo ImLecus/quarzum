@@ -5,7 +5,7 @@ static string* buffer;
 
 lexer* init_lexer(char* filename, char* input){
     if(!input){return NULL;}
-    lexer* lex = (lexer*)malloc(sizeof(lexer));
+    lexer* lex = malloc(sizeof(lexer));
     lex->input = input;
     lex->line = 1;
     lex->column = 1;
@@ -34,7 +34,7 @@ static inline char lexer_consume(lexer* lexer){
 }
 
 token* new_token(int type, lexer* lexer){
-    token* tok = (token*)malloc(sizeof(token));
+    token* tok = malloc(sizeof(token));
     tok->type = type;
     tok->value = string_copy(buffer);
     tok->line = lexer->line;

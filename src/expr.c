@@ -1,9 +1,15 @@
 #include "quarzum.h"
 
-static node* literal_expr(lexer* lexer, type* type){
+node* null_expr() {
+    return init_node(0, N_NULL_EXPR);
+} 
+
+static node* literal_expr(lexer* lexer, type* t){
     node* lit_expr = init_node(2, N_LITERAL);
+    type* lit_type = malloc(sizeof(type));
     vector_push(lit_expr->children, lexer->tok->value);
-    vector_push(lit_expr->children, type);
+    memcpy(lit_type, t, sizeof(type));
+    vector_push(lit_expr->children, lit_type);
     return lit_expr;
 }
 
@@ -28,7 +34,7 @@ static node* parse_primary_expr(lexer* lexer){
     case T_KEYWORD_FALSE:
         return literal_expr(lexer, ty_bool);
     case T_NULL_LITERAL:
-        return literal_expr(lexer, ty_null);
+        return null_expr();
     case T_LEFT_PAR:
         read_next(lexer);
         node* expr = parse_expr(lexer);
@@ -62,10 +68,13 @@ node* parse_expr(lexer* lexer){
     case T_ARITHMETIC_OP:
     case T_LOGICAL_OP:
     case T_COMPARATION_OP:
-        op = lexer->tok->value;
         read_next(lexer);
         node* right = parse_expr(lexer);
-        break;
+
+        node* binary = init_node(2, N_BINARY_EXPR);
+        vector_push(binary->children, left);
+        vector_push(binary->children, right);
+        return binary;
     
     default:
         break;

@@ -3,7 +3,7 @@
 inline string* read_file(const char* filename){
     FILE* file = fopen(filename, "r");
     if(file == NULL){
-        printf(ERROR_MSG("No such file or directory."));
+        printf(RED"[ERROR]"RESET" (%s) File not found\n",filename);
         return NULL;
     }
     string* b = init_string(256);

@@ -7,8 +7,9 @@ void mangle_name(symbol* s){
         if(strcmp("main", s->name )== 0){
             return;
         }
-        for(unsigned int i = 0; i < s->type->args->len; ++i){
-            type* arg = s->type->args->value[i];
+        function_info* info = s->type->info;
+        for(unsigned int i = 0; i < info->args->len; ++i){
+            type* arg = info->args->value[i];
             int len = strlen(arg->name);
             string_push(mangled_name, '_');
             char len_buffer[2];

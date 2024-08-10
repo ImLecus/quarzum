@@ -32,6 +32,7 @@ static void generate_instruction(vector* ir_list,node* n){
     case N_NULL_EXPR:
         break;
     case N_LITERAL:
+    case N_IDENTIFIER:
         last_literal->value = n->children->value[0];
         break;
     case N_BINARY_EXPR:
@@ -133,7 +134,7 @@ static void generate_instruction(vector* ir_list,node* n){
         }
         function_info* info = s->type->info;
         int size = info->align * info->local_variables_len;
-        char* size_str = malloc(3 * sizeof(char));
+        char* size_str = malloc(3);
         sprintf(size_str,"%d",size);
         vector_push(ir_list, 
             init_instruction(I_FUNCTION,s->name,size_str, NULL,info->local_variables)

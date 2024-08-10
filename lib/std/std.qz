@@ -1,2 +1,4 @@
+// Returns the lenght of a list of elements.
 foreign uint len(var* list);
+// Finishes the program execution.
 foreign function exit(int code);

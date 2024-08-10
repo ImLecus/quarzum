@@ -1,13 +1,5 @@
 import "@std/console.qz"
-
-struct User {
-    int age;
-}
-
-User u = 2;
-
-function main(string* args){
-    int i = 6;
-    out("Hello world from Quarzum!");
-    exit(1);
+string name = "Quarzum";
+function main(string* args){  
+    out(name);
 }

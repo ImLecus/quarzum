@@ -3,15 +3,18 @@
 int main(int argc, char** argv) {
     struct process task = start_process("Task");
     printf(DEBUG_MSG("Starting the compiler..."));
+
     // Lexical & Syntax analisys
-    struct process lex = start_process("Parse phase");
+    struct process parsing = start_process("Parse phase");
     hashmap* type_map = init_type_map();
     parse_tree* ast = parse("code.qz");
     if(!ast || ast->has_errors){
         printf(ERROR_MSG("Process aborted with exit code -1"));
         exit(-1);
     }
-    end_process(&lex);
+    end_process(&parsing);
+
+
     // Semantic analisys
     struct process checking = start_process("Check phase");
     // checkAST(ast);
@@ -40,11 +43,11 @@ int main(int argc, char** argv) {
     free(assembly);
     end_process(&task);
     printf(GREEN BOLD"[SUCCESS]"RESET" Process finished with exit code 0\n");
-    system("read");
+    //system("read");
     system("as out.asm -o out.o");
     system("ld ./builtins/x86_64/__base__.o ./builtins/x86_64/console.o out.o -o code");
     system("rm out.o");
-    system("rm out.asm");
+    //system("rm out.asm");
     //system("clear");
     system("./code");
     system("rm ./code");

@@ -18,7 +18,7 @@ lexer* init_lexer(char* filename, char* input){
     lex->pos = 0;
     lex->file = filename;
 
-    lex->buffer = init_string(DEFAULT_TOKENIZER_BUFFER_SIZE);
+    lex->buffer = init_string(32);
     return lex;
 }
 

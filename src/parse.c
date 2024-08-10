@@ -1,9 +1,27 @@
 #include "quarzum.h"
 static node* parse_statement(lexer* lexer);
 static node* parse_decl(lexer* lexer, int scope);
-static const int filled = 1;
+static int filled = 1;
 static hashmap* imported_files;
 static hashmap* type_map;
+static hashmap* symbol_map;
+static bool has_errors = false;
+
+/**
+ * Initializes static variables one time per program.
+ */
+static void start_parsing(lexer* lexer){
+    if(!imported_files){
+        imported_files = init_hashmap(20);
+    }
+    hashmap_add(imported_files, lexer->file, &filled);
+    if(!type_map){
+        type_map = init_type_map();
+    }
+    if(!symbol_map){
+        symbol_map = init_hashmap(20);
+    }
+}
 
 node* init_node(uint32_t children, uint8_t type){
     node* n = malloc(sizeof(node));
@@ -16,6 +34,7 @@ void expect(token* t, uint8_t type, char* what){
     if(t->type != type){
         printf(RED "[ERROR]" RESET " (%s) Expected %s at line %d.\n", 
                t->file, what, t->line);
+        has_errors = true;
     }
 }
 
@@ -266,6 +285,7 @@ static symbol* parse_symbol(lexer* lexer, int scope){
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     // TO-DO: mangle name
     s->name = lexer->tok->value;
+    hashmap_add(symbol_map, s->name, s);
     return s;
 }
 
@@ -314,7 +334,7 @@ static node* parse_var(lexer* l, symbol* s, bool has_value){
 static node* parse_enum(lexer* l, symbol* s){
     node* enum_node = init_node(2, N_ENUM);
     vector_push(enum_node->children, s);
-    expect(l, T_LEFT_CURLY, "'{'");
+    expect(l->tok, T_LEFT_CURLY, "'{'");
     read_next(l);
     while(l->tok->type != T_RIGHT_CURLY){
         // symbol* child = parse_symbol(l, S_PARAMETER);
@@ -420,7 +440,7 @@ static node* parse_decl(lexer* lexer, int scope){
         else{
             expect(lexer->tok, T_SEMICOLON, "semicolon");
         }
-        //mangle_name(s);
+        mangle_name(s);
         return func_decl_node;
     default:
         break;
@@ -432,14 +452,7 @@ parse_tree* parse(char* file){
     if(!input){return NULL;}
     lexer* lexer = init_lexer(file,input->value);
     if(!lexer){return NULL;}
-
-    if(!imported_files){
-        imported_files = init_hashmap(20);
-    }
-    hashmap_add(imported_files, file, &filled);
-    if(!type_map){
-        type_map = init_type_map();
-    }
+    start_parsing(lexer);
 
     parse_tree* result = malloc(sizeof(parse_tree));
     result->has_errors = false;
@@ -472,7 +485,7 @@ parse_tree* parse(char* file){
         } 
  
     }
-    
+    result->has_errors = has_errors;
     free(lexer);
     return result;
 }

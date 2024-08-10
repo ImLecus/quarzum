@@ -4,12 +4,30 @@ node* null_expr() {
     return init_node(0, N_NULL_EXPR);
 } 
 
+static node* call_expr(lexer* lexer, char* id){
+    node* expr = init_node(N_CALL_EXPR, 2);
+    vector_push(expr->children, id);
+    read_next(lexer);
+    while(lexer->tok->value != T_RIGHT_PAR){
+        node* arg = parse_expr(lexer);
+        vector_push(expr->children, arg);
+        if(lexer->tok->type == T_RIGHT_PAR){
+            break;
+        }
+        expect(lexer->tok, T_COMMA, "',' or ')'");
+        read_next(lexer);
+    }
+    read_next(lexer);
+    return expr;
+}
+
 static node* literal_expr(lexer* lexer, type* t){
     node* lit_expr = init_node(2, N_LITERAL);
     type* lit_type = malloc(sizeof(type));
     vector_push(lit_expr->children, lexer->tok->value);
     memcpy(lit_type, t, sizeof(type));
     vector_push(lit_expr->children, lit_type);
+    read_next(lexer);
     return lit_expr;
 }
 
@@ -39,15 +57,21 @@ static node* parse_primary_expr(lexer* lexer){
         read_next(lexer);
         node* expr = parse_expr(lexer);
         expect(lexer->tok, T_RIGHT_PAR, "')'");
+        read_next(lexer);
         return paren_expr(expr);
     
     case T_IDENTIFIER:
+        char* id = lexer->tok->value;
+        read_next(lexer);
+        if(lexer->tok->type == T_LEFT_PAR){
+            return call_expr(lexer,id);
+        } 
         node* id_expr = init_node(1,N_IDENTIFIER);
-        vector_push(id_expr->children, lexer->tok->value);
+        vector_push(id_expr->children, id);
         return id_expr;
 
     default:
-        printf(ERROR_MSG("Invalid expression"));
+        printf(RED"[ERROR]"RESET" (%s) Invalid expression at line %d\n", lexer->file, lexer->line); 
         break;
     }
 
@@ -56,9 +80,7 @@ static node* parse_primary_expr(lexer* lexer){
 
 node* parse_expr(lexer* lexer){
     node* left = parse_primary_expr(lexer);
-    read_next(lexer);
     if(!left){
-        printf(ERROR_MSG("Invalid expression")); 
         return NULL;
     }
 

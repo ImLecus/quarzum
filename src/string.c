@@ -6,7 +6,7 @@ inline string* init_string(const uint32_t size){
     }
     s->size = size;
     s->len = 0;
-    s->value = malloc((size + 1) * sizeof(char));
+    s->value = malloc(size + 1);
     if(s->value == NULL){
         free(s);
         return NULL;
@@ -62,20 +62,17 @@ void string_append(string* s, char* c){
 
 char* delete_quotes(char* c){
     int len = strlen(c);
-    char* new_str = malloc(sizeof(char) * (len - 2));
-    for(int i = 1; i < len - 1; ++i){
-        new_str[i - 1] = c[i];
-    }
+    char* new_str = malloc(len - 2);
+    strcpy(new_str, c + 1);
+    new_str[len - 2] = 0;
     return new_str;
 }
 
 char* resolve_path(char* path){
     if(path && path[0] == '@'){
-        char* lib_path = malloc(sizeof(char) * (LIB_PATH_LEN + strlen(path) - 1));
-        strcat(lib_path, LIB_PATH);
-        for(uint32_t i = 0; i < strlen(path); ++i){
-            lib_path[LIB_PATH_LEN + i] = path[i + 1];
-        }
+        char* lib_path = malloc(LIB_PATH_LEN + strlen(path));
+        strcpy(lib_path, LIB_PATH);
+        strcat(lib_path, path + 1);
         return lib_path;
     }
     return path;

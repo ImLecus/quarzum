@@ -191,7 +191,8 @@ enum {
     T_LEFT_CURLY,
     T_RIGHT_CURLY,
     T_ARROW,
-    T_EQUAL
+    T_EQUAL,
+    T_KEYWORD_OPERATOR
 };
 
 
@@ -204,8 +205,8 @@ typedef struct {
 } token;
 
 
-#define KEYWORDS_SIZE 55
-#define SYMBOLS_SIZE 41
+#define KEYWORDS_SIZE 56
+#define SYMBOLS_SIZE 40
 
 
 static const char* keywords[KEYWORDS_SIZE] = {
@@ -215,7 +216,7 @@ static const char* keywords[KEYWORDS_SIZE] = {
     "false","for","foreach","foreign","function",
     "if","import","in","int","int16","int32","int64","int8",
     "module","new","not","null","num","num16","num32","num64",
-    "or","persist","private","protected","public",
+    "operator", "or","persist","private","protected","public",
     "return","sizeof","string","struct","switch",
     "true","typedef","uint","uint16",
     "uint32","uint64","uint8","var","while","xor"
@@ -229,7 +230,8 @@ static const int keyword_types[KEYWORDS_SIZE] = {
     T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
     T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
     T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
-    T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_LOGICAL_OP,
+    T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
+    T_KEYWORD_OPERATOR, T_LOGICAL_OP,
     T_KEYWORD_PERSIST, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
     T_KEYWORD_SIZEOF,
     T_TYPE, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
@@ -351,7 +353,7 @@ enum {
     TY_VAR,
     TY_STRUCT,
     TY_CUSTOM,
-    TY_NULL
+    TY_VAR // "var" is basically a pointer of any type
 };
 
 #define CONST_FLAG      0b00000001
@@ -390,8 +392,8 @@ static type* ty_num16 =    &(type){TY_NUM,"num16", 2, 2};
 static type* ty_num32 =    &(type){TY_NUM,"num32", 4, 4};
 static type* ty_num64 =    &(type){TY_NUM,"num64", 8, 8};
 
-static type* ty_string =   &(type){TY_STRING,"string", 4, 4, POINTER_FLAG};
-static type* ty_null =    &(type){TY_NULL,"null", 1, 1};
+static type* ty_string =   &(type){TY_STRING,"string", 8, 8, POINTER_FLAG};
+static type* ty_var =      &(type){TY_VAR,"var", 8, 8, POINTER_FLAG};
 
 hashmap* init_type_map();
 // 

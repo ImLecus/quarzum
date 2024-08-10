@@ -3,15 +3,16 @@ static node* parse_statement(lexer* lexer);
 static node* parse_decl(lexer* lexer, int scope);
 static const int filled = 1;
 static hashmap* imported_files;
+static hashmap* type_map;
 
-node* init_node(unsigned int children, int type){
+node* init_node(uint32_t children, uint8_t type){
     node* n = malloc(sizeof(node));
     n->children = init_vector(children);
     n->type = type;
     return n;
 }
 
-void expect(token* t, int type, char* what){
+void expect(token* t, uint8_t type, char* what){
     if(t->type != type){
         printf(RED "[ERROR]" RESET " (%s) Expected %s at line %d.\n", 
                t->file, what, t->line);
@@ -42,7 +43,7 @@ static void parse_import(lexer* lexer, node* ast){
                 // create a virtual module with name {as}
                 // maybe transforming the root node?
             }
-            for(unsigned int i = 0; i < imported_file->ast->children->len; ++i){
+            for(uint32_t i = 0; i < imported_file->ast->children->len; ++i){
                 vector_push(ast->children, imported_file->ast->children->value[i]);
             }
             
@@ -89,6 +90,7 @@ static node* parse_function_call(lexer* lexer, char* id){
     }
     read_next(lexer);
     expect(lexer->tok, T_SEMICOLON, "semicolon");
+    read_next(lexer);
     return call_node;
 }
 
@@ -192,28 +194,12 @@ static node* parse_module(lexer* lexer){
 static type* parse_type(lexer* lexer){
     type* t = malloc(sizeof(type));
     t->flags = 0;
-    if(lexer->tok->type != T_TYPE){
-        // custom type
+    type* template = hashmap_get(type_map, lexer->tok->value);
+    if(!template){
+        printf(RED"[ERROR]"RESET" (%s) Unrecognized type '%s' at line %d\n", lexer->file, lexer->tok->value, lexer->line);
+        template = ty_int8;    
     }
-    else{
-        // TO-DO: Create a type table (using a hashmap)
-
-        if(strcmp(lexer->tok->value, "string") == 0){
-            memcpy(t, ty_string, sizeof(type));
-        }
-        else if(strcmp(lexer->tok->value, "int") == 0){
-            memcpy(t, ty_int32, sizeof(type));
-        }
-        else if(strcmp(lexer->tok->value, "char") == 0){
-            memcpy(t, ty_char, sizeof(type));
-        }
-        else{
-            // int8 as placeholder
-            memcpy(t, ty_int8, sizeof(type));
-        }
-        
-    }
-
+    memcpy(t, template, sizeof(type));
     read_next(lexer);
     if(strcmp(lexer->tok->value, "*") == 0){
         t->flags |= POINTER_FLAG;
@@ -228,20 +214,22 @@ static node* parse_class(lexer* lexer){
     node* class_node = init_node(3, N_CLASS);
     read_next(lexer);
     expect(lexer->tok, T_IDENTIFIER, "identifier");
-    // create a symbol
-    vector_push(class_node->children, lexer->tok->value);
-    // parse optional inheritance
+    
     read_next(lexer);
+
     if(lexer->tok->type == T_ARROW){
-        // parse type
+        read_next(lexer);
+        type* extends = parse_type(lexer);
+        vector_push(class_node->children, extends);
     }
 
     expect(lexer->tok, T_LEFT_CURLY, "'{'");
-    while(lexer->tok->type != T_RIGHT_CURLY){
-        read_next(lexer);
+    read_next(lexer);
+    while(lexer->tok->type != T_RIGHT_CURLY){    
         vector_push(class_node->children, parse_statement(lexer) );
     }
     expect(lexer->tok, T_RIGHT_CURLY, "'}'");
+    read_next(lexer);
 
     return class_node;
 }
@@ -273,10 +261,6 @@ static symbol* parse_symbol(lexer* lexer, int scope){
         }
         read_next(lexer);
     }
-    if(lexer->tok->type == T_KEYWORD_STRUCT){
-        // parse_struct_decl
-        return NULL;
-    }
     s->type = parse_type(lexer);
     s->type->flags |= flags;
     expect(lexer->tok, T_IDENTIFIER, "identifier");
@@ -288,7 +272,7 @@ static symbol* parse_symbol(lexer* lexer, int scope){
 /**
  * Parses the sequence [symbol] = ([expr]; | {[expr]});
  */
-static node* parse_arrow_function(lexer* lexer,symbol* s){
+static node* parse_lambda(lexer* lexer,symbol* s){
     s->type->flags |= LAMBDA_FLAG;
     bool inside_curly_brackets = lexer->tok->type == T_LEFT_CURLY;
     if(inside_curly_brackets){
@@ -301,38 +285,90 @@ static node* parse_arrow_function(lexer* lexer,symbol* s){
     else{
         expect(lexer->tok, T_SEMICOLON, "semicolon");
     }
-    node* arrow_function = init_node(N_LAMBDA, 1);
-    vector_push(arrow_function->children, expr);
-    return arrow_function;
+    node* lambda = init_node(N_LAMBDA, 1);
+    vector_push(lambda->children, expr);
+    return lambda;
+}
+
+/**
+ * Parses the sequence [symbol] (";" | "=" [expr] ";") 
+ */
+static node* parse_var(lexer* l, symbol* s, bool has_value){
+    node* var_node = init_node(2, N_VAR);
+    vector_push(var_node->children, s);
+    if(has_value){
+        expect(l->tok, T_EQUAL, "'='");
+        read_next(l);
+        node* expr = parse_expr(l);
+        expect(l->tok, T_SEMICOLON, "semicolon");
+        vector_push(var_node->children, expr);
+        read_next(l);
+        return var_node;
+    }
+    expect(l->tok, T_SEMICOLON, "semicolon or declaration");
+    read_next(l);
+    vector_push(var_node->children, null_expr());
+    return var_node;
+}
+
+static node* parse_enum(lexer* l, symbol* s){
+    node* enum_node = init_node(2, N_ENUM);
+    vector_push(enum_node->children, s);
+    expect(l, T_LEFT_CURLY, "'{'");
+    read_next(l);
+    while(l->tok->type != T_RIGHT_CURLY){
+        // symbol* child = parse_symbol(l, S_PARAMETER);
+        // read_next(l);
+        // s->type->align = child->type->align > s->type->align ? child->type->align : s->type->align;
+        // ++children;
+        // expect(l->tok, T_SEMICOLON, "semicolon");
+        // vector_push(struct_node->children, child);
+        read_next(l);
+    }
+    read_next(l);
+    return enum_node;
+}
+
+/**
+ * Parses the sequence "struct" [id] "{" ([symbol]";")* "}"
+ */
+static void parse_struct(lexer* l){
+    read_next(l); // first token is the keyword
+    expect(l->tok, T_IDENTIFIER, "identifier");
+    char* id = l->tok->value;
+    read_next(l);
+    type* struct_type = malloc(sizeof(type));
+    expect(l->tok, T_LEFT_CURLY, "'{'");
+    read_next(l);
+    uint32_t children = 0;
+    while(l->tok->type != T_RIGHT_CURLY){
+        symbol* child = parse_symbol(l, S_PARAMETER);
+        read_next(l);
+        struct_type->align = max(child->type->align, struct_type->align);
+        ++children;
+        expect(l->tok, T_SEMICOLON, "semicolon");
+        read_next(l);
+    }
+    struct_type->size = struct_type->align * children;
+    struct_type->flags = STRUCT_FLAG;
+    struct_type->name = id;
+    struct_type->type = TY_STRUCT;
+    hashmap_add(type_map, id, struct_type);
+    read_next(l);
 }
 
 static node* parse_decl(lexer* lexer, int scope){
     symbol* s = parse_symbol(lexer, scope);
-    // if s is a struct, return the struct
     read_next(lexer);
-    switch (lexer->tok->value[0])
+    switch (lexer->tok->type)
     {
-    case '=':
-        if( (s->type->flags & FOREIGN_FLAG) > 0){
-            printf(RED"[ERROR]"RESET" (%s) 'foreign' variables can't be initialized at line %i\n",lexer->file,lexer->line);
-            // err
-        }
-        read_next(lexer);
-        node* expr = parse_expr(lexer);
-        expect(lexer->tok, T_SEMICOLON, "semicolon");
-
-        node* var_decl_node = init_node(2,N_VAR);
-        vector_push(var_decl_node->children, s);
-        vector_push(var_decl_node->children, expr);
-        return var_decl_node;
+    case T_EQUAL:
+        return parse_var(lexer, s, true);
     
-    case ';':
-        node* var_def_node = init_node(2,N_VAR);
-        vector_push(var_def_node->children, s);
-        vector_push(var_def_node->children, null_expr());
-        return var_def_node;
+    case T_SEMICOLON:
+        return parse_var(lexer, s, false);
 
-    case '(':
+    case T_LEFT_PAR:
         s->type->flags |= FUNCTION_FLAG;
         read_next(lexer);
         function_info* info = s->type->info;
@@ -350,7 +386,7 @@ static node* parse_decl(lexer* lexer, int scope){
         read_next(lexer);
         if(lexer->tok->type == T_ARROW){
             read_next(lexer);
-            return parse_arrow_function(lexer, s);
+            return parse_lambda(lexer, s);
         }
 
 
@@ -377,7 +413,6 @@ static node* parse_decl(lexer* lexer, int scope){
                     info->align = local_var->type->size;
                 }
                 vector_push(func_decl_node->children, stmt);
-                read_next(lexer);
             }
             s->type->info = info;
             read_next(lexer);
@@ -402,6 +437,9 @@ parse_tree* parse(char* file){
         imported_files = init_hashmap(20);
     }
     hashmap_add(imported_files, file, &filled);
+    if(!type_map){
+        type_map = init_type_map();
+    }
 
     parse_tree* result = malloc(sizeof(parse_tree));
     result->has_errors = false;
@@ -419,8 +457,13 @@ parse_tree* parse(char* file){
             case T_KEYWORD_CLASS:
                 vector_push(result->ast->children, parse_class(lexer));  
                 break;
+            case T_KEYWORD_STRUCT:
+                parse_struct(lexer);
+                break;
+
             case T_SPECIFIER:
             case T_TYPE:
+            case T_IDENTIFIER:
                 vector_push(result->ast->children, parse_decl(lexer, S_GLOBAL));
                 break;
             default:

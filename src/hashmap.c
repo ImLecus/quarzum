@@ -1,11 +1,11 @@
 #include "quarzum.h"
 
-hashmap* init_hashmap(unsigned int size){
+hashmap* init_hashmap(uint32_t size){
     hashmap* map = malloc(sizeof(hashmap));
     map->size = size;
     map->len =0;
     map->content = malloc(size * sizeof(bucket*));
-    for(unsigned int i = 0; i < map->size; ++i){
+    for(uint32_t i = 0; i < map->size; ++i){
         map->content[i] = NULL;
     }
     return map;
@@ -29,7 +29,7 @@ void* hashmap_get(hashmap* map, char* key){
     int hashed_key = hash(key)%map->size;
     if(map->content[hashed_key] != NULL){
         if(strcmp(map->content[hashed_key]->key, key) != 0){
-            for(unsigned int i = 0; i < map->size; ++i){
+            for(uint32_t i = 0; i < map->size; ++i){
                 if(map->content[i] != NULL && strcmp(map->content[i]->key, key) == 0){
                     return map->content[i]->value;
                 }
@@ -49,7 +49,7 @@ void hashmap_add(hashmap* map, char* key, void* value){
     int hashed_key = hash(key)%map->size; 
 
     if(map->content[hashed_key] != NULL){
-        for(unsigned int i = 0; i < map->size; ++i){
+        for(uint32_t i = 0; i < map->size; ++i){
             if(map->content[i] == NULL){
                 hashed_key = i;
                 break;

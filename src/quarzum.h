@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>
 
 #define QUARZUM_COMPILER_VERSION "1.0"
 #define QUARZUM_VERSION "1.0"
@@ -14,10 +15,11 @@ typedef int bool;
 #define true 1
 #define false 0
 
+#define max(a,b) a > b ? a: b
 //
 //  bsearch.c
 //
-int binary_search(const char* symbol, const char** list, unsigned int size);
+int binary_search(const char* symbol, const char** list, uint32_t size);
 
 //
 //  debug
@@ -54,11 +56,11 @@ typedef struct {
 
 typedef struct {
     bucket** content;
-    unsigned int size;
-    unsigned int len;
+    uint32_t size;
+    uint32_t len;
 } hashmap;
 
-hashmap* init_hashmap(unsigned int size);
+hashmap* init_hashmap(uint32_t size);
 
 void free_hashmap(hashmap* map);
 
@@ -68,16 +70,18 @@ void* hashmap_get(hashmap* map, char* key);
 
 void hashmap_add(hashmap* map, char* key, void* value);
 
+const hashmap* init_const_hashmap(uint32_t size, bucket* elements);
+
 //
 //  string.c
 //
 typedef struct {
-    unsigned int size;
-    unsigned int len;
+    uint32_t size;
+    uint32_t len;
     char* value;
 } string;
 
-string* init_string(const unsigned int size);
+string* init_string(const uint32_t size);
 void free_string(string* s);
 void string_push(string* s, const char c);
 void string_pop(string* s);
@@ -115,16 +119,16 @@ void end_process(struct process* process);
 #define VECTOR_SIZE_INCREMENT 2
 
 typedef struct {
-    unsigned int size;
-    unsigned int len;
+    uint32_t size;
+    uint32_t len;
     void** value;
 } vector;
 
-vector* init_vector(unsigned int size);
+vector* init_vector(uint32_t size);
 void free_vector(vector* v);
 void vector_push(vector* v, void* element);
 void vector_pop(vector* v);
-void* vector_get(vector* v, unsigned int index);
+void* vector_get(vector* v, uint32_t index);
 
 //
 //  tokenizer.c
@@ -186,20 +190,23 @@ enum {
     T_RIGHT_SQUARE,
     T_LEFT_CURLY,
     T_RIGHT_CURLY,
-    T_ARROW
+    T_ARROW,
+    T_EQUAL
 };
 
 
 typedef struct {
-    int type;
-    char* value;
-    unsigned int line;
-    unsigned int column;
     char* file;
+    char* value;
+    uint32_t line;
+    uint32_t column;
+    uint8_t type;
 } token;
 
+
 #define KEYWORDS_SIZE 55
-#define SYMBOLS_SIZE 40
+#define SYMBOLS_SIZE 41
+
 
 static const char* keywords[KEYWORDS_SIZE] = {
     "and","as","bool","break","case",
@@ -241,7 +248,7 @@ static const int symbol_types[SYMBOLS_SIZE] = {
     T_ASSIGN_OP, T_BITWISE_OP, T_ASSIGN_OP, T_LEFT_PAR, T_RIGHT_PAR, T_ARITHMETIC_OP,
     T_ASSIGN_OP, T_ARITHMETIC_OP, T_UNARY, T_ASSIGN_OP, T_COMMA, T_ARITHMETIC_OP,
     T_UNARY, T_ASSIGN_OP, T_DOT, T_ARITHMETIC_OP, T_ASSIGN_OP, T_COLON, T_SEMICOLON,
-    T_COMPARATION_OP, T_COMPARATION_OP, T_ASSIGN_OP, T_COMPARATION_OP,T_ARROW ,T_COMPARATION_OP,
+    T_COMPARATION_OP, T_COMPARATION_OP, T_EQUAL, T_COMPARATION_OP,T_ARROW ,T_COMPARATION_OP,
     T_COMPARATION_OP, T_TERNARY_OP, T_LEFT_SQUARE, T_RIGHT_SQUARE, T_ARITHMETIC_OP,
     T_ASSIGN_OP, T_LEFT_CURLY, T_BITWISE_OP, T_ASSIGN_OP, T_RIGHT_CURLY
 
@@ -251,16 +258,17 @@ static const int symbol_types[SYMBOLS_SIZE] = {
 
 typedef struct {
     char* input;
-    unsigned int line;
-    unsigned int column;
-    unsigned int pos;
     char* file;
     token* tok;
+    string* buffer;
+    uint32_t line;
+    uint32_t column;
+    uint32_t pos;
 } lexer;
 
 lexer* init_lexer(char* filename, char* input);
 
-token* new_token(int type, lexer* lexer);
+token* new_token(uint8_t type, lexer* lexer);
 
 token* next_token(lexer* lexer);
 
@@ -275,7 +283,6 @@ char* get_error_line(lexer* lexer);
 
 enum {
     N_ROOT,
-    N_STRUCT,
     N_IF,
     N_WHILE,
     N_VAR,
@@ -288,6 +295,7 @@ enum {
     N_TYPE,
     N_RETURN,
     N_LAMBDA,
+    N_ENUM,
     // Expression nodes
     N_UNARY_EXPR,
     N_BINARY_EXPR,
@@ -303,7 +311,7 @@ enum {
 };
 
 typedef struct {
-    int type;
+    uint8_t type;
     vector* children;
 } node;
 
@@ -315,8 +323,8 @@ typedef struct {
 
 } parse_tree;
 
-node* init_node(unsigned int children, int type);
-void expect(token* t, int type, char* what);
+node* init_node(uint32_t children, uint8_t type);
+void expect(token* t, uint8_t type, char* what);
 parse_tree* parse(char* file);
 
 node* null_expr();
@@ -341,6 +349,7 @@ enum {
     TY_UINT,
     TY_NUM,
     TY_VAR,
+    TY_STRUCT,
     TY_CUSTOM,
     TY_NULL
 };
@@ -352,13 +361,14 @@ enum {
 #define POINTER_FLAG    0b00010000
 #define FUNCTION_FLAG   0b00100000
 #define LAMBDA_FLAG     0b01000000
+#define ENUM_FLAG       0b10000000
 
 typedef struct {
-    int type;
+    uint8_t type;
     char* name;
-    unsigned int align;
-    unsigned int size;
-    unsigned int flags;
+    uint32_t align;
+    uint32_t size;
+    uint8_t flags;
     void* info;
 } type;
 
@@ -383,7 +393,7 @@ static type* ty_num64 =    &(type){TY_NUM,"num64", 8, 8};
 static type* ty_string =   &(type){TY_STRING,"string", 4, 4, POINTER_FLAG};
 static type* ty_null =    &(type){TY_NULL,"null", 1, 1};
 
-
+hashmap* init_type_map();
 // 
 //  symbol.c
 //
@@ -403,9 +413,9 @@ typedef struct {
 
 typedef struct {
     vector* args;
-    unsigned int local_variables_len;
-    unsigned int local_variables_size;
-    unsigned int align;
+    uint32_t local_variables_len;
+    uint32_t local_variables_size;
+    uint32_t align;
     symbol** local_variables; 
 } function_info;
 

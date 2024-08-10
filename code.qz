@@ -1,9 +1,10 @@
 import "@std/console.qz"
 
+struct User {
+    int age;
+}
 
-int sum(int a, int b) => {a + b}
-
-uint j = 1 + 3;
+User u = 2;
 
 function main(string* args){
     int i = 6;

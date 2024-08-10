@@ -8,7 +8,7 @@ void mangle_name(symbol* s){
             return;
         }
         function_info* info = s->type->info;
-        for(unsigned int i = 0; i < info->args->len; ++i){
+        for(uint32_t i = 0; i < info->args->len; ++i){
             type* arg = info->args->value[i];
             int len = strlen(arg->name);
             string_push(mangled_name, '_');

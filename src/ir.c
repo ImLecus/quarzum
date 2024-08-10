@@ -12,17 +12,17 @@ instruction* init_instruction(int type, char* dest, char* arg1, char* arg2, void
     return i;
 }
 
-static char* get_index(char type, unsigned int index){
+static char* get_index(char type, uint32_t index){
     char buffer[10];
     sprintf(buffer,".%c%d",type,index);
     return strdup(buffer);
 }
 
 static void generate_instruction(vector* ir_list,node* n){
-    static unsigned int b_index = 0; // branch index
-    static unsigned int t_index = 0; // temporal expression index 
-    static unsigned int c_index = 0; // close branch index
-    static unsigned int s_index = 0; // string index
+    static uint32_t b_index = 0; // branch index
+    static uint32_t t_index = 0; // temporal expression index 
+    static uint32_t c_index = 0; // close branch index
+    static uint32_t s_index = 0; // string index
     if(!n){
         printf(ERROR_MSG("no node?"));
         return;
@@ -54,7 +54,7 @@ static void generate_instruction(vector* ir_list,node* n){
         vector_push(ir_list, 
             init_instruction(I_NIF, "true", get_index('c', c_index), NULL, NULL)
         );        
-        for(unsigned int i = 1; i < n->children->len && n->children->value[i]; ++i){
+        for(uint32_t i = 1; i < n->children->len && n->children->value[i]; ++i){
             generate_instruction(ir_list, n->children->value[i]);
         }
         JMP(get_index('b', b_index++));
@@ -68,10 +68,10 @@ static void generate_instruction(vector* ir_list,node* n){
             init_instruction(I_IF, "true", get_index('b', b_index), NULL, NULL)
         );
         // else zone
-        unsigned int first_c_index = c_index;
+        uint32_t first_c_index = c_index;
         JMP(get_index('c', c_index++));
         BRANCH(get_index('b', b_index++));
-        for(unsigned int i = 1; i < n->children->len && n->children->value[i]; ++i){
+        for(uint32_t i = 1; i < n->children->len && n->children->value[i]; ++i){
             generate_instruction(ir_list, n->children->value[i]);
         }
         BRANCH(get_index('c', first_c_index));
@@ -99,9 +99,12 @@ static void generate_instruction(vector* ir_list,node* n){
             );
         }
         break;
-    
+
+    case N_ENUM:
+        break;
+
     case N_CALL:
-        for(unsigned int i = 1; i < n->children->len; ++i){
+        for(uint32_t i = 1; i < n->children->len; ++i){
             node* param = (node*)(n->children->value[i]);
             char* param_name = param->children->value[0];
             if(param_name[0] == '"'){
@@ -136,7 +139,7 @@ static void generate_instruction(vector* ir_list,node* n){
             init_instruction(I_FUNCTION,s->name,size_str, NULL,info->local_variables)
         );
         
-        for(unsigned int i = 1; i < n->children->len; ++i){
+        for(uint32_t i = 1; i < n->children->len; ++i){
             // TO-DO: check if it's a parameter (symbol*) or a child (node*)
             generate_instruction(ir_list,(node*)(vector_get(n->children,i)));
         }
@@ -153,7 +156,7 @@ static void generate_instruction(vector* ir_list,node* n){
 vector* generate_ir(node* ast){
     last_literal = init_string(10);
     vector* list = init_vector(INSTRUCTION_LIST_DEFAULT_SIZE);
-    for(unsigned int i = 0; i < ast->children->len; ++i){
+    for(uint32_t i = 0; i < ast->children->len; ++i){
         generate_instruction(list,(node*)(vector_get(ast->children,i)));
     }
     return list;

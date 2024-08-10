@@ -1,6 +1,6 @@
 #include "quarzum.h"
 
-vector* init_vector(unsigned int size){
+vector* init_vector(uint32_t size){
     vector* vec = malloc(sizeof(vector));
     vec->size = size;
     vec->len = 0;
@@ -25,6 +25,6 @@ inline void vector_pop(vector* v){
     v->value[v->len--] = NULL;
 }
 
-inline void* vector_get(vector* v, unsigned int index){
+inline void* vector_get(vector* v, uint32_t index){
     return index <= v->len ? v->value[index] : NULL;
 }

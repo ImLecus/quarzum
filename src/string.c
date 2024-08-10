@@ -1,12 +1,12 @@
 #include "quarzum.h"
-inline string* init_string(const unsigned int size){
+inline string* init_string(const uint32_t size){
     string* s = malloc(sizeof(string));
     if(s == NULL){
         return NULL;
     }
     s->size = size;
     s->len = 0;
-    s->value = malloc(size + 1);
+    s->value = malloc((size + 1) * sizeof(char));
     if(s->value == NULL){
         free(s);
         return NULL;
@@ -38,7 +38,7 @@ inline void string_pop(string* s){
 }
 
 inline void string_clear(string* s){
-    for(unsigned int i = 0; s->value[i]; ++i){
+    for(uint32_t i = 0; s->value[i]; ++i){
         s->value[i] = '\0';
     }
     s->len = 0;
@@ -55,7 +55,7 @@ inline char* string_copy(string* s){
 
 void string_append(string* s, char* c){
     int len = strlen(c);
-    for(unsigned int i = 0; i < len; ++i){
+    for(uint32_t i = 0; i < len; ++i){
         string_push(s,c[i]);
     }
 }
@@ -73,7 +73,7 @@ char* resolve_path(char* path){
     if(path && path[0] == '@'){
         char* lib_path = malloc(sizeof(char) * (LIB_PATH_LEN + strlen(path) - 1));
         strcat(lib_path, LIB_PATH);
-        for(unsigned int i = 0; i < strlen(path); ++i){
+        for(uint32_t i = 0; i < strlen(path); ++i){
             lib_path[LIB_PATH_LEN + i] = path[i + 1];
         }
         return lib_path;

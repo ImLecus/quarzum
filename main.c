@@ -5,6 +5,7 @@ int main(int argc, char** argv) {
     printf(DEBUG_MSG("Starting the compiler..."));
     // Lexical & Syntax analisys
     struct process lex = start_process("Parse phase");
+    hashmap* type_map = init_type_map();
     parse_tree* ast = parse("code.qz");
     if(!ast || ast->has_errors){
         printf(ERROR_MSG("Process aborted with exit code -1"));
@@ -47,8 +48,6 @@ int main(int argc, char** argv) {
     //system("clear");
     system("./code");
     system("rm ./code");
-
-    
     
     return 0;
 }

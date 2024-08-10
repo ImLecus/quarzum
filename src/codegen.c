@@ -130,7 +130,7 @@ asm_code* code_gen(vector* ir){
     code->text_section =    init_string(1024);
     string_append(code->text_section, ".text\n.global _start\n_start:\ncall main\nmovq $60, %rax\nmovq $0, %rdi\nsyscall\n");
 
-    for(unsigned int i = 0; i < ir->len; ++i){
+    for(uint32_t i = 0; i < ir->len; ++i){
         instruction* child = (instruction*)(vector_get(ir,i));
         node_gen(child, code);
     }

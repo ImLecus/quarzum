@@ -319,10 +319,9 @@ typedef struct {
 
 typedef struct {
     node* ast;
-    vector* symbol_table;
+    hashmap* symbol_table;
+    hashmap* type_table;
     bool has_errors;
-    // type table
-
 } parse_tree;
 
 node* init_node(uint32_t children, uint8_t type);
@@ -350,7 +349,6 @@ enum {
     TY_INT,
     TY_UINT,
     TY_NUM,
-    TY_VAR,
     TY_STRUCT,
     TY_CUSTOM,
     TY_VAR // "var" is basically a pointer of any type
@@ -406,10 +404,18 @@ enum {
     S_PARAMETER
 };
 
+enum {
+    ST_VAR,
+    ST_FUNC,
+    ST_LAMBDA,
+    ST_PARAMETER
+};
+
 typedef struct {
+    char* mangled_name;
     char* name;
     type* type;
-    int scope;
+    int8_t scope;
 
 } symbol;
 
@@ -421,18 +427,15 @@ typedef struct {
     symbol** local_variables; 
 } function_info;
 
-void mangle_name(symbol* s);
+char* mangle_name(symbol* s);
 int try_add_symbol(vector* table, symbol* s);
-int merge_symbol_tables(vector* dest, vector* add);
 symbol* get_symbol(vector* dest, char* name);
 
 //
 //  check.c
 //
 
-void checkAST(node* ast);
-void checkNode(node* node, vector* symbols);
-
+void check_parse_tree(parse_tree* tree);
 //
 //  codegen.c
 //
@@ -461,6 +464,7 @@ enum {
     I_IF,
     I_NIF,
     I_JMP,
+    I_MOV,
 
     I_ADD
 };

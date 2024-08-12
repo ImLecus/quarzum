@@ -1,5 +1,10 @@
 import "@std/console.qz"
-string name = "Quarzum";
+import "@std/time.qz"
+
+int t = time();
+int t = 3;
+
 function main(string* args){  
-    out(name);
+    
+    out("Quarzum");
 }

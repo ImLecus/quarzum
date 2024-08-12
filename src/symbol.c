@@ -2,29 +2,33 @@
 
 #define USER_DEFINED_PREFIX "_Z"
 
-void mangle_name(symbol* s){
-    string* mangled_name = init_string(strlen(s->name)* 2);
-    string_push(mangled_name, '_');
-    if((s->type->flags & CONST_FLAG) > 0){
+static void mangle_type(type* t, string* mangled_name){
+    if((t->flags & CONST_FLAG) > 0){
         string_push(mangled_name, 'C');
     }
-    if((s->type->flags & POINTER_FLAG) > 0){
+    if((t->flags & POINTER_FLAG) > 0){
         string_push(mangled_name, 'P');
     }
-    if(s->type->type == TY_CUSTOM || s->type->type == TY_STRUCT){
+    if(t->type == TY_CUSTOM || t->type == TY_STRUCT){
         string_push(mangled_name, 'Z');
-        string_append(mangled_name, s->type->name);
+        string_append(mangled_name, t->name);
     }
     else{
-        char first_char =  s->type->name[0];
+        char first_char = t->name[0];
         string_push(mangled_name,first_char);
         if(first_char == 'i' || first_char == 'u'){
             char size[2];
-            sprintf(size, "%d", s->type->size * 8);
+            sprintf(size, "%d", t->size * 8);
             string_push(mangled_name,size[0]);
             string_push(mangled_name,size[1]);
         }
     }
+}
+
+char* mangle_name(symbol* s){
+    string* mangled_name = init_string(strlen(s->name)* 2);
+    string_push(mangled_name, '_');
+    mangle_type(s->type, mangled_name);
     
     string_push(mangled_name, '_');
     // namespace?
@@ -33,22 +37,17 @@ void mangle_name(symbol* s){
 
     if( (s->type->flags & FUNCTION_FLAG) > 0 ){
         if(strcmp("main", s->name )== 0){
-            return;
+            return "main";
         }
         function_info* info = s->type->info;
-
-    // TO-DO: solve error when accessing info->args
-
-    //     for(uint32_t i = 0; i < info->args->len; ++i){
-    //         type* arg = info->args->value[i];
-    //         int len = strlen(arg->name);
-    //         string_push(mangled_name, '_');
-    //         char len_buffer[2];
-    //         sprintf(len_buffer,"%i",len);
-    //         string_append(mangled_name, len_buffer);
-    //         string_append(mangled_name, arg->name);
-    //     }
+        for(uint8_t i = 0; i < info->args->len; ++i){
+            type* arg = info->args->value[i];
+            string_push(mangled_name, '_');
+            mangle_type(arg, mangled_name);            
+        }
+        
     }
-    //s->name = string_copy(mangled_name);
-    //printf("%s\n", string_copy(mangled_name));
+    char* result = string_copy(mangled_name);
+    printf("%s\n", result);
+    return result;
 }

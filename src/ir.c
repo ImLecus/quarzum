@@ -29,6 +29,32 @@ static void generate_instruction(vector* ir_list,node* n){
     }
     switch (n->type)
     {
+    case N_CALL_EXPR:
+        
+        for(uint32_t i = 1; i < n->children->len; ++i){
+            node* param = (node*)(n->children->value[i]);
+            char* param_name = param->children->value[0];
+            if(param_name[0] == '"'){
+                vector_push(ir_list, 
+                    init_instruction(I_ASSIGN, get_index('s',s_index), param_name, NULL,ty_string)
+                );
+                vector_push(ir_list, 
+                    init_instruction(I_PARAM,get_index('s',s_index++), NULL, NULL,NULL)
+                );
+                break;
+            }
+            vector_push(ir_list, 
+                init_instruction(I_PARAM, param->children->value[0], NULL, NULL,NULL)
+            );
+        }
+        vector_push(ir_list, 
+            init_instruction(I_CALL, n->children->value[0], NULL, NULL,NULL)
+        );
+        vector_push(ir_list, 
+            init_instruction(I_MOV, "%rax", get_index('t', t_index), NULL,NULL)
+        );
+        last_literal->value = get_index('t', t_index++);
+        break;
     case N_NULL_EXPR:
         break;
     case N_LITERAL:
@@ -83,7 +109,6 @@ static void generate_instruction(vector* ir_list,node* n){
         symbol* sy = n->children->value[0];
         node* expr = n->children->value[1];
         if(sy->scope == S_LOCAL){
-            
             break;
         }
         if(expr->type == N_LITERAL){

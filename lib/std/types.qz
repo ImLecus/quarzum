@@ -1,3 +1,5 @@
+import "@std/std.qz"
+
 foreign int toInt(num value);
 foreign int toInt(string value);
 

@@ -1,18 +1,1 @@
 foreign int time();
-
-class Date {
-    private uint8 day;
-    private uint8 month;
-    private uint16 year;
-
-    public uint8 getDay(){ return this.day; }
-    public uint8 getMonth(){ return this.month; }
-    public uint16 getYear(){ return this.year; }
-}
-
-string toString(Date date){
-    string s = toString(date.getDay()) + '/' + 
-               toString(date.getMonth()) + '/' + 
-               toString(date.getYear());
-    return s;
-}

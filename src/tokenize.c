@@ -198,7 +198,7 @@ static void ignore_comment(lexer* lexer){
     }
     last_line_pos = lexer->pos;
     lexer_advance(lexer);
-}
+} 
 
 static void ignore_multi_comment(lexer* lexer){
     lexer_advance(lexer);
@@ -216,21 +216,23 @@ static void ignore_multi_comment(lexer* lexer){
     lexer_advance(lexer);
 }
 
-static void check_comment(lexer* lexer){
+static bool check_comment(lexer* lexer){
     if(lexer_peek(lexer) == '/'){
-        
         lexer_advance(lexer);
         if(lexer_peek(lexer) == '/'){
             ignore_comment(lexer);
+            return 1;
         }
         else if(lexer_peek(lexer) == '*'){
             ignore_multi_comment(lexer);
+            return 1;
         }
         else{
             --lexer->pos;
             --lexer->column;
         }
     }
+    return 0;
 }
 
 char* get_error_line(lexer* lexer){
@@ -269,13 +271,13 @@ char* get_error_line(lexer* lexer){
 }
 
 token* next_token(lexer* lexer){
-    check_comment(lexer);
-    while (isspace(lexer_peek(lexer)))
-    {
+    while (isspace(lexer_peek(lexer))){
         lexer_advance(lexer);
-        check_comment(lexer);
     }
-    
+    if(check_comment(lexer) == 1){
+        return next_token(lexer);
+    }
+
     char c = lexer_peek(lexer);
     
     if(isalpha(c) || c == '_'){

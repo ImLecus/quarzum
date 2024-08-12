@@ -1,11 +1,15 @@
 #include "quarzum.h"
+
 static node* parse_statement(lexer* lexer);
 static node* parse_decl(lexer* lexer, int scope);
+static node* parse_module(lexer* lexer);
+
 static int filled = 1;
 static hashmap* imported_files;
 static hashmap* type_map;
 static hashmap* symbol_map;
 static bool has_errors = false;
+static string* last_namespace;
 
 /**
  * Initializes static variables one time per program.
@@ -38,6 +42,14 @@ void expect(token* t, uint8_t type, char* what){
     }
 }
 
+static function_info* init_function_info(){
+    function_info* f = malloc(sizeof(function_info));
+    f->align = 0;
+    f->args = init_vector(1);
+    
+    return f;
+}
+
 static void parse_import(lexer* lexer, node* ast){
     read_next(lexer);
     if(lexer->tok->type == T_STRING_LITERAL){
@@ -65,10 +77,14 @@ static void parse_import(lexer* lexer, node* ast){
             for(uint32_t i = 0; i < imported_file->ast->children->len; ++i){
                 vector_push(ast->children, imported_file->ast->children->value[i]);
             }
+            free_vector(imported_file->ast->children);
+            free(imported_file->ast);
+
+            free(imported_file);
             
         }
         else{
-            printf("%s -- File already imported.\n", path);
+            printf(CYAN"[LOG] "RESET"(%s) File already imported, avoided symbol duplication\n", path);
         }
         end_process(&importing);
 
@@ -174,6 +190,8 @@ static node* parse_statement(lexer* lexer){
         default:
             break;
         }
+    case T_KEYWORD_MODULE:
+        return parse_module(lexer);
     case T_KEYWORD_IF:
         return parse_if_statement(lexer);
     case T_KEYWORD_WHILE:
@@ -200,13 +218,11 @@ static node* parse_module(lexer* lexer){
     read_next(lexer);
     
     expect(lexer->tok, T_LEFT_CURLY, "'{'");
-
+    read_next(lexer);
     while(lexer->tok->type != T_RIGHT_CURLY){
-        read_next(lexer);
         vector_push(module_node->children, parse_statement(lexer) );
     }
     expect(lexer->tok, T_RIGHT_CURLY, "'}'");
-
     return module_node;
 }
 
@@ -215,7 +231,7 @@ static type* parse_type(lexer* lexer){
     t->flags = 0;
     type* template = hashmap_get(type_map, lexer->tok->value);
     if(!template){
-        printf(RED"[ERROR]"RESET" (%s) Unrecognized type '%s' at line %d\n", lexer->file, lexer->tok->value, lexer->line);
+        printf(RED"[ERROR]"RESET" (%s) Undefined type '%s' at line %d\n", lexer->file, lexer->tok->value, lexer->line);
         template = ty_int8;    
     }
     memcpy(t, template, sizeof(type));
@@ -283,9 +299,9 @@ static symbol* parse_symbol(lexer* lexer, int scope){
     s->type = parse_type(lexer);
     s->type->flags |= flags;
     expect(lexer->tok, T_IDENTIFIER, "identifier");
-    // TO-DO: mangle name
+
     s->name = lexer->tok->value;
-    hashmap_add(symbol_map, s->name, s);
+    
     return s;
 }
 
@@ -294,6 +310,7 @@ static symbol* parse_symbol(lexer* lexer, int scope){
  */
 static node* parse_lambda(lexer* lexer,symbol* s){
     s->type->flags |= LAMBDA_FLAG;
+    s->type->flags |= FUNCTION_FLAG;
     bool inside_curly_brackets = lexer->tok->type == T_LEFT_CURLY;
     if(inside_curly_brackets){
         read_next(lexer);
@@ -305,7 +322,12 @@ static node* parse_lambda(lexer* lexer,symbol* s){
     else{
         expect(lexer->tok, T_SEMICOLON, "semicolon");
     }
-    node* lambda = init_node(N_LAMBDA, 1);
+    node* lambda = init_node(N_LAMBDA, 2);
+    vector_push(lambda->children, s);
+
+    s->mangled_name = mangle_name(s);
+    hashmap_add(symbol_map, s->mangled_name, s);
+
     vector_push(lambda->children, expr);
     return lambda;
 }
@@ -316,6 +338,10 @@ static node* parse_lambda(lexer* lexer,symbol* s){
 static node* parse_var(lexer* l, symbol* s, bool has_value){
     node* var_node = init_node(2, N_VAR);
     vector_push(var_node->children, s);
+
+    s->mangled_name = mangle_name(s);
+    hashmap_add(symbol_map, s->mangled_name, s);
+
     if(has_value){
         expect(l->tok, T_EQUAL, "'='");
         read_next(l);
@@ -373,6 +399,14 @@ static void parse_struct(lexer* l){
     struct_type->flags = STRUCT_FLAG;
     struct_type->name = id;
     struct_type->type = TY_STRUCT;
+
+    type* duplicated = hashmap_get(type_map, id);
+    if(duplicated){
+        printf(RED"[ERROR]"RESET" (%s) Type '%s' was already defined\n",l->file,id);
+        has_errors = true;
+        read_next(l);
+        return;
+    }
     hashmap_add(type_map, id, struct_type);
     read_next(l);
 }
@@ -390,12 +424,12 @@ static node* parse_decl(lexer* lexer, int scope){
 
     case T_LEFT_PAR:
         s->type->flags |= FUNCTION_FLAG;
-        read_next(lexer);
+        s->type->info = init_function_info();
         function_info* info = s->type->info;
-
+        read_next(lexer);
         while(lexer->tok->type != T_RIGHT_PAR){
-            symbol* arg = parse_symbol(lexer, true);
-            //vector_push(info->args, arg->type);
+            symbol* arg = parse_symbol(lexer, S_PARAMETER);
+            vector_push(info->args, arg->type);
             read_next(lexer);
             if(lexer->tok->type == T_COMMA){
                 read_next(lexer);
@@ -412,9 +446,14 @@ static node* parse_decl(lexer* lexer, int scope){
 
         node* func_decl_node = init_node(2,N_FUNCTION);
         vector_push(func_decl_node->children, s);
+
+        s->mangled_name = mangle_name(s);
+        hashmap_add(symbol_map, s->mangled_name, s);
+
+
         if(lexer->tok->type == T_LEFT_CURLY){
             read_next(lexer);
-            function_info* info = malloc(sizeof(function_info)); 
+            
             info->local_variables = malloc(sizeof(symbol*) * 4);
             info->local_variables_len = 0;
             info->local_variables_size = 4;
@@ -440,10 +479,10 @@ static node* parse_decl(lexer* lexer, int scope){
         else{
             expect(lexer->tok, T_SEMICOLON, "semicolon");
         }
-        mangle_name(s);
+
         return func_decl_node;
     default:
-        break;
+        return NULL;
     }
 }
 
@@ -457,7 +496,7 @@ parse_tree* parse(char* file){
     parse_tree* result = malloc(sizeof(parse_tree));
     result->has_errors = false;
     read_next(lexer);
-    result->ast = init_node(10, N_ROOT);
+    result->ast = init_node(16, N_ROOT);
     while (lexer->tok->type != T_EOF)
     {
         switch(lexer->tok->type){
@@ -483,9 +522,10 @@ parse_tree* parse(char* file){
                 read_next(lexer);
                 break;
         } 
- 
     }
     result->has_errors = has_errors;
+    result->symbol_table = symbol_map;
+    result->type_table = type_map;
     free(lexer);
     return result;
 }

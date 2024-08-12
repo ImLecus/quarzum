@@ -22,7 +22,7 @@ static char* get_type(type* type){
         return ".string ";
     }
     if(type->type == TY_NUM){
-        return type->size == 8 ? ".double " : ".float";
+        return type->size == 8 ? ".double " : ".float ";
     }
     if(type->size == 2){
         return ".word ";
@@ -92,6 +92,16 @@ static void node_gen(instruction* instruction, asm_code* code){
         string_append(code->data_section, get_type(assign_type));
         string_append(code->data_section, instruction->arg1);
         string_push(code->data_section, '\n');
+        break;
+    case I_MOV:
+        if(instruction->arg1[0] == '.'){
+            instruction->arg1 = registers[instruction->arg1[strlen(instruction->arg1)- 1]-'0'];
+        }
+        string_append(code->text_section, "mov ");
+        string_append(code->text_section, instruction->dest);
+        string_append(code->text_section, ", ");
+        string_append(code->text_section, instruction->arg1);
+        string_push(code->text_section, '\n');
         break;
     case I_LEAVERET:
         string_append(code->text_section, "leave\nret\n");

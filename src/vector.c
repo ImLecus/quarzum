@@ -14,17 +14,26 @@ inline void free_vector(vector* v){
 }
 
 inline void vector_push(vector* v, void* element){
-    if(v->len + 1 >= v->size){
-        v->value = (void**)realloc(v->value,sizeof(void*)*v->size*VECTOR_SIZE_INCREMENT);
-        v->size *= 2;
+    if(v->len >= v->size){
+        uint32_t new_size = v->size*VECTOR_SIZE_INCREMENT;
+        v->value = realloc(v->value,sizeof(void*)*new_size);
+        if(!v->value){
+            printf("ERROR: vector could not reallocate\n");
+        }
+        v->size = new_size;
+    }
+    if(!element || !v->value){
+        return;
     }
     v->value[v->len++] = element;
 }
 
 inline void vector_pop(vector* v){
-    v->value[v->len--] = NULL;
+    if(v->len > 0){
+        v->value[v->len--] = NULL;
+    }
 }
 
 inline void* vector_get(vector* v, uint32_t index){
-    return index <= v->len ? v->value[index] : NULL;
+    return (index < v->len) ? v->value[index] : NULL;
 }

@@ -5,10 +5,10 @@ node* null_expr() {
 } 
 
 static node* call_expr(lexer* lexer, char* id){
-    node* expr = init_node(N_CALL_EXPR, 2);
+    node* expr = init_node(2, N_CALL_EXPR);
     vector_push(expr->children, id);
     read_next(lexer);
-    while(lexer->tok->value != T_RIGHT_PAR){
+    while(lexer->tok->type != T_RIGHT_PAR){
         node* arg = parse_expr(lexer);
         vector_push(expr->children, arg);
         if(lexer->tok->type == T_RIGHT_PAR){

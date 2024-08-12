@@ -43,8 +43,13 @@ void* hashmap_get(hashmap* map, char* key){
 
 void hashmap_add(hashmap* map, char* key, void* value){
     if(map->len >= map->size){
+        bucket** new_content = realloc(map->content, sizeof(bucket*) * map->size * 2);
+        if(!new_content){
+            printf("Error in realloc");
+            return;
+        }
         map->size *= 2;
-        map->content = realloc(map->content, map->size);
+        map->content = new_content;
     }
     int hashed_key = hash(key)%map->size; 
 

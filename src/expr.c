@@ -52,6 +52,7 @@ static node* parse_primary_expr(lexer* lexer){
     case T_KEYWORD_FALSE:
         return literal_expr(lexer, ty_bool);
     case T_NULL_LITERAL:
+        read_next(lexer);
         return null_expr();
     case T_LEFT_PAR:
         read_next(lexer);

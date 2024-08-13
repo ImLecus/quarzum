@@ -1,11 +1,17 @@
-const int READ_MODE = 1;
+import "@std/std.qz"
 
 struct File {
+    string name;
     int fd;
     bool isOpen;
-};
+}
 
-foreign int getFileDescriptor(string name, int flags, int mode);
-foreign int openFile(string name, int flags, int mode);
-foreign int closeFile(int fd);
-foreign string readFile(int fd);
+foreign File openFile(string name, int flags, int mode);
+
+foreign function closeFile(File f);
+
+foreign string readFile(File f);
+
+foreign function writeFile(File f, string message);
+
+foreign string getFormat(File f);

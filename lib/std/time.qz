@@ -1,1 +1,3 @@
+import "@std/std.qz"
+
 foreign int time();

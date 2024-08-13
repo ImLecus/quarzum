@@ -1,10 +1,14 @@
 import "@std/console.qz"
 import "@std/time.qz"
+import "@std/file.qz"
+import "@std/types.qz"
 
 int t = time();
-int t = 3;
+
+int str_sum(string a, int b) => {toInt(a) + b};
+
+string name = toString(str_sum("A",12));
 
 function main(string* args){  
-    
     out("Quarzum");
 }

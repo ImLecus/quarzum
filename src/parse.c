@@ -16,14 +16,14 @@ static string* last_namespace;
  */
 static void start_parsing(lexer* lexer){
     if(!imported_files){
-        imported_files = init_hashmap(20);
+        imported_files = init_hashmap(32);
     }
     hashmap_add(imported_files, lexer->file, &filled);
     if(!type_map){
         type_map = init_type_map();
     }
     if(!symbol_map){
-        symbol_map = init_hashmap(20);
+        symbol_map = init_hashmap(256);
     }
 }
 
@@ -318,15 +318,16 @@ static node* parse_lambda(lexer* lexer,symbol* s){
     node* expr = parse_expr(lexer);
     if(inside_curly_brackets){
         expect(lexer->tok, T_RIGHT_CURLY, "'}'");
+        read_next(lexer);
     }
-    else{
-        expect(lexer->tok, T_SEMICOLON, "semicolon");
-    }
+    expect(lexer->tok, T_SEMICOLON, "semicolon");
+    read_next(lexer);
+
     node* lambda = init_node(N_LAMBDA, 2);
     vector_push(lambda->children, s);
 
     s->mangled_name = mangle_name(s);
-    hashmap_add(symbol_map, s->mangled_name, s);
+    hashmap_add(symbol_map, s->name, s);
 
     vector_push(lambda->children, expr);
     return lambda;
@@ -340,7 +341,7 @@ static node* parse_var(lexer* l, symbol* s, bool has_value){
     vector_push(var_node->children, s);
 
     s->mangled_name = mangle_name(s);
-    hashmap_add(symbol_map, s->mangled_name, s);
+    hashmap_add(symbol_map, s->name, s);
 
     if(has_value){
         expect(l->tok, T_EQUAL, "'='");
@@ -448,7 +449,7 @@ static node* parse_decl(lexer* lexer, int scope){
         vector_push(func_decl_node->children, s);
 
         s->mangled_name = mangle_name(s);
-        hashmap_add(symbol_map, s->mangled_name, s);
+        hashmap_add(symbol_map, s->name, s);
 
 
         if(lexer->tok->type == T_LEFT_CURLY){
@@ -478,6 +479,7 @@ static node* parse_decl(lexer* lexer, int scope){
         }
         else{
             expect(lexer->tok, T_SEMICOLON, "semicolon");
+            read_next(lexer);
         }
 
         return func_decl_node;
@@ -519,6 +521,8 @@ parse_tree* parse(char* file){
                 vector_push(result->ast->children, parse_decl(lexer, S_GLOBAL));
                 break;
             default:
+                printf(RED"[ERROR] "RESET"(%s) Unexpected token '%s' at line %d\n", lexer->file, lexer->tok->value, lexer->line);
+                has_errors = true;
                 read_next(lexer);
                 break;
         } 

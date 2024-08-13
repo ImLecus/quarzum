@@ -29,7 +29,12 @@ void* hashmap_get(hashmap* map, char* key){
     int hashed_key = hash(key)%map->size;
     if(map->content[hashed_key] != NULL){
         if(strcmp(map->content[hashed_key]->key, key) != 0){
-            for(uint32_t i = 0; i < map->size; ++i){
+            for(uint32_t i = hashed_key; i < map->size; ++i){
+                if(map->content[i] != NULL && strcmp(map->content[i]->key, key) == 0){
+                    return map->content[i]->value;
+                }
+            }
+            for(uint32_t i = 0; i < hashed_key; ++i){
                 if(map->content[i] != NULL && strcmp(map->content[i]->key, key) == 0){
                     return map->content[i]->value;
                 }
@@ -54,12 +59,23 @@ void hashmap_add(hashmap* map, char* key, void* value){
     int hashed_key = hash(key)%map->size; 
 
     if(map->content[hashed_key] != NULL){
-        for(uint32_t i = 0; i < map->size; ++i){
+        bool has_key = false;
+        for(uint32_t i = hashed_key; i < map->size; ++i){
             if(map->content[i] == NULL){
                 hashed_key = i;
+                has_key = true;
                 break;
             }
         }
+        if(!has_key){
+            for(uint32_t i = 0; i < hashed_key; ++i){
+                if(map->content[i] == NULL){
+                    hashed_key = i;
+                    break;
+                }
+            }
+        }
+        
     }
     bucket* b = malloc(sizeof(bucket));
     b->key = key;

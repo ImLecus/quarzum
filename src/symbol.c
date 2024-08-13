@@ -48,6 +48,6 @@ char* mangle_name(symbol* s){
         
     }
     char* result = string_copy(mangled_name);
-    printf("%s\n", result);
+    //printf("%s\n", result);
     return result;
 }

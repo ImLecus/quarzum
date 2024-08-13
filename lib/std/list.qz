@@ -1,4 +1,4 @@
-import "./memory.qz"
+import "@std/memory.qz"
 
 class List<T>{
     public uint64 size;

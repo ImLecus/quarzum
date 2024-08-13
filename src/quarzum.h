@@ -394,6 +394,9 @@ static type* ty_string =   &(type){TY_STRING,"string", 8, 8, POINTER_FLAG};
 static type* ty_var =      &(type){TY_VAR,"var", 8, 8, POINTER_FLAG};
 
 hashmap* init_type_map();
+
+bool compare_types(type* a, type* b);
+
 // 
 //  symbol.c
 //
@@ -425,12 +428,11 @@ typedef struct {
     uint32_t local_variables_size;
     uint32_t align;
     symbol** local_variables; 
+
+    uint8_t mandatory_args;
 } function_info;
 
 char* mangle_name(symbol* s);
-int try_add_symbol(vector* table, symbol* s);
-symbol* get_symbol(vector* dest, char* name);
-
 //
 //  check.c
 //

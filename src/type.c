@@ -25,3 +25,11 @@ hashmap* init_type_map(){
 
     return type_map;
 }
+
+bool compare_types(type* a, type* b){
+    bool equal = true;
+    equal = a->type == b->type;
+    equal = a->name == b->name;
+    equal = a->size == b->size;
+    return equal;
+}

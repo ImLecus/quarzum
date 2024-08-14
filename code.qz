@@ -3,12 +3,20 @@ import "@std/time.qz"
 import "@std/file.qz"
 import "@std/types.qz"
 
-int t = time();
+module Math {
+    module Trig {
+        int i(int a) => {a + 23};
+    }
+    
+}
+
+char t = time();
 
 int str_sum(string a, int b) => {toInt(a) + b};
 
 string name = toString(str_sum("A",12));
 
 function main(string* args){  
+    t = 64 + toInt("hello world!");
     out("Quarzum");
 }

@@ -10,16 +10,22 @@ int main(int argc, char** argv) {
     parse_tree* ast = parse("code.qz");
     if(!ast || ast->has_errors){
         printf(ERROR_MSG("Process aborted with exit code -1"));
+        free_parse_tree(ast);
         exit(-1);
     }
     end_process(&parsing);
 
-
     // Semantic analisys
     struct process checking = start_process("Check phase");
-    check_parse_tree(ast);
+    bool has_errors = check_parse_tree(ast);
+    if(has_errors){
+        printf(ERROR_MSG("Process aborted with exit code -1"));
+        free_parse_tree(ast);
+        exit(-1);
+    }
     vector* ir_list = generate_ir(ast->ast);
     end_process(&checking);
+
 
     // Code generation
     // struct process codegn = start_process("Code generation phase");
@@ -33,8 +39,7 @@ int main(int argc, char** argv) {
 
     // free memory
     free_vector(ir_list);
-    free_vector(ast->ast->children);
-    free(ast->ast);
+    free_parse_tree(ast);
 
     // free_string(assembly->bss_section);
     // free_string(assembly->data_section);

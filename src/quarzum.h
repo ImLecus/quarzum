@@ -298,6 +298,7 @@ enum {
     N_RETURN,
     N_LAMBDA,
     N_ENUM,
+    N_ASSIGN,
     // Expression nodes
     N_UNARY_EXPR,
     N_BINARY_EXPR,
@@ -327,6 +328,7 @@ typedef struct {
 node* init_node(uint32_t children, uint8_t type);
 void expect(token* t, uint8_t type, char* what);
 parse_tree* parse(char* file);
+void free_parse_tree(parse_tree* tree);
 
 node* null_expr();
 
@@ -432,12 +434,12 @@ typedef struct {
     uint8_t mandatory_args;
 } function_info;
 
-char* mangle_name(symbol* s);
+char* mangle_name(symbol* s, string* last_namespace);
 //
 //  check.c
 //
 
-void check_parse_tree(parse_tree* tree);
+bool check_parse_tree(parse_tree* tree);
 //
 //  codegen.c
 //

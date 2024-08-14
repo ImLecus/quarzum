@@ -25,6 +25,38 @@ static void start_parsing(lexer* lexer){
     if(!symbol_map){
         symbol_map = init_hashmap(256);
     }
+    if(!last_namespace){
+        last_namespace = init_string(32);
+    }
+}
+
+static void add_namespace(char* namespace){
+    if(last_namespace->len > 0){
+        string_push(last_namespace, '@');
+    }
+    string_append(last_namespace, namespace);
+}
+
+static void delete_last_namespace(){
+    for(uint32_t i = last_namespace->len; i > 0; --i){
+        if(last_namespace->value[i] == '@'){
+            string_pop(last_namespace);
+            break;
+        }
+        string_pop(last_namespace);
+        
+    }
+}
+
+static void free_node(node* n){
+    free_vector(n->children);
+    free(n);
+}
+
+void free_parse_tree(parse_tree* tree){
+    free_hashmap(tree->symbol_table);
+    free_hashmap(tree->type_table);
+    free_node(tree->ast);
 }
 
 node* init_node(uint32_t children, uint8_t type){
@@ -173,6 +205,17 @@ static node* parse_while_statement(lexer* lexer){
     return while_stmt;
 }
 
+static node* parse_assign(lexer* lexer, char* id){
+    read_next(lexer);
+    node* assign_node = init_node(2, N_ASSIGN);
+    vector_push(assign_node->children, id);
+    node* expr = parse_expr(lexer);
+    vector_push(assign_node->children, expr);
+    expect(lexer->tok, T_SEMICOLON, "semicolon");
+    read_next(lexer);
+    return assign_node;
+}
+
 static node* parse_statement(lexer* lexer){
     switch (lexer->tok->type)
     {
@@ -187,6 +230,8 @@ static node* parse_statement(lexer* lexer){
         case T_LEFT_PAR:
             return parse_function_call(lexer, id);
         
+        case T_EQUAL:
+            return parse_assign(lexer, id);
         default:
             break;
         }
@@ -210,19 +255,23 @@ static node* parse_statement(lexer* lexer){
 }
 
 static node* parse_module(lexer* lexer){
-    node* module_node = init_node(3, N_MODULE);
+    node* module_node = init_node(2, N_MODULE);
     read_next(lexer);
     expect(lexer->tok, T_IDENTIFIER, "identifier");
-    vector_push(module_node->children, lexer->tok->value);
+    char* id = lexer->tok->value;
+    vector_push(module_node->children, id);
     // symbol table check
     read_next(lexer);
     
     expect(lexer->tok, T_LEFT_CURLY, "'{'");
     read_next(lexer);
+    add_namespace(id);
     while(lexer->tok->type != T_RIGHT_CURLY){
         vector_push(module_node->children, parse_statement(lexer) );
     }
+    delete_last_namespace();
     expect(lexer->tok, T_RIGHT_CURLY, "'}'");
+    read_next(lexer);
     return module_node;
 }
 
@@ -323,10 +372,10 @@ static node* parse_lambda(lexer* lexer,symbol* s){
     expect(lexer->tok, T_SEMICOLON, "semicolon");
     read_next(lexer);
 
-    node* lambda = init_node(N_LAMBDA, 2);
+    node* lambda = init_node(2, N_LAMBDA);
     vector_push(lambda->children, s);
 
-    s->mangled_name = mangle_name(s);
+    s->mangled_name = mangle_name(s, last_namespace);
     hashmap_add(symbol_map, s->name, s);
 
     vector_push(lambda->children, expr);
@@ -340,7 +389,12 @@ static node* parse_var(lexer* l, symbol* s, bool has_value){
     node* var_node = init_node(2, N_VAR);
     vector_push(var_node->children, s);
 
-    s->mangled_name = mangle_name(s);
+    symbol* dup = hashmap_get(symbol_map, s->name);
+    if(dup){
+        printf(RED"[ERROR] "RESET"Symbol '%s' already exists \n", s->name);
+        has_errors = true;
+    }
+    s->mangled_name = mangle_name(s, last_namespace);
     hashmap_add(symbol_map, s->name, s);
 
     if(has_value){
@@ -448,7 +502,7 @@ static node* parse_decl(lexer* lexer, int scope){
         node* func_decl_node = init_node(2,N_FUNCTION);
         vector_push(func_decl_node->children, s);
 
-        s->mangled_name = mangle_name(s);
+        s->mangled_name = mangle_name(s, last_namespace);
         hashmap_add(symbol_map, s->name, s);
 
 

@@ -25,13 +25,13 @@ static void mangle_type(type* t, string* mangled_name){
     }
 }
 
-char* mangle_name(symbol* s){
+char* mangle_name(symbol* s, string* last_namespace){
     string* mangled_name = init_string(strlen(s->name)* 2);
     string_push(mangled_name, '_');
     mangle_type(s->type, mangled_name);
     
     string_push(mangled_name, '_');
-    // namespace?
+    string_append(mangled_name, string_copy(last_namespace));
     string_push(mangled_name, '_');
     string_append(mangled_name, s->name);
 

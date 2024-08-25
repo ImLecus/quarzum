@@ -27,9 +27,22 @@ hashmap* init_type_map(){
 }
 
 bool compare_types(type* a, type* b){
-    bool equal = true;
-    equal = a->type == b->type;
-    equal = a->name == b->name;
-    equal = a->size == b->size;
-    return equal;
+    if(a->type == TY_VAR){return true;}
+    if(a->type != b->type){
+        return false;
+    }
+    if(strcmp(a->name, b->name) != 0){
+        return false;
+    }
+    if(a->size != b->size){
+        return false;
+    }
+    return true;
+}
+
+type* merge_types(type* a, type* b, char op){
+    if(compare_types(a,b)){
+        return a;
+    }
+    return ty_var;
 }

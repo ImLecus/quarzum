@@ -178,6 +178,8 @@ enum {
     T_KEYWORD_TRUE,
     T_KEYWORD_TYPEDEF,
     T_KEYWORD_WHILE,
+    T_KEYWORD_CONSTRUCTOR,
+    T_KEYWORD_DESTRUCTOR,
     T_LEFT_PAR,
     T_RIGHT_PAR,
     T_COMMA,
@@ -205,14 +207,14 @@ typedef struct {
 } token;
 
 
-#define KEYWORDS_SIZE 56
+#define KEYWORDS_SIZE 58
 #define SYMBOLS_SIZE 40
 
 
 static const char* keywords[KEYWORDS_SIZE] = {
     "and","as","bool","break","case",
-    "char","class","const","continue","default",
-    "delete","do","else","enum",
+    "char","class","const","constructor","continue","default",
+    "delete","destructor","do","else","enum",
     "false","for","foreach","foreign","function",
     "if","import","in","int","int16","int32","int64","int8",
     "module","new","not","null","num","num16","num32","num64",
@@ -226,8 +228,8 @@ static const char* keywords[KEYWORDS_SIZE] = {
 // primitive type names are keywords.
 static const int keyword_types[KEYWORDS_SIZE] = {
     T_LOGICAL_OP, T_KEYWORD_AS, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE,
-    T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT,
-    T_KEYWORD_DELETE, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
+    T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT,
+    T_KEYWORD_DELETE,T_KEYWORD_DESTRUCTOR, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
     T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
     T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
     T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
@@ -310,7 +312,8 @@ enum {
 
     N_LITERAL,
     N_CLASS,
-    N_INIT_LIST
+    N_INIT_LIST,
+    N_CLASS_STMT
 };
 
 typedef struct {
@@ -398,6 +401,7 @@ static type* ty_var =      &(type){TY_VAR,"var", 8, 8, POINTER_FLAG};
 hashmap* init_type_map();
 
 bool compare_types(type* a, type* b);
+type* merge_types(type* a, type* b, char op);
 
 // 
 //  symbol.c
@@ -426,11 +430,8 @@ typedef struct {
 
 typedef struct {
     vector* args;
-    uint32_t local_variables_len;
-    uint32_t local_variables_size;
+    vector* local_vars;
     uint32_t align;
-    symbol** local_variables; 
-
     uint8_t mandatory_args;
 } function_info;
 

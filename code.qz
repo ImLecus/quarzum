@@ -1,20 +1,26 @@
 import "@std/console.qz"
-import "@std/time.qz"
+//import "@std/time.qz"
 import "@std/file.qz"
 import "@std/types.qz"
 
-module Math {
-    module Trig {
-        int i(int a) => {a + 23};
+int32 t = 4;
+
+int str_sum(string a, int b) => {t + t};
+
+File input_file = openFile("inputfile.txt", 0, 1);
+string file_content = readFile(input_file);
+
+
+//string name = str_sum("A",12).toString();
+
+class Point {
+    public num x;
+    public num y;
+
+    public function print(){
+        out(x.toString() + ',' + y.toString());   
     }
-    
 }
-
-char t = time();
-
-int str_sum(string a, int b) => {toInt(a) + b};
-
-string name = toString(str_sum("A",12));
 
 function main(string* args){  
     t = 64 + toInt("hello world!");

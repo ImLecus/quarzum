@@ -1,6 +1,8 @@
 import "@std/std.qz"
 // Prints a message in console, terminated with the separator character
 foreign function out(string message, char separator);
+// Prints a message in console at debug level
+foreign function debug(string message, char separator);
 // Returns a string with the console input. Can print a previous message
 foreign string input(string message);
 // Prints an error message and finishes the program

@@ -294,6 +294,14 @@ static type* parse_type(lexer* lexer){
 }
 
 
+static node* parse_class_statement(lexer* lexer) {
+    expect(lexer->tok, T_ACCESS, "attribute or method");
+    
+    read_next(lexer);
+    node* class_stmt_node = parse_decl(lexer, S_LOCAL);
+    return class_stmt_node;
+}
+
 static node* parse_class(lexer* lexer){
     node* class_node = init_node(3, N_CLASS);
     read_next(lexer);
@@ -310,7 +318,7 @@ static node* parse_class(lexer* lexer){
     expect(lexer->tok, T_LEFT_CURLY, "'{'");
     read_next(lexer);
     while(lexer->tok->type != T_RIGHT_CURLY){    
-        vector_push(class_node->children, parse_statement(lexer) );
+        vector_push(class_node->children, parse_class_statement(lexer) );
     }
     expect(lexer->tok, T_RIGHT_CURLY, "'}'");
     read_next(lexer);
@@ -484,7 +492,7 @@ static node* parse_decl(lexer* lexer, int scope){
         read_next(lexer);
         while(lexer->tok->type != T_RIGHT_PAR){
             symbol* arg = parse_symbol(lexer, S_PARAMETER);
-            vector_push(info->args, arg->type);
+            vector_push(info->args, arg);
             read_next(lexer);
             if(lexer->tok->type == T_COMMA){
                 read_next(lexer);
@@ -509,9 +517,9 @@ static node* parse_decl(lexer* lexer, int scope){
         if(lexer->tok->type == T_LEFT_CURLY){
             read_next(lexer);
             
-            info->local_variables = malloc(sizeof(symbol*) * 4);
-            info->local_variables_len = 0;
-            info->local_variables_size = 4;
+            //info->local_variables = malloc(sizeof(symbol*) * 4);
+            //info->local_variables_len = 0;
+            //info->local_variables_size = 4;
             while(lexer->tok->type != T_RIGHT_CURLY){
                 node* stmt = parse_statement(lexer);
                 if(!stmt){
@@ -519,12 +527,12 @@ static node* parse_decl(lexer* lexer, int scope){
                 }
                 if(stmt->type == N_VAR){
                     symbol* local_var = ((symbol*) stmt->children->value[0]); 
-                    if(info->local_variables_len >= info->local_variables_size){
-                        info->local_variables = realloc(info->local_variables, info->local_variables_size * 2);
-                        info->local_variables_size *= 2;
-                    }
-                    info->local_variables[info->local_variables_len++] = local_var;
-                    info->align = local_var->type->size;
+                    // if(info->local_variables_len >= info->local_variables_size){
+                    //     info->local_variables = realloc(info->local_variables, info->local_variables_size * 2);
+                    //     info->local_variables_size *= 2;
+                    // }
+                    // info->local_variables[info->local_variables_len++] = local_var;
+                    // info->align = local_var->type->size;
                 }
                 vector_push(func_decl_node->children, stmt);
             }

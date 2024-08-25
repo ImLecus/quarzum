@@ -16,6 +16,15 @@ static void check_symbol(symbol* s){
 }
 
 
+static symbol* try_get_symbol(char* name){
+    symbol* s = hashmap_get(symbol_table, name);
+    if(!s){
+        printf(RED"[ERROR] "RESET"Symbol '%s' does not exist \n", name);
+        has_errors = true;
+    }
+    return s;
+}
+
 static void check_type_compatibility(type* a, type* b){
     if(!compare_types(a, b)){
         printf(RED"[ERROR] "RESET"Expected '%s'; received '%s'\n", a->name, b->name);
@@ -28,14 +37,22 @@ static type* check_expr(node* expr){
 
     switch (expr->type)
     {
+    case N_IDENTIFIER:
+        symbol* sym = try_get_symbol(expr->children->value[0]);
+        if(!sym){
+            break;
+        }
+        return sym->type;
+    case N_BINARY_EXPR:
+        type* left = check_expr(expr->children->value[0]);
+        type* right = check_expr(expr->children->value[1]);
+        return merge_types(left, right, expr->children->value[2]);
     case N_LITERAL:
         return expr->children->value[1];
     case N_CALL_EXPR:
         uint8_t args = expr->children->len - 1;
-        symbol* s = hashmap_get(symbol_table, expr->children->value[0]);
+        symbol* s = try_get_symbol(expr->children->value[0]);
         if(!s){
-            printf(RED"[ERROR] "RESET"Symbol '%s' does not exist \n", expr->children->value[0]);
-            has_errors = true;
             break;
         }
         function_info* i = s->type->info;
@@ -53,9 +70,9 @@ static type* check_expr(node* expr){
         // TO-DO: expand this function for non-mandatory arguments
         for(uint8_t n = 1; n < expr->children->len; ++n){
             type* t = check_expr(expr->children->value[n]);
-            type* t2 = i->args->value[n - 1];
-            if(!compare_types(t,t2)){
-                printf(RED"[ERROR] "RESET"Types '%s' and '%s' do not match \n", t->name, t2->name);
+            symbol* arg = i->args->value[n - 1];
+            if(!compare_types(t,arg->type)){
+                printf(RED"[ERROR] "RESET"Types '%s' and '%s' do not match \n", t->name, arg->type->name);
                 has_errors = true;
                 break;
             }

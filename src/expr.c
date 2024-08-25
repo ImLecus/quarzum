@@ -1,8 +1,26 @@
 #include "quarzum.h"
 
+static node* call_expr(lexer* lexer, char* id);
+
 node* null_expr() {
     return init_node(0, N_NULL_EXPR);
 } 
+
+static node* member_expr(lexer* lexer, char* id){
+    read_next(lexer);
+    node* member = init_node(2, N_MEMBER_EXPR);
+    vector_push(member->children, id);
+    char* child = lexer->tok->value;
+    read_next(lexer);
+    if(lexer->tok->type == T_DOT){
+        vector_push(member->children, member_expr(lexer, child));
+    }
+    if(lexer->tok->type == T_LEFT_PAR){
+        vector_push(member->children, call_expr(lexer, child));
+    }
+    vector_push(member->children, child);
+    return member;
+}
 
 static node* call_expr(lexer* lexer, char* id){
     node* expr = init_node(2, N_CALL_EXPR);
@@ -65,8 +83,11 @@ static node* parse_primary_expr(lexer* lexer){
         char* id = lexer->tok->value;
         read_next(lexer);
         if(lexer->tok->type == T_LEFT_PAR){
-            return call_expr(lexer,id);
+            return call_expr(lexer, id);
         } 
+        if(lexer->tok->type == T_DOT){
+            return member_expr(lexer, id);
+        }
         node* id_expr = init_node(1,N_IDENTIFIER);
         vector_push(id_expr->children, id);
         return id_expr;
@@ -85,18 +106,20 @@ node* parse_expr(lexer* lexer){
         return NULL;
     }
 
-    char* op;
+    char op;
     switch (lexer->tok->type)
     {
     case T_ARITHMETIC_OP:
     case T_LOGICAL_OP:
     case T_COMPARATION_OP:
+        op = lexer->tok->value[0];
         read_next(lexer);
         node* right = parse_expr(lexer);
 
-        node* binary = init_node(2, N_BINARY_EXPR);
+        node* binary = init_node(3, N_BINARY_EXPR);
         vector_push(binary->children, left);
         vector_push(binary->children, right);
+        vector_push(binary->children, &op);
         return binary;
     
     default:

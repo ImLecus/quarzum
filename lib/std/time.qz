@@ -1,3 +1,26 @@
 import "@std/std.qz"
 
 foreign int time();
+
+class Timer {
+    private int startTime;
+    private int endTime;
+    private int pauseTime;
+    
+    public function start() => this.startTime = time();
+    public function pause() => this.pauseTime = time();
+    public function play() => this.endTime -= (time() - pauseTime);
+    public function stop() => this.endTime = time();
+
+    public function reset(){
+        this.startTime = 0;
+        this.endTime = 0;
+        this.pauseTime = 0;
+    }
+
+    public int getTime() => {
+        this.endTime > 0 ? 
+            this.endTime - this.startTime : 
+            0
+    };
+}

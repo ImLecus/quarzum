@@ -8,3 +8,4 @@ module Constants {
 
 foreign num64 abs(num64 n);
 foreign num64 sin(num64 n);
+foreign num64 cos(num64 n);

@@ -153,25 +153,25 @@ static void generate_instruction(vector* ir_list,node* n){
         break;
 
     case N_FUNCTION:
-        symbol* s = (symbol*)(n->children->value[0]);
-        if((s->type->flags & FOREIGN_FLAG) > 0){
-            return;
-        }
-        function_info* info = s->type->info;
-        int size = info->align * info->local_variables_len;
-        char* size_str = malloc(3);
-        sprintf(size_str,"%d",size);
-        vector_push(ir_list, 
-            init_instruction(I_FUNCTION,s->name,size_str, NULL,info->local_variables)
-        );
+        // symbol* s = (symbol*)(n->children->value[0]);
+        // if((s->type->flags & FOREIGN_FLAG) > 0){
+        //     return;
+        // }
+        // function_info* info = s->type->info;
+        // int size = info->align * info->local_variables_len;
+        // char* size_str = malloc(3);
+        // sprintf(size_str,"%d",size);
+        // vector_push(ir_list, 
+        //     init_instruction(I_FUNCTION,s->name,size_str, NULL,info->local_variables)
+        // );
         
-        for(uint32_t i = 1; i < n->children->len; ++i){
-            // TO-DO: check if it's a parameter (symbol*) or a child (node*)
-            generate_instruction(ir_list,(node*)(vector_get(n->children,i)));
-        }
-        vector_push(ir_list, 
-            init_instruction(I_LEAVERET,NULL, NULL, NULL,NULL)
-        );
+        // for(uint32_t i = 1; i < n->children->len; ++i){
+        //     // TO-DO: check if it's a parameter (symbol*) or a child (node*)
+        //     generate_instruction(ir_list,(node*)(vector_get(n->children,i)));
+        // }
+        // vector_push(ir_list, 
+        //     init_instruction(I_LEAVERET,NULL, NULL, NULL,NULL)
+        // );
         break;
     
     default:

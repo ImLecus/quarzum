@@ -206,6 +206,7 @@ typedef struct {
     uint8_t type;
 } token;
 
+bool is_operator(uint8_t t);
 
 #define KEYWORDS_SIZE 56
 #define SYMBOLS_SIZE 41

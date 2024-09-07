@@ -26,14 +26,15 @@ static void start_parsing(lexer* lexer){
 
 static inline void add_namespace(char* namespace){
     if(last_namespace->len > 0){
-        string_push(last_namespace, '@');
+        string_append(last_namespace, "::");
     }
     string_append(last_namespace, namespace);
 }
 
 static void delete_last_namespace(){
     for(uint32_t i = last_namespace->len; i > 0; --i){
-        if(last_namespace->value[i] == '@'){
+        if(last_namespace->value[i] == ':' && last_namespace->value[i-1] == ':'){
+            string_pop(last_namespace);
             string_pop(last_namespace);
             break;
         }
@@ -253,13 +254,13 @@ static symbol* parse_symbol(lexer* lexer, int scope){
         switch (lexer->tok->value[0])
         {
         case 'c':
-            if((flags & CONST_FLAG) > 0){
+            if(flags & CONST_FLAG){
                 printf(ORANGE BOLD"[WARNING]"RESET" (%s) Duplicated 'const' specifier at line %i\n",lexer->file,lexer->line);
             }
             flags |= CONST_FLAG;
             break;
         case 'f':
-            if((flags & FOREIGN_FLAG) > 0){
+            if(flags & FOREIGN_FLAG){
                 printf(ORANGE BOLD"[WARNING]"RESET" (%s) Duplicated 'foreign' specifier at line %i\n",lexer->file,lexer->line);
             }
             flags |= FOREIGN_FLAG;
@@ -282,6 +283,15 @@ static symbol* parse_symbol(lexer* lexer, int scope){
         expect(lexer->tok, T_TYPE_EXTENSION_OP, "'::'");
         add_namespace(base_type);
         read_next(lexer);
+        if(lexer->tok->type == T_KEYWORD_OPERATOR){
+            read_next(lexer);
+            if(!is_operator(lexer->tok->type)){
+                expect(lexer->tok, T_COMPARATION_OP, "operator");
+            }
+            s->name = lexer->tok->value;
+            s->mangled_name = mangle_name(s, last_namespace);    
+            return s;
+        }
     }
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     s->name = lexer->tok->value;
@@ -358,7 +368,7 @@ static node* parse_enum(lexer* l, symbol* s){
  * Parses the sequence "struct" ID "{" ([symbol]";")* "}"
  */
 static void parse_struct(lexer* l){
-    read_next(l); // first token is the keyword
+    read_next(l);
     expect(l->tok, T_IDENTIFIER, "identifier");
     char* id = l->tok->value;
     read_next(l);
@@ -444,10 +454,10 @@ static node* parse_decl(lexer* lexer, int scope){
         return parse_var(lexer, s, false);
 
     case T_LEFT_PAR:
+        s->mangled_name = mangle_name(s, last_namespace);
+        add_namespace(s->name);
         s->type->flags |= FUNCTION_FLAG;
         s->info = parse_function_args(lexer);
-        s->mangled_name = mangle_name(s, last_namespace);
-        if(s->scope == S_EXTEND) delete_last_namespace();
 
         read_next(lexer);
         if(lexer->tok->type == T_ARROW){
@@ -459,7 +469,6 @@ static node* parse_decl(lexer* lexer, int scope){
         vector_push(func_decl_node->children, s);
         
         if(lexer->tok->type == T_LEFT_CURLY){
-            add_namespace(s->name);
             read_next(lexer);
             while(lexer->tok->type != T_RIGHT_CURLY){
                 node* stmt = parse_statement(lexer);
@@ -469,13 +478,13 @@ static node* parse_decl(lexer* lexer, int scope){
                 vector_push(func_decl_node->children, stmt);
             }
             read_next(lexer);
-            delete_last_namespace();
         }
         else{
             expect(lexer->tok, T_SEMICOLON, "semicolon");
             read_next(lexer);
         }
-        
+        if(s->scope == S_EXTEND) delete_last_namespace();
+        delete_last_namespace();
         return func_decl_node;
     default:
         return NULL;
@@ -517,8 +526,9 @@ static node* parse_module(lexer* lexer){
     read_next(lexer);
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     char* id = lexer->tok->value;
-    symbol* s = &(symbol){mangle_namespace(id, last_namespace), id};
-
+    symbol* s = &(symbol){};
+    s->name = id;
+    s->mangled_name = mangle_namespace(id, last_namespace);
     
     vector_push(module_node->children, s);
     read_next(lexer);
@@ -536,6 +546,7 @@ static node* parse_module(lexer* lexer){
     delete_last_namespace();
     expect(lexer->tok, T_RIGHT_CURLY, "'}'");
     read_next(lexer);
+
     return module_node;
 }
 

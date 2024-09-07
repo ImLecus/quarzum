@@ -17,10 +17,27 @@ static void check_symbol(symbol* s){
     }
     //printf("%s -> %s \n", s->name, s->mangled_name);
     hashmap_add(symbol_table, s->name, s);
+    // Functions
+    if(s->type->flags & FUNCTION_FLAG){
+        function_info* info = s->info;
+        for(uint8_t i = 0; i < info->args->len; ++i){
+            check_symbol(info->args->value[i]);
+        }
+    }
 }
 
 static void check_module(node* module_node){
-    
+    symbol* module = n_get(module_node, 0);
+    symbol* dup = hashmap_get(symbol_table, module->name);
+    if(dup && strcmp(dup->mangled_name, module->mangled_name) == 0){
+        printf(RED"[ERROR] "RESET"Module '%s' already exists \n", module->name);
+        has_errors = true;
+        return;
+    }
+    hashmap_add(symbol_table, module->name, module);
+    for(uint i = 0; i < module_node->children->len; ++i){
+        check_statement(n_get(module_node, i));
+    }
 }
 
 
@@ -93,8 +110,6 @@ static type* check_expr(node* expr){
     case N_LITERAL:
         return expr->children->value[1];
 
-    // TODO: convert child expression into an extension of parent
-    // x.to_string() =>  [x, x::to_string]
     case N_MEMBER_EXPR:
         node* parent = n_get(expr, 0);
         node* child = n_get(expr, 1);
@@ -139,7 +154,7 @@ static type* check_expr(node* expr){
         }
 
 
-        if((s->type->flags & LAMBDA_FLAG) > 0){
+        if(s->type->flags & LAMBDA_FLAG){
             // replace the call_expression to the lambda expression, changing the parameters inside the 
             // expression for the argument expressions.
         }

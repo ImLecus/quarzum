@@ -4,6 +4,6 @@ foreign function out(char* message, char separator = '\n');
 // Prints a message in console at debug level
 foreign function debug(char* message, char separator = '\n');
 // Returns a string with the console input. Can print a previous message
-foreign char* input(char* message);
+foreign char* input(char* message = "");
 // Prints an error message and finishes the program
 foreign function error(char* message);

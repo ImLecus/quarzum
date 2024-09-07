@@ -2,10 +2,10 @@
 #define USER_DEFINED_PREFIX "_Z"
 
 static void mangle_type(type* t, string* mangled_name){
-    if((t->flags & CONST_FLAG) > 0){
+    if(t->flags & CONST_FLAG){
         string_push(mangled_name, 'C');
     }
-    if((t->flags & POINTER_FLAG) > 0){
+    if(t->flags & POINTER_FLAG){
         string_push(mangled_name, 'P');
     }
     if(t->type == TY_CUSTOM || t->type == TY_STRUCT){

@@ -8,6 +8,7 @@ foreign char string::at(uint64 i);
 foreign bool string::contains(char c);
 foreign uint64 string::length();
 foreign bool string::empty();
+foreign string string::substring(uint64 s, uint64 e);
 
 /*
     These functions modify the original content
@@ -17,3 +18,16 @@ foreign function string::uppercase();
 foreign function string::lowercase();
 foreign function string::sort();
 foreign function string::replace(char t, char c);
+foreign char string::pop();
+
+/*
+    Strings are not a dynamic array, perform operations
+    with them usually creates new strings.
+*/
+
+// internamente esto es string::op+(string this, string s)
+foreign string string::operator+(string s);
+foreign string string::operator*(uint n);
+foreign string string::operator-(uint64 n);
+foreign bool string::operator==(string s);
+foreign bool string::operator!=(string s);

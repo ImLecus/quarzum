@@ -2,6 +2,12 @@
 
 static uint32_t last_line_pos;
 
+bool is_operator(uint8_t t){
+    return t == T_EQUAL || t == T_COMPARATION_OP ||
+    t == T_ARITHMETIC_OP || t == T_LOGICAL_OP || 
+    t == T_BITWISE_OP || t == T_ASSIGN_OP;
+}
+
 lexer* init_lexer(char* filename, char* input){
     if(!input) return NULL;
     lexer* lex = malloc(sizeof(lexer));

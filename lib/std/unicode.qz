@@ -1,0 +1,28 @@
+typedef unicode int16
+typedef w_string unicode*
+
+foreign unicode w_string::at(uint64 i);
+foreign bool w_string::contains(unicode c);
+foreign uint64 w_string::length();
+foreign bool w_string::empty();
+foreign w_string w_string::substring(uint64 s, uint64 e);
+
+/*
+    These functions modify the original content
+    of the string, so they don't return a new one.
+*/
+foreign function w_string::uppercase();
+foreign function w_string::lowercase();
+foreign function w_string::sort();
+foreign function w_string::replace(unicode t, unicode c);
+foreign unicode w_string::pop();
+
+/*
+    Strings are not a dynamic array, perform operations
+    with them usually creates new strings.
+*/
+foreign w_string w_string::operator+(w_string s);
+foreign w_string w_string::operator*(uint n);
+foreign w_string w_string::operator-(uint64 n);
+foreign bool w_string::operator==(w_string s);
+foreign bool w_string::operator!=(w_string s);

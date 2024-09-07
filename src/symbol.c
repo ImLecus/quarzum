@@ -48,7 +48,7 @@ char* mangle_name(symbol* s, string* last_namespace){
     if( (s->type->flags & FUNCTION_FLAG) > 0 ){
         if(strcmp(s->name, "main") == 0){return "main";}
 
-        function_info* info = s->type->info;
+        function_info* info = s->info;
         for(uint8_t i = 0; i < info->args->len; ++i){
             symbol* arg = info->args->value[i];
             string_push(mangled_name, ';');

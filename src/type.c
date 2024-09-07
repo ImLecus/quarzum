@@ -51,9 +51,10 @@ inline void convert_to_pointer(type* t){
     t->align = 8;
     t->flags |= POINTER_FLAG;
     t->size = 8;
-    char* new_name = malloc(strlen(t->name) + 1);
-    strcat(new_name, t->name);
-    strcat(new_name, "*");
-    t->name = new_name;
+    string* new_name = init_string(strlen(t->name) + 1);
+    string_append(new_name, t->name);
+    string_push(new_name, '*');
+    t->name = string_copy(new_name);
+    free_string(new_name);
     t->type = TY_PTR;
 }

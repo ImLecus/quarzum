@@ -112,29 +112,31 @@ static type* check_expr(node* expr){
         if(!s){
             break;
         }
-        function_info* i = s->type->info;
+        function_info* i = s->info;
         if(!i){
             printf(RED"[ERROR] "RESET"Symbol '%s' is not a callable function \n");
             has_errors = true;
             break;
         }
-        if(i->args->len != args){
+        if(args > i->args->len || args < i->min_args){
             printf(RED"[ERROR] "RESET"Incorrect number of arguments for call '%s'\n");
             has_errors = true;
             break;
         }
 
-        // TO-DO: expand this function for non-mandatory arguments
-        for(uint8_t n = 1; n < expr->children->len; ++n){
+        for(uint8_t n = 1; n < args + 1; ++n){
             type* t = check_expr(expr->children->value[n]);
             symbol* arg = i->args->value[n - 1];
-            if(!compare_types(t,arg->type)){
-                printf(RED"[ERROR] "RESET"Types '%s' and '%s' do not match \n", t->name, arg->type->name);
-                has_errors = true;
-                break;
+            check_type_compatibility(t, arg->type);
+        }
+        // If some args are default, check the type of the default args
+        if(args < i->args->len){
+            for(uint8_t n = i->min_args; n < i->args->len; ++n){
+                type* t = check_expr(i->optional_values->value[n - i->min_args]);
+                symbol* arg = i->args->value[n];
+                check_type_compatibility(arg->type, t);
             }
         }
-        //printf("%s (matches arg number: %s)\n",s->mangled_name, (i->args->len == args)? "true":"false");
 
 
         if((s->type->flags & LAMBDA_FLAG) > 0){
@@ -147,7 +149,7 @@ static type* check_expr(node* expr){
     default: return ty_var;
        
     }
-
+    return ty_var;
     
 }
 

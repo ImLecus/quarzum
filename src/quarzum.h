@@ -308,7 +308,6 @@ typedef struct {
     uint32_t align;
     uint32_t size;
     uint8_t flags;
-    void* info;
 } type;
 
 static type* ty_function = &(type){TY_FUNCTION,"function", 1, 1};
@@ -433,13 +432,17 @@ typedef struct {
     char* name;
     type* type;
     int8_t scope;
+
+    void* info;
 } symbol;
 
 typedef struct {
+    uint8_t min_args;
     vector* args;
+    vector* optional_values;
+
     vector* local_vars;
     uint32_t align;
-    uint8_t mandatory_args;
 } function_info;
 
 char* mangle_name(symbol* s, string* last_namespace);

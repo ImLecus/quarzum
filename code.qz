@@ -1,34 +1,8 @@
 import "@std/console.qz"
 import "@std/string.qz"
-int t = 457;
 
-int str_sum(char* a, int b) => {t};
-
-char get_a() => 'a';
-
-string content = "Hello world!";
-
-string int::to_string(){
-    return "Hola";
-}
-
-int char::to_int(){
-    return 0;
-}
-
-struct Point {
-    int x;
-    int y;
-}
-
-function main(char** args){     
-
-    int** matrix;
-
-    
-    char name = matrix[0][0].to_string()[t - 1];
-
-    Point p;
-
-
+function main(string* args){
+    string name = "Quarzum";
+    uint64 len = name.length();
+    out("Hello world!");
 }

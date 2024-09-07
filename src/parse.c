@@ -76,6 +76,8 @@ static function_info* init_function_info(){
     function_info* f = malloc(sizeof(function_info));
     f->align = 0;
     f->args = init_vector(1);
+    f->min_args = 0;
+    f->optional_values = init_vector(1);
     
     return f;
 }
@@ -203,11 +205,8 @@ type* parse_type(lexer* lexer){
             read_next(lexer);
             continue;
         }
-        break;
-        
-    }
-
-    return t;
+        return t;
+    }   
 }
 
 
@@ -396,6 +395,38 @@ static node* parse_class_special_methods(lexer* lexer){
     return NULL;
 }   
 
+static function_info* parse_function_args(lexer* lexer){
+    function_info* info = init_function_info();
+    read_next(lexer);
+    bool optional_args = false;
+    while(lexer->tok->type != T_RIGHT_PAR){
+        symbol* arg = parse_symbol(lexer, S_PARAMETER);
+        vector_push(info->args, arg);
+        read_next(lexer);
+        if(!optional_args){
+            if(lexer->tok->type == T_EQUAL){
+                optional_args = true;
+                read_next(lexer);
+                vector_push(info->optional_values, parse_expr(lexer)); 
+            }
+            else {
+                ++info->min_args;    
+            }
+        }
+        else {
+            expect(lexer->tok, T_EQUAL, "initializer");
+            read_next(lexer);
+            vector_push(info->optional_values, parse_expr(lexer));
+        }
+        if(lexer->tok->type == T_COMMA){
+            read_next(lexer);
+            continue;
+        } 
+        expect(lexer->tok, T_RIGHT_PAR, "')'");
+    }
+    return info;
+}
+
 static node* parse_decl(lexer* lexer, int scope){
     if(scope == S_CLASS && 
     (lexer->tok->type == T_KEYWORD_CONSTRUCTOR ||
@@ -414,20 +445,7 @@ static node* parse_decl(lexer* lexer, int scope){
 
     case T_LEFT_PAR:
         s->type->flags |= FUNCTION_FLAG;
-        
-        s->type->info = init_function_info();
-        function_info* info = s->type->info;
-        read_next(lexer);
-        while(lexer->tok->type != T_RIGHT_PAR){
-            symbol* arg = parse_symbol(lexer, S_PARAMETER);
-            vector_push(info->args, arg);
-            read_next(lexer);
-            if(lexer->tok->type == T_COMMA){
-                read_next(lexer);
-                continue;
-            }
-            expect(lexer->tok, T_RIGHT_PAR, "')'");
-        }
+        s->info = parse_function_args(lexer);
         s->mangled_name = mangle_name(s, last_namespace);
         if(s->scope == S_EXTEND) delete_last_namespace();
 
@@ -443,27 +461,13 @@ static node* parse_decl(lexer* lexer, int scope){
         if(lexer->tok->type == T_LEFT_CURLY){
             add_namespace(s->name);
             read_next(lexer);
-            
-            //info->local_variables = malloc(sizeof(symbol*) * 4);
-            //info->local_variables_len = 0;
-            //info->local_variables_size = 4;
             while(lexer->tok->type != T_RIGHT_CURLY){
                 node* stmt = parse_statement(lexer);
                 if(!stmt){
                     break;
                 }
-                //if(stmt->type == N_VAR){
-                //    symbol* local_var = ((symbol*) stmt->children->value[0]); 
-                    // if(info->local_variables_len >= info->local_variables_size){
-                    //     info->local_variables = realloc(info->local_variables, info->local_variables_size * 2);
-                    //     info->local_variables_size *= 2;
-                    // }
-                    // info->local_variables[info->local_variables_len++] = local_var;
-                    // info->align = local_var->type->size;
-                //}
                 vector_push(func_decl_node->children, stmt);
             }
-            s->type->info = info;
             read_next(lexer);
             delete_last_namespace();
         }
@@ -567,7 +571,6 @@ static void parse_typedef(lexer* lexer){
     expect(lexer->tok, T_EQUAL, "'='");
     read_next(lexer);
     type* target = parse_type(lexer);
-    read_next(lexer);
     hashmap_add(type_map, id, target);
 }
 

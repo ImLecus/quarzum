@@ -4,6 +4,16 @@
 */
 typedef string = char*
 
+foreign char string::at(uint64 i);
+foreign bool string::contains(char c);
+foreign uint64 string::length();
+foreign bool string::empty();
+
+/*
+    These functions modify the original content
+    of the string, so they don't return a new one.
+*/
 foreign function string::uppercase();
 foreign function string::lowercase();
-foreign bool string::contains(char c);
+foreign function string::sort();
+foreign function string::replace(char t, char c);

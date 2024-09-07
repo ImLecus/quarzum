@@ -199,13 +199,13 @@ static void ignore_comment(lexer* lexer){
 static void ignore_multi_comment(lexer* lexer){
     lexer_advance(lexer);
     char next = lexer->input[lexer->pos + 1];
-    while(!(lexer_peek(lexer) == '*' && next == '/')){
-        lexer_advance(lexer);
+    while(lexer_peek(lexer) != '*' || next != '/'){
         if(lexer_peek(lexer) == '\n'){
             ++lexer->line;
             lexer->column = 1;
             last_line_pos = lexer->pos;
         }
+        lexer_advance(lexer);
         next = lexer->input[lexer->pos + 1];
     }
     lexer_advance(lexer);

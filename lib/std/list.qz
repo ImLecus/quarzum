@@ -1,11 +1,20 @@
 import "@std/memory.qz"
 
-class List<T>{
-    public uint64 size;
-    public uint64 length;
+/*
+    Defines a List type, a dynamic array-type.
+*/
+
+class List<T> {
     private T* elements;
-    
-    public bool isEmpty() => this.length == 0;
+    private uint64 size;
+    private uint64 length;
+
+    public foreign function reverse();
+    public foreign function clear();
+    public uint64 size() => {this.size};
+    public uint64 length() => {this.length};
+    public bool empty() => {this.length == 0};
+    public foreign function pop();
 
     public function resize(uint64 newsize){
         this.size = newsize;
@@ -22,12 +31,8 @@ class List<T>{
 
     public T get(uint64 index) => index >= this.length ? null : this.elements[index];
 
-    public function pop(){
-        this.elements[this.length--] = null;
-    }
-
-    public T getFirst() => this.get(0);
-    public T getLast() => this.get(this.length - 1);
+    public T get_first() => this.get(0);
+    public T get_last() => this.get(this.length - 1);
 
     constructor(uint64 size = 0){
         this.size = size;
@@ -36,6 +41,5 @@ class List<T>{
 
     destructor(){
         free(elements);
-        free(this);
     }
 }

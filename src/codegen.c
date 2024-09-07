@@ -18,7 +18,7 @@ static char* get_type(type* type){
     if(type->size == 1){
         return ".byte ";
     }
-    if(type->type == TY_STRING){ 
+    if(type->type == TY_PTR && strcmp(type->name, "char*") == 0){ 
         return ".string ";
     }
     if(type->type == TY_NUM){

@@ -3,21 +3,14 @@
 static uint32_t last_line_pos;
 
 lexer* init_lexer(char* filename, char* input){
-    if(!input){
-        return NULL;
-    }
-
+    if(!input) return NULL;
     lexer* lex = malloc(sizeof(lexer));
-    if(!lex){
-        return NULL;
-    }
-
+    if(!lex) return NULL;
     lex->input = input;
     lex->line = 1;
     lex->column = 1;
     lex->pos = 0;
     lex->file = filename;
-
     lex->buffer = init_string(32);
     return lex;
 }
@@ -40,6 +33,9 @@ static inline char lexer_consume(lexer* lexer){
     return lexer->input[lexer->pos++];
 }
 
+// Generates a new token in the heap.
+// The lexer buffer will be the token value and
+// then it will be reseted.
 token* new_token(uint8_t type, lexer* lexer){
     token* tok = malloc(sizeof(token));
     if(!tok){
@@ -203,7 +199,7 @@ static void ignore_comment(lexer* lexer){
 static void ignore_multi_comment(lexer* lexer){
     lexer_advance(lexer);
     char next = lexer->input[lexer->pos + 1];
-    while(lexer_peek(lexer) != '*' && next != '/'){
+    while(!(lexer_peek(lexer) == '*' && next == '/')){
         lexer_advance(lexer);
         if(lexer_peek(lexer) == '\n'){
             ++lexer->line;

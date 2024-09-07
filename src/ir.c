@@ -129,28 +129,28 @@ static void generate_instruction(vector* ir_list,node* n){
     case N_ENUM:
         break;
 
-    case N_CALL:
-        for(uint32_t i = 1; i < n->children->len; ++i){
-            node* param = (node*)(n->children->value[i]);
-            char* param_name = param->children->value[0];
-            if(param_name[0] == '"'){
-                vector_push(ir_list, 
-                    init_instruction(I_ASSIGN, get_index('s',s_index), param_name, NULL,ty_string)
-                );
-                vector_push(ir_list, 
-                    init_instruction(I_PARAM,get_index('s',s_index++), NULL, NULL,NULL)
-                );
-                break;
-            }
-            vector_push(ir_list, 
-                init_instruction(I_PARAM, param->children->value[0], NULL, NULL,NULL)
-            );
-        }
-        vector_push(ir_list, 
-            init_instruction(I_CALL, n->children->value[0], NULL, NULL,NULL)
-        );
+    // case N_CALL:
+    //     for(uint32_t i = 1; i < n->children->len; ++i){
+    //         node* param = (node*)(n->children->value[i]);
+    //         char* param_name = param->children->value[0];
+    //         if(param_name[0] == '"'){
+    //             vector_push(ir_list, 
+    //                 init_instruction(I_ASSIGN, get_index('s',s_index), param_name, NULL,ty_string)
+    //             );
+    //             vector_push(ir_list, 
+    //                 init_instruction(I_PARAM,get_index('s',s_index++), NULL, NULL,NULL)
+    //             );
+    //             break;
+    //         }
+    //         vector_push(ir_list, 
+    //             init_instruction(I_PARAM, param->children->value[0], NULL, NULL,NULL)
+    //         );
+    //     }
+    //     vector_push(ir_list, 
+    //         init_instruction(I_CALL, n->children->value[0], NULL, NULL,NULL)
+    //     );
 
-        break;
+    //     break;
 
     case N_FUNCTION:
         // symbol* s = (symbol*)(n->children->value[0]);

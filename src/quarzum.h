@@ -152,7 +152,7 @@ enum {
     T_CHAR_LITERAL,
     T_INT_LITERAL,
     T_NULL_LITERAL,
-    T_KEYWORD_AS,
+    T_KEYWORD_ALLOC,
     T_KEYWORD_BREAK,
     T_KEYWORD_CASE,
     T_KEYWORD_CLASS,
@@ -170,7 +170,6 @@ enum {
     T_KEYWORD_IN,
     T_KEYWORD_MODULE,
     T_KEYWORD_NEW,
-    T_KEYWORD_PERSIST,
     T_KEYWORD_RETURN,
     T_KEYWORD_SIZEOF,
     T_KEYWORD_STRUCT,
@@ -194,7 +193,8 @@ enum {
     T_RIGHT_CURLY,
     T_ARROW,
     T_EQUAL,
-    T_KEYWORD_OPERATOR
+    T_KEYWORD_OPERATOR,
+    T_TYPE_EXTENSION_OP
 };
 
 
@@ -207,19 +207,19 @@ typedef struct {
 } token;
 
 
-#define KEYWORDS_SIZE 58
-#define SYMBOLS_SIZE 40
+#define KEYWORDS_SIZE 56
+#define SYMBOLS_SIZE 41
 
 
 static const char* keywords[KEYWORDS_SIZE] = {
-    "and","as","bool","break","case",
+    "alloc","and","bool","break","case",
     "char","class","const","constructor","continue","default",
     "delete","destructor","do","else","enum",
     "false","for","foreach","foreign","function",
     "if","import","in","int","int16","int32","int64","int8",
     "module","new","not","null","num","num16","num32","num64",
-    "operator", "or","persist","private","protected","public",
-    "return","sizeof","string","struct","switch",
+    "operator", "or","private","protected","public",
+    "return","sizeof","struct","switch",
     "true","typedef","uint","uint16",
     "uint32","uint64","uint8","var","while","xor"
 };
@@ -227,16 +227,14 @@ static const char* keywords[KEYWORDS_SIZE] = {
 // There are 27 keywords in the Quarzum language, but internally,
 // primitive type names are keywords.
 static const int keyword_types[KEYWORDS_SIZE] = {
-    T_LOGICAL_OP, T_KEYWORD_AS, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE,
+    T_KEYWORD_ALLOC ,T_LOGICAL_OP, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE,
     T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT,
     T_KEYWORD_DELETE,T_KEYWORD_DESTRUCTOR, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
     T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
     T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
     T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
-    T_KEYWORD_OPERATOR, T_LOGICAL_OP,
-    T_KEYWORD_PERSIST, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
-    T_KEYWORD_SIZEOF,
-    T_TYPE, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
+    T_KEYWORD_OPERATOR, T_LOGICAL_OP, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
+    T_KEYWORD_SIZEOF, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
     T_KEYWORD_TYPEDEF, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
     T_TYPE, T_TYPE, T_KEYWORD_WHILE, T_LOGICAL_OP
 
@@ -244,14 +242,14 @@ static const int keyword_types[KEYWORDS_SIZE] = {
 
 static const char* symbols[SYMBOLS_SIZE] = {
     "!","!=","#","#=","%","%=","&","&=","(",")","*","*=","+","++","+=",",","-","--","-=",
-    ".","/","/=",":",";","<","<=","=","==","=>",">",">=","?","[","]","^","^=","{","|","|=","}"
+    ".","/","/=",":","::",";","<","<=","=","==","=>",">",">=","?","[","]","^","^=","{","|","|=","}"
 };
 
 static const int symbol_types[SYMBOLS_SIZE] = {
     T_BITWISE_OP, T_ASSIGN_OP, T_BITWISE_OP, T_ASSIGN_OP, T_ARITHMETIC_OP,
     T_ASSIGN_OP, T_BITWISE_OP, T_ASSIGN_OP, T_LEFT_PAR, T_RIGHT_PAR, T_ARITHMETIC_OP,
     T_ASSIGN_OP, T_ARITHMETIC_OP, T_UNARY, T_ASSIGN_OP, T_COMMA, T_ARITHMETIC_OP,
-    T_UNARY, T_ASSIGN_OP, T_DOT, T_ARITHMETIC_OP, T_ASSIGN_OP, T_COLON, T_SEMICOLON,
+    T_UNARY, T_ASSIGN_OP, T_DOT, T_ARITHMETIC_OP, T_ASSIGN_OP, T_COLON,T_TYPE_EXTENSION_OP, T_SEMICOLON,
     T_COMPARATION_OP, T_COMPARATION_OP, T_EQUAL, T_COMPARATION_OP,T_ARROW ,T_COMPARATION_OP,
     T_COMPARATION_OP, T_TERNARY_OP, T_LEFT_SQUARE, T_RIGHT_SQUARE, T_ARITHMETIC_OP,
     T_ASSIGN_OP, T_LEFT_CURLY, T_BITWISE_OP, T_ASSIGN_OP, T_RIGHT_CURLY
@@ -280,83 +278,19 @@ void read_next(lexer* lexer);
 
 char* get_error_line(lexer* lexer);
 
-
-//
-//  parse.c
-//
-
-enum {
-    N_ROOT,
-    N_IF,
-    N_WHILE,
-    N_VAR,
-    N_MODULE,
-    N_BREAK,
-    N_CONTINUE,
-    N_FUNCTION,
-    N_CALL,
-    N_IDENTIFIER,
-    N_TYPE,
-    N_RETURN,
-    N_LAMBDA,
-    N_ENUM,
-    N_ASSIGN,
-    // Expression nodes
-    N_UNARY_EXPR,
-    N_BINARY_EXPR,
-    N_PAREN_EXPR,
-    N_TERNARY_EXPR,
-    N_MEMBER_EXPR,
-    N_CALL_EXPR,
-    N_NULL_EXPR,
-
-    N_LITERAL,
-    N_CLASS,
-    N_INIT_LIST,
-    N_CLASS_STMT
-};
-
-typedef struct {
-    uint8_t type;
-    vector* children;
-} node;
-
-typedef struct {
-    node* ast;
-    hashmap* symbol_table;
-    hashmap* type_table;
-    bool has_errors;
-} parse_tree;
-
-node* init_node(uint32_t children, uint8_t type);
-void expect(token* t, uint8_t type, char* what);
-parse_tree* parse(char* file);
-void free_parse_tree(parse_tree* tree);
-
-node* null_expr();
-
-
-//
-//  expr.c
-//
-
-node* parse_expr(lexer* lexer);
-
 //
 //  type.c
 //
 
 enum {
-    TY_BOOL,
-    TY_CHAR,
-    TY_STRING,
     TY_FUNCTION,
     TY_INT,
-    TY_UINT,
     TY_NUM,
     TY_STRUCT,
     TY_CUSTOM,
-    TY_VAR // "var" is basically a pointer of any type
+    TY_VAR, // "var" is basically a pointer of any type
+    TY_NULL,
+    TY_PTR 
 };
 
 #define CONST_FLAG      0b00000001
@@ -378,30 +312,102 @@ typedef struct {
 } type;
 
 static type* ty_function = &(type){TY_FUNCTION,"function", 1, 1};
-static type* ty_bool =     &(type){TY_BOOL,"bool", 1, 1, UNSIGNED_FLAG};
-static type* ty_char =     &(type){TY_CHAR,"char", 1, 1};
+static type* ty_bool =     &(type){TY_INT,"bool", 1, 1, UNSIGNED_FLAG};
+static type* ty_char =     &(type){TY_INT,"char", 1, 1};
 
 static type* ty_int8 =     &(type){TY_INT,"int8", 1, 1};
 static type* ty_int16 =    &(type){TY_INT,"int16", 2, 2};
 static type* ty_int32 =    &(type){TY_INT,"int32", 4, 4};
 static type* ty_int64 =    &(type){TY_INT,"int64", 8, 8};
 
-static type* ty_uint8 =     &(type){TY_UINT,"uint8", 1, 1, UNSIGNED_FLAG};
-static type* ty_uint16 =    &(type){TY_UINT,"uint16", 2, 2, UNSIGNED_FLAG};
-static type* ty_uint32 =    &(type){TY_UINT,"uint32", 4, 4, UNSIGNED_FLAG};
-static type* ty_uint64 =    &(type){TY_UINT,"uint64", 8, 8, UNSIGNED_FLAG};
+static type* ty_uint8 =     &(type){TY_INT,"uint8", 1, 1, UNSIGNED_FLAG};
+static type* ty_uint16 =    &(type){TY_INT,"uint16", 2, 2, UNSIGNED_FLAG};
+static type* ty_uint32 =    &(type){TY_INT,"uint32", 4, 4, UNSIGNED_FLAG};
+static type* ty_uint64 =    &(type){TY_INT,"uint64", 8, 8, UNSIGNED_FLAG};
 
 static type* ty_num16 =    &(type){TY_NUM,"num16", 2, 2};
 static type* ty_num32 =    &(type){TY_NUM,"num32", 4, 4};
 static type* ty_num64 =    &(type){TY_NUM,"num64", 8, 8};
 
-static type* ty_string =   &(type){TY_STRING,"string", 8, 8, POINTER_FLAG};
+static type* ty_string =   &(type){TY_PTR,"char*", 8, 8, POINTER_FLAG};
 static type* ty_var =      &(type){TY_VAR,"var", 8, 8, POINTER_FLAG};
+static type* ty_null =     &(type){TY_NULL,"null",0,0};
+
 
 hashmap* init_type_map();
 
 bool compare_types(type* a, type* b);
 type* merge_types(type* a, type* b, char op);
+void convert_to_pointer(type* t);
+
+#define is_ptr(TYPE) ((TYPE->flags & POINTER_FLAG) > 0)
+
+//
+//  parse.c
+//
+
+enum {
+    N_ROOT,
+    N_IF,
+    N_WHILE,
+    N_VAR,
+    N_MODULE,
+    N_BREAK,
+    N_CONTINUE,
+    N_FUNCTION,
+    N_IDENTIFIER,
+    N_TYPE,
+    N_RETURN,
+    N_LAMBDA,
+    N_ENUM,
+    // Expression nodes
+    N_UNARY_EXPR,
+    N_BINARY_EXPR,
+    N_PAREN_EXPR,
+    N_TERNARY_EXPR,
+    N_MEMBER_EXPR,
+    N_CALL_EXPR,
+    N_NULL_EXPR,
+    N_CAST,
+    N_INDEX_EXPR,
+
+    N_LITERAL,
+    N_CLASS,
+    N_INIT_LIST,
+    N_CLASS_STMT
+};
+
+typedef struct {
+    uint8_t type;
+    vector* children;
+} node;
+
+void* n_get(node* n, uint index);
+
+typedef struct {
+    node* ast;
+    hashmap* symbol_table;
+    hashmap* type_table;
+    bool has_errors;
+} parse_tree;
+
+node* init_node(uint32_t children, uint8_t type);
+void expect(token* t, uint8_t type, char* what);
+type* parse_type(lexer* lexer);
+parse_tree* parse(char* file);
+void free_parse_tree(parse_tree* tree);
+
+
+#ifndef NULL_EXPR
+#define NULL_EXPR init_node(0, N_NULL_EXPR)
+#endif 
+
+
+//
+//  expr.c
+//
+
+node* parse_expr(lexer* lexer);
 
 // 
 //  symbol.c
@@ -410,7 +416,9 @@ type* merge_types(type* a, type* b, char op);
 enum {
     S_GLOBAL,
     S_LOCAL,
-    S_PARAMETER
+    S_PARAMETER,
+    S_CLASS,
+    S_EXTEND
 };
 
 enum {
@@ -425,7 +433,6 @@ typedef struct {
     char* name;
     type* type;
     int8_t scope;
-
 } symbol;
 
 typedef struct {
@@ -436,6 +443,7 @@ typedef struct {
 } function_info;
 
 char* mangle_name(symbol* s, string* last_namespace);
+char* mangle_namespace(char* id, string* last_namespace);
 //
 //  check.c
 //

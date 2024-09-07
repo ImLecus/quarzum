@@ -1,28 +1,34 @@
 import "@std/console.qz"
-//import "@std/time.qz"
-import "@std/file.qz"
-import "@std/types.qz"
+import "@std/string.qz"
+int t = 457;
 
-int32 t = 4;
+int str_sum(char* a, int b) => {t};
 
-int str_sum(string a, int b) => {t + t};
+char get_a() => 'a';
 
-File input_file = openFile("inputfile.txt", 0, 1);
-string file_content = readFile(input_file);
+string content = "Hello world!";
 
-
-//string name = str_sum("A",12).toString();
-
-class Point {
-    public num x;
-    public num y;
-
-    public function print(){
-        out(x.toString() + ',' + y.toString());   
-    }
+string int::to_string(){
+    return "Hola";
 }
 
-function main(string* args){  
-    t = 64 + toInt("hello world!");
-    out("Quarzum");
+int char::to_int(){
+    return 0;
+}
+
+struct Point {
+    int x;
+    int y;
+}
+
+function main(char** args){     
+
+    int** matrix;
+
+    
+    char name = matrix[0][0].to_string()[t - 1];
+
+    Point p;
+
+
 }

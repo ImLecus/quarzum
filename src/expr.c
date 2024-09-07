@@ -1,27 +1,27 @@
 #include "quarzum.h"
 
 static node* call_expr(lexer* lexer, char* id);
+static node* non_literal_expr(lexer* lexer);
+static node* index_expr(lexer* lexer, node* array);
 
-node* null_expr() {
-    return init_node(0, N_NULL_EXPR);
-} 
-
-static node* member_expr(lexer* lexer, char* id){
+// Returns an expression with the form [expr].[expr]
+static node* member_expr(lexer* lexer, node* parent){
     read_next(lexer);
     node* member = init_node(2, N_MEMBER_EXPR);
-    vector_push(member->children, id);
-    char* child = lexer->tok->value;
-    read_next(lexer);
+    vector_push(member->children, parent);
+    node* child = non_literal_expr(lexer);
+
     if(lexer->tok->type == T_DOT){
         vector_push(member->children, member_expr(lexer, child));
     }
-    if(lexer->tok->type == T_LEFT_PAR){
-        vector_push(member->children, call_expr(lexer, child));
-    }
     vector_push(member->children, child);
+    if(lexer->tok->type == T_LEFT_SQUARE){
+        return index_expr(lexer, member);
+    }
     return member;
 }
 
+// Returns an expression with the form [id]([expr]? (,[expr])*)
 static node* call_expr(lexer* lexer, char* id){
     node* expr = init_node(2, N_CALL_EXPR);
     vector_push(expr->children, id);
@@ -55,6 +55,50 @@ static node* paren_expr(node* expr){
     return par_expr;
 }
 
+static node* non_literal_expr(lexer* lexer){
+    char* id = lexer->tok->value;
+    read_next(lexer);
+    if(lexer->tok->type == T_LEFT_PAR){
+        return call_expr(lexer, id);
+    } 
+    node* id_expr = init_node(1,N_IDENTIFIER);
+    vector_push(id_expr->children, id);
+    return id_expr;
+}
+
+static node* cast_expr(lexer* lexer){
+    node* cast = init_node(2, N_CAST);
+    type* t = parse_type(lexer);
+    vector_push(cast->children, t);
+    expect(lexer->tok, T_RIGHT_SQUARE, "]");
+    read_next(lexer);
+    vector_push(cast->children, parse_expr(lexer));
+    return cast;
+}
+
+static node* index_expr(lexer* lexer, node* array){
+    node* expr = init_node(2, N_INDEX_EXPR);
+    vector_push(expr->children, array);
+    read_next(lexer);
+    node* index = parse_expr(lexer);
+    expect(lexer->tok, T_RIGHT_SQUARE, "']");
+    vector_push(expr->children, index);
+    read_next(lexer);
+
+    if(lexer->tok->type == T_DOT){
+        return member_expr(lexer, expr);
+    }
+    if(lexer->tok->type == T_LEFT_SQUARE){
+        return index_expr(lexer, expr);
+    }
+    return expr;
+}
+
+static node* stack_var_expr(lexer* lexer){
+   
+    return NULL;
+}
+
 static node* parse_primary_expr(lexer* lexer){
     switch (lexer->tok->type)
     {
@@ -71,27 +115,29 @@ static node* parse_primary_expr(lexer* lexer){
         return literal_expr(lexer, ty_bool);
     case T_NULL_LITERAL:
         read_next(lexer);
-        return null_expr();
+        return NULL_EXPR;
     case T_LEFT_PAR:
         read_next(lexer);
         node* expr = parse_expr(lexer);
         expect(lexer->tok, T_RIGHT_PAR, "')'");
         read_next(lexer);
         return paren_expr(expr);
+    case T_LEFT_SQUARE:
+        read_next(lexer);
+        return cast_expr(lexer);
     
     case T_IDENTIFIER:
-        char* id = lexer->tok->value;
-        read_next(lexer);
-        if(lexer->tok->type == T_LEFT_PAR){
-            return call_expr(lexer, id);
-        } 
+        // a non-literal can be an identifier or a function call
+        node* non_literal = non_literal_expr(lexer);
         if(lexer->tok->type == T_DOT){
-            return member_expr(lexer, id);
+            return member_expr(lexer, non_literal);
         }
-        node* id_expr = init_node(1,N_IDENTIFIER);
-        vector_push(id_expr->children, id);
-        return id_expr;
-
+        if(lexer->tok->type == T_LEFT_SQUARE){
+            return index_expr(lexer, non_literal);
+        }
+        return non_literal;
+    case T_KEYWORD_NEW:
+        return stack_var_expr(lexer);
     default:
         printf(RED"[ERROR]"RESET" (%s) Invalid expression at line %d\n", lexer->file, lexer->line); 
         break;
@@ -103,7 +149,7 @@ static node* parse_primary_expr(lexer* lexer){
 node* parse_expr(lexer* lexer){
     node* left = parse_primary_expr(lexer);
     if(!left){
-        return NULL;
+        return NULL_EXPR;
     }
 
     char op;
@@ -121,9 +167,24 @@ node* parse_expr(lexer* lexer){
         vector_push(binary->children, right);
         vector_push(binary->children, &op);
         return binary;
-    
     default:
         break;
     }
+
+    if(lexer->tok->type == T_TERNARY_OP){
+        read_next(lexer);
+        node* if_true = parse_expr(lexer);
+        
+        expect(lexer->tok, T_COLON, "':'");
+        read_next(lexer);
+        node* if_false = parse_expr(lexer);
+
+        node* ternary = init_node(3, N_TERNARY_EXPR);
+        vector_push(ternary->children, left);
+        vector_push(ternary->children, if_true);
+        vector_push(ternary->children, if_false);
+        return ternary;
+    }
+
     return left;
 }

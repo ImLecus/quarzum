@@ -1,0 +1,9 @@
+/*
+    Defines a custom type to manage character arrays.
+    A standard string is the same as a char*.
+*/
+typedef string = char*
+
+foreign function string::uppercase();
+foreign function string::lowercase();
+foreign bool string::contains(char c);

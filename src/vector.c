@@ -22,10 +22,9 @@ inline void vector_push(vector* v, void* element){
         }
         v->size = new_size;
     }
-    if(!element || !v->value){
-        return;
+    if(element && v->value){
+        v->value[v->len++] = element;
     }
-    v->value[v->len++] = element;
 }
 
 inline void vector_pop(vector* v){

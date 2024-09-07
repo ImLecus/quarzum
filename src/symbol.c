@@ -1,5 +1,4 @@
 #include "quarzum.h"
-
 #define USER_DEFINED_PREFIX "_Z"
 
 static void mangle_type(type* t, string* mangled_name){
@@ -10,7 +9,6 @@ static void mangle_type(type* t, string* mangled_name){
         string_push(mangled_name, 'P');
     }
     if(t->type == TY_CUSTOM || t->type == TY_STRUCT){
-        string_push(mangled_name, 'Z');
         string_append(mangled_name, t->name);
     }
     else{
@@ -25,29 +23,38 @@ static void mangle_type(type* t, string* mangled_name){
     }
 }
 
+char* mangle_namespace(char* id, string* last_namespace){
+    string* ns = init_string(strlen(last_namespace->value)+strlen(id)+2);
+    string_append(ns, last_namespace);
+    string_append(ns, "::");
+    string_append(ns, id);
+    char* result = string_copy(ns);
+    free_string(ns);
+    return result;
+}
+
 char* mangle_name(symbol* s, string* last_namespace){
     string* mangled_name = init_string(strlen(s->name)* 2);
-    string_push(mangled_name, '_');
     mangle_type(s->type, mangled_name);
     
-    string_push(mangled_name, '_');
+    string_push(mangled_name, ';');
     string_append(mangled_name, string_copy(last_namespace));
-    string_push(mangled_name, '_');
+    if(last_namespace->len > 0){
+        string_append(mangled_name, "::");
+    }
+    
     string_append(mangled_name, s->name);
 
     if( (s->type->flags & FUNCTION_FLAG) > 0 ){
-        if(strcmp("main", s->name )== 0){
-            return "main";
-        }
+        if(strcmp(s->name, "main") == 0){return "main";}
+
         function_info* info = s->type->info;
         for(uint8_t i = 0; i < info->args->len; ++i){
-            type* arg = info->args->value[i];
-            string_push(mangled_name, '_');
-            mangle_type(arg, mangled_name);            
+            symbol* arg = info->args->value[i];
+            string_push(mangled_name, ';');
+            mangle_type(arg->type, mangled_name);            
         }
         
     }
-    char* result = string_copy(mangled_name);
-    //printf("%s\n", result);
-    return result;
+    return string_copy(mangled_name);
 }

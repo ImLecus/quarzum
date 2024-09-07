@@ -6,12 +6,14 @@ struct File {
     bool isOpen;
 }
 
-foreign File openFile(string name, int flags, int mode);
+foreign File open_file(string name, int flags, int mode);
 
-foreign function closeFile(File f);
+foreign function close_file(File f);
 
-foreign string readFile(File f);
+foreign string read_file(File f);
 
-foreign function writeFile(File f, string message);
+foreign function write_file(File f, string message);
 
-foreign string getFormat(File f);
+foreign string get_format(File f);
+
+foreign function File::close();

@@ -382,7 +382,7 @@ typedef struct {
     vector* children;
 } node;
 
-void* n_get(node* n, uint index);
+void* n_get(node* n, uint32_t index);
 
 typedef struct {
     node* ast;

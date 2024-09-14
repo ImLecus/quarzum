@@ -1,8 +1,15 @@
-#include "src/quarzum.h"
+#include "quarzum.h"
+#include "core/error.h"
 
 int main(int argc, char** argv) {
     struct process task = start_process("Task");
     printf(DEBUG_MSG("Starting the compiler..."));
+
+    throw_error(1, 1, "My custom error");
+    if(error_count > 0){
+        print_errors();
+    }
+    
 
     // Lexical & Syntax analisys
     struct process parsing = start_process("Parse phase");

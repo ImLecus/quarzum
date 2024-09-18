@@ -59,11 +59,11 @@ void hashmap_add(hashmap* map, char* key, void* value){
     int hashed_key = hash(key)%map->size; 
 
     if(map->content[hashed_key] != NULL){
-        bool has_key = false;
+        int has_key = 0;
         for(uint32_t i = hashed_key; i < map->size; ++i){
             if(map->content[i] == NULL){
                 hashed_key = i;
-                has_key = true;
+                has_key = 1;
                 break;
             }
         }

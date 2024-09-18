@@ -1,5 +1,7 @@
 #include "quarzum.h"
 
+hashmap* type_map;
+
 hashmap* init_type_map(){
     hashmap* type_map = init_hashmap(64);
     hashmap_add(type_map, "int8", ty_int8);
@@ -24,20 +26,17 @@ hashmap* init_type_map(){
     return type_map;
 }
 
-bool compare_types(type* a, type* b){
-    if(a->type == TY_VAR){return true;}
-    if(b->type == TY_NULL){return true;}
+int compare_types(type* a, type* b){
+    if(a->type == TY_VAR){return 1;}
+    if(b->type == TY_NULL){return 1;}
     
     if(a->type != b->type){
-        return false;
-    }
-    if(strcmp(a->name, b->name) != 0){
-        return false;
+        return 0;
     }
     if(a->size != b->size){
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }
 
 type* merge_types(type* a, type* b, char op){

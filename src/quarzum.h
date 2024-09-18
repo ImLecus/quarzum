@@ -6,20 +6,27 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdint.h>
-
+#include "core/error.h"
+#include "core/array.h"
 #define QUARZUM_COMPILER_VERSION "1.0"
 #define QUARZUM_VERSION "1.0"
 #define VERSION_TYPE "experimental"
-
-typedef int bool;
-#define true 1
-#define false 0
 
 #define max(a,b) a > b ? a: b
 //
 //  bsearch.c
 //
 int binary_search(const char* symbol, const char** list, uint32_t size);
+
+// 
+// text
+//
+
+typedef struct {
+    char* file;
+    uint32_t line;
+    uint32_t column;
+} text_pos_t;
 
 //
 //  debug
@@ -34,8 +41,6 @@ int binary_search(const char* symbol, const char** list, uint32_t size);
 #define GRAY "\e[1;90m"
 #define ORANGE "\e[38;5;214m"
 
-#define UNDERLINE "\e[4m"
-#define BOLD "\e[1m"
 
 #define ERROR_MSG(msg) RED"[ERROR] "RESET"%s\n",msg
 #define LOG_MSG(msg) CYAN"[LOG] "RESET"%s\n",msg
@@ -56,8 +61,7 @@ typedef struct {
 
 typedef struct {
     bucket** content;
-    uint32_t size;
-    uint32_t len;
+    uint32_t size, len;
 } hashmap;
 
 hashmap* init_hashmap(uint32_t size);
@@ -76,8 +80,7 @@ const hashmap* init_const_hashmap(uint32_t size, bucket* elements);
 //  string.c
 //
 typedef struct {
-    uint32_t size;
-    uint32_t len;
+    uint32_t size, len;
     char* value;
 } string;
 
@@ -106,8 +109,7 @@ void write_file(FILE* file, char* content);
 //
 struct process {
     char* name;
-    int start;
-    int end;
+    int start, end;
 };
 
 struct process start_process(char* name);
@@ -119,8 +121,7 @@ void end_process(struct process* process);
 #define VECTOR_SIZE_INCREMENT 2
 
 typedef struct {
-    uint32_t size;
-    uint32_t len;
+    uint32_t size, len;
     void** value;
 } vector;
 
@@ -206,38 +207,34 @@ typedef struct {
     uint8_t type;
 } token;
 
-bool is_operator(uint8_t t);
+int is_operator(uint8_t t);
 
-#define KEYWORDS_SIZE 56
+#define KEYWORDS_SIZE 39
 #define SYMBOLS_SIZE 41
 
 
 static const char* keywords[KEYWORDS_SIZE] = {
-    "alloc","and","bool","break","case",
-    "char","class","const","constructor","continue","default",
+    "alloc","and","break","case","class","const","constructor","continue","default",
     "delete","destructor","do","else","enum",
-    "false","for","foreach","foreign","function",
-    "if","import","in","int","int16","int32","int64","int8",
-    "module","new","not","null","num","num16","num32","num64",
+    "false","for","foreach","foreign",
+    "if","import","in",
+    "module","new","not","null",
     "operator", "or","private","protected","public",
     "return","sizeof","struct","switch",
-    "true","typedef","uint","uint16",
-    "uint32","uint64","uint8","var","while","xor"
+    "true","typedef","while","xor"
 };
 
 // There are 27 keywords in the Quarzum language, but internally,
 // primitive type names are keywords.
 static const int keyword_types[KEYWORDS_SIZE] = {
-    T_KEYWORD_ALLOC ,T_LOGICAL_OP, T_TYPE, T_KEYWORD_BREAK, T_KEYWORD_CASE,
-    T_TYPE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT,
-    T_KEYWORD_DELETE,T_KEYWORD_DESTRUCTOR, T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, T_SPECIFIER,
-    T_TYPE, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN,
-    T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_TYPE, T_KEYWORD_MODULE, T_KEYWORD_NEW,
-    T_UNARY, T_NULL_LITERAL, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
+    T_KEYWORD_ALLOC ,T_LOGICAL_OP, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, 
+    T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT, T_KEYWORD_DELETE,T_KEYWORD_DESTRUCTOR, 
+    T_KEYWORD_DO, T_KEYWORD_ELSE, T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH,
+    T_SPECIFIER, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN, T_KEYWORD_MODULE, T_KEYWORD_NEW,
+    T_UNARY, T_NULL_LITERAL,
     T_KEYWORD_OPERATOR, T_LOGICAL_OP, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
     T_KEYWORD_SIZEOF, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
-    T_KEYWORD_TYPEDEF, T_TYPE, T_TYPE, T_TYPE, T_TYPE,
-    T_TYPE, T_TYPE, T_KEYWORD_WHILE, T_LOGICAL_OP
+    T_KEYWORD_TYPEDEF, T_KEYWORD_WHILE, T_LOGICAL_OP
 
 };
 
@@ -291,7 +288,8 @@ enum {
     TY_CUSTOM,
     TY_VAR, // "var" is basically a pointer of any type
     TY_NULL,
-    TY_PTR 
+    TY_PTR,
+    TY_MODULE 
 };
 
 #define CONST_FLAG      0b00000001
@@ -311,7 +309,7 @@ typedef struct {
     uint8_t flags;
 } type;
 
-static type* ty_function = &(type){TY_FUNCTION,"function", 1, 1};
+static type* ty_function = &(type){TY_FUNCTION,"function", 0, 0};
 static type* ty_bool =     &(type){TY_INT,"bool", 1, 1, UNSIGNED_FLAG};
 static type* ty_char =     &(type){TY_INT,"char", 1, 1};
 
@@ -333,10 +331,13 @@ static type* ty_string =   &(type){TY_PTR,"char*", 8, 8, POINTER_FLAG};
 static type* ty_var =      &(type){TY_VAR,"var", 8, 8, POINTER_FLAG};
 static type* ty_null =     &(type){TY_NULL,"null",0,0};
 
+static type* ty_module = &(type){TY_MODULE,"module",0,0};
+
+extern hashmap* type_map;
 
 hashmap* init_type_map();
 
-bool compare_types(type* a, type* b);
+int compare_types(type* a, type* b);
 type* merge_types(type* a, type* b, char op);
 void convert_to_pointer(type* t);
 
@@ -380,26 +381,19 @@ enum {
 typedef struct {
     uint8_t type;
     vector* children;
+    uint32_t line, column;
 } node;
 
 void* n_get(node* n, uint32_t index);
 
-typedef struct {
-    node* ast;
-    hashmap* symbol_table;
-    hashmap* type_table;
-    bool has_errors;
-} parse_tree;
-
-node* init_node(uint32_t children, uint8_t type);
+node* init_node(uint32_t children, uint8_t type, uint32_t line, uint32_t column);
 void expect(token* t, uint8_t type, char* what);
 type* parse_type(lexer* lexer);
-parse_tree* parse(char* file);
-void free_parse_tree(parse_tree* tree);
+node* parse(char* file);
 
 
 #ifndef NULL_EXPR
-#define NULL_EXPR init_node(0, N_NULL_EXPR)
+#define NULL_EXPR init_node(0, N_NULL_EXPR, 0, 0)
 #endif 
 
 
@@ -412,6 +406,7 @@ node* parse_expr(lexer* lexer);
 // 
 //  symbol.c
 //
+extern hashmap* symbol_table;
 
 enum {
     S_GLOBAL,
@@ -429,8 +424,7 @@ enum {
 };
 
 typedef struct {
-    char* mangled_name;
-    char* name;
+    char *mangled_name, *name;
     type* type;
     int8_t scope;
 
@@ -439,65 +433,16 @@ typedef struct {
 
 typedef struct {
     uint8_t min_args;
-    vector* args;
-    vector* optional_values;
-
-    vector* local_vars;
+    vector *args, *optional_values, *local_vars;
     uint32_t align;
 } function_info;
 
-char* mangle_name(symbol* s, string* last_namespace);
-char* mangle_namespace(char* id, string* last_namespace);
+char* mangle_name(symbol* s);
+char* mangle_namespace(char* id, char* last_namespace);
 //
 //  check.c
 //
 
-bool check_parse_tree(parse_tree* tree);
-//
-//  codegen.c
-//
-
-typedef struct {
-    string* data_section;
-    string* bss_section;
-    string* text_section;
-} asm_code;
-
-asm_code* code_gen(vector* ir);
-
-//
-//  ir.c
-//
-enum {
-    I_GLOBAL,
-    I_ASSIGN,
-    I_EXIT,
-    I_FUNCTION,
-    I_CALL,
-    I_PARAM,
-    I_LEAVERET,
-    I_BRANCH,
-    I_CMPTRUE,
-    I_IF,
-    I_NIF,
-    I_JMP,
-    I_MOV,
-
-    I_ADD
-};
-
-#define INSTRUCTION_LIST_DEFAULT_SIZE 32
-typedef struct {
-    int type;
-    char* dest;
-    char* arg1;
-    char* arg2;
-    void* data;
-} instruction;
-
-vector* generate_ir(node* ast);
-
-#define JMP(dest) vector_push(ir_list, init_instruction(I_JMP, dest, NULL , NULL, NULL))
-#define BRANCH(dest) vector_push(ir_list, init_instruction(I_BRANCH, dest, NULL , NULL, NULL))
+void check_ast(node* tree);
 
 #endif

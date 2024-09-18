@@ -4,7 +4,7 @@ import List from "@std/collections.qz";
 function main(){
     List<uint8> numbers = new List();
 
-    while(true){
+    while(1){
         string i = input("Write a number between 0 and 255: ");
         uint8 number = toUint8(i);
         if(number == null){

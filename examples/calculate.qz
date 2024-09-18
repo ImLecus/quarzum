@@ -1,7 +1,7 @@
 import "@std/console.qz";
 
 function main(){
-    while(true){
+    while(1){
         string first = input("Write a number: ");
         if(toInt(first) == null){
             out("Error: try again");

@@ -1,8 +1,8 @@
 #include "quarzum.h"
-static bool has_errors = false;
-static hashmap* symbol_table;
-static hashmap* type_table;
+static int has_errors = 0;
+hashmap* symbol_table;
 static void check_statement(node* n);
+static char* prefix = "";
 
 
 // Checks if the symbol has been added to the symbol table and
@@ -12,16 +12,16 @@ static void check_symbol(symbol* s){
     symbol* dup = hashmap_get(symbol_table, s->name);
     if(dup && strcmp(dup->mangled_name, s->mangled_name)==0){
         printf(RED"[ERROR] "RESET"Symbol '%s' already exists \n", s->name);
-        has_errors = true;
+        has_errors = 1;
         return;
     }
-    //printf("%s -> %s \n", s->name, s->mangled_name);
+    printf("%s -> %s \n", s->name, s->mangled_name);
     hashmap_add(symbol_table, s->name, s);
     // Functions
     if(s->type->flags & FUNCTION_FLAG){
         function_info* info = s->info;
         for(uint8_t i = 0; i < info->args->len; ++i){
-            check_symbol(info->args->value[i]);
+            //check_symbol(info->args->value[i]);
         }
     }
 }
@@ -29,32 +29,31 @@ static void check_symbol(symbol* s){
 static void check_module(node* module_node){
     symbol* module = n_get(module_node, 0);
     symbol* dup = hashmap_get(symbol_table, module->name);
-    if(dup && strcmp(dup->mangled_name, module->mangled_name) == 0){
+    if(dup){
         printf(RED"[ERROR] "RESET"Module '%s' already exists \n", module->name);
-        has_errors = true;
+        has_errors = 1;
         return;
     }
+    printf("mod: %s \n", module->name);
     hashmap_add(symbol_table, module->name, module);
-    for(uint i = 0; i < module_node->children->len; ++i){
-        check_statement(n_get(module_node, i));
-    }
 }
 
 
-static symbol* try_get_symbol(char* name){
-    symbol* s = hashmap_get(symbol_table, name);
+static symbol* try_get_symbol(char* name, char* prefix){
+    printf("Trying to get symbol %s...\n", mangle_namespace(name, prefix));
+    symbol* s = hashmap_get(symbol_table, mangle_namespace(name, prefix));
     if(!s){
         printf(RED"[ERROR] "RESET"Symbol '%s' does not exist \n", name);
-        has_errors = true;
+        has_errors = 1;
     }
     return s;
 }
 
 static void check_type_compatibility(type* a, type* b){
-    if(!b){has_errors = true; return;}
+    if(!b){has_errors = 1; return;}
     if(!compare_types(a, b)){
         printf(RED"[ERROR] "RESET"Expected '%s'; received '%s'\n", a->name, b->name);
-        has_errors = true;
+        has_errors = 1;
     }
 }
 
@@ -65,12 +64,10 @@ type* unmask_pointer(char* ptr_name){
     if(ptr_name[strlen(ptr_name) - 1] == '*'){
         return &(type){TY_PTR, ptr_name, 8, 8, POINTER_FLAG};
     }
-    return hashmap_get(type_table, ptr_name);
+    return hashmap_get(type_map, ptr_name);
 }
 
 static type* check_expr(node* expr){
-    // check the type rules 
-
     switch (expr->type)
     {
     case N_CAST:
@@ -87,18 +84,20 @@ static type* check_expr(node* expr){
         return unmask_pointer(array_type->name);
     case N_TERNARY_EXPR:
 
-        node* if_true = expr->children->value[1];
-        node* if_false = expr->children->value[2];
-        symbol* if_true_symbol = if_true->children->value[1];
+        node* if_1 = n_get(expr, 1);
+        check_expr(if_1);
+        node* if_false = n_get(expr, 2);
+        check_expr(if_false);
+        symbol* if_1_symbol = if_1->children->value[1];
         symbol* if_false_symbol = if_false->children->value[1];
 
-        if(compare_types(if_true_symbol->type, if_false_symbol->type)){
-            return if_true_symbol->type;
+        if(compare_types(if_1_symbol->type, if_false_symbol->type)){
+            return if_1_symbol->type;
         }
         return ty_var;
 
     case N_IDENTIFIER:
-        symbol* sym = try_get_symbol(expr->children->value[0]);
+        symbol* sym = try_get_symbol(expr->children->value[0], prefix);
         if(!sym){
             break;
         }
@@ -106,36 +105,42 @@ static type* check_expr(node* expr){
     case N_BINARY_EXPR:
         type* left = check_expr(expr->children->value[0]);
         type* right = check_expr(expr->children->value[1]);
-        return merge_types(left, right, expr->children->value[2]);
+        return left;//merge_types(left, right, expr->children->value[2]);
     case N_LITERAL:
-        return expr->children->value[1];
+        return n_get(expr, 1);
 
     case N_MEMBER_EXPR:
         node* parent = n_get(expr, 0);
         node* child = n_get(expr, 1);
-        
+
         // Gets the parent type and checks if the combined 
         // name matches (int t; t.to_string() => int::to_string)
         type* base = check_expr(parent);
-            
-       
-
+        if(base){
+            prefix = base->name;
+            if(base->type == TY_MODULE){
+                symbol* namespace = n_get(parent, 0);
+                prefix = namespace->name;
+            }
+        }
+        
         return check_expr(child);
     case N_CALL_EXPR:
         uint8_t args = expr->children->len - 1;
-        symbol* s = try_get_symbol(expr->children->value[0]);
+        symbol* s = try_get_symbol(expr->children->value[0], prefix);
         if(!s){
             break;
         }
+        // printf(s->name);
         function_info* i = s->info;
         if(!i){
             printf(RED"[ERROR] "RESET"Symbol '%s' is not a callable function \n");
-            has_errors = true;
+            has_errors = 1;
             break;
         }
         if(args > i->args->len || args < i->min_args){
             printf(RED"[ERROR] "RESET"Incorrect number of arguments for call '%s'\n");
-            has_errors = true;
+            has_errors = 1;
             break;
         }
 
@@ -175,6 +180,7 @@ static void check_var(node* var){
     check_symbol(s);
     node* expr = n_get(var, 1);
     check_type_compatibility(s->type, check_expr(expr));
+    prefix = "";
 }
 
 static void check_lambda(node* lambda){
@@ -182,6 +188,7 @@ static void check_lambda(node* lambda){
     check_symbol(s);
     node* expr = lambda->children->value[1];
     check_type_compatibility(s->type, check_expr(expr));
+    prefix = "";
 }
 
 static void check_function_statement(node* n, type* t){
@@ -197,7 +204,7 @@ static void check_function_statement(node* n, type* t){
         type* return_type = check_expr(n_get(n, 0));
         if(!compare_types(t, return_type)){
             printf(RED "[ERROR] " RESET "Expected a return type '%s', received '%s'\n", t->name, return_type->name);
-            has_errors=true;
+            has_errors=1;
         }
         break;
     default:
@@ -248,16 +255,13 @@ static void check_statement(node* n){
     }
 }
 
-bool check_parse_tree(parse_tree* tree){
-    if(!tree){
-        return 0;
+void check_ast(node* ast){
+    if(!ast){
+        return;
     }
-    symbol_table = tree->symbol_table;
-    type_table = tree->type_table;
-    
-    for(uint32_t i = 0; i < tree->ast->children->len; ++i){
-        node* n = tree->ast->children->value[i];
+    symbol_table = init_hashmap(128);
+    for(uint32_t i = 0; i < ast->children->len; ++i){
+        node* n = ast->children->value[i];
         check_statement(n);
     }
-    return has_errors;
 }

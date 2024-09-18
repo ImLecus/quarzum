@@ -23,26 +23,25 @@ static void mangle_type(type* t, string* mangled_name){
     }
 }
 
-char* mangle_namespace(char* id, string* last_namespace){
-    string* ns = init_string(strlen(last_namespace->value)+strlen(id)+2);
-    string_append(ns, last_namespace);
-    string_append(ns, "::");
+char* mangle_namespace(char* id, char* last_namespace){
+    int len = strlen(last_namespace);
+    string* ns = init_string(len+strlen(id)+2);
+    
+    if( len > 0 ) { 
+        string_append(ns, last_namespace);
+        string_append(ns, "::"); 
+    }
     string_append(ns, id);
     char* result = string_copy(ns);
     free_string(ns);
     return result;
 }
 
-char* mangle_name(symbol* s, string* last_namespace){
+char* mangle_name(symbol* s){
     string* mangled_name = init_string(strlen(s->name)* 2);
     mangle_type(s->type, mangled_name);
     
     string_push(mangled_name, ';');
-    string_append(mangled_name, string_copy(last_namespace));
-    if(last_namespace->len > 0){
-        string_append(mangled_name, "::");
-    }
-    
     string_append(mangled_name, s->name);
 
     if( (s->type->flags & FUNCTION_FLAG) > 0 ){

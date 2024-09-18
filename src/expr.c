@@ -7,7 +7,7 @@ static node* index_expr(lexer* lexer, node* array);
 // Returns an expression with the form [expr].[expr]
 static node* member_expr(lexer* lexer, node* parent){
     read_next(lexer);
-    node* member = init_node(2, N_MEMBER_EXPR);
+    node* member = init_node(2, N_MEMBER_EXPR, lexer->line, lexer->column);
     vector_push(member->children, parent);
     node* child = non_literal_expr(lexer);
 
@@ -23,7 +23,7 @@ static node* member_expr(lexer* lexer, node* parent){
 
 // Returns an expression with the form [id]([expr]? (,[expr])*)
 static node* call_expr(lexer* lexer, char* id){
-    node* expr = init_node(2, N_CALL_EXPR);
+    node* expr = init_node(2, N_CALL_EXPR, lexer->line, lexer->column);
     vector_push(expr->children, id);
     read_next(lexer);
     while(lexer->tok->type != T_RIGHT_PAR){
@@ -40,7 +40,7 @@ static node* call_expr(lexer* lexer, char* id){
 }
 
 static node* literal_expr(lexer* lexer, type* t){
-    node* lit_expr = init_node(2, N_LITERAL);
+    node* lit_expr = init_node(2, N_LITERAL, lexer->line, lexer->column);
     type* lit_type = malloc(sizeof(type));
     vector_push(lit_expr->children, lexer->tok->value);
     memcpy(lit_type, t, sizeof(type));
@@ -49,8 +49,8 @@ static node* literal_expr(lexer* lexer, type* t){
     return lit_expr;
 }
 
-static node* paren_expr(node* expr){
-    node* par_expr = init_node(1, N_PAREN_EXPR);
+static node* paren_expr(lexer* lexer, node* expr){
+    node* par_expr = init_node(1, N_PAREN_EXPR, lexer->line, lexer->column);
     vector_push(par_expr->children, expr);
     return par_expr;
 }
@@ -61,13 +61,13 @@ static node* non_literal_expr(lexer* lexer){
     if(lexer->tok->type == T_LEFT_PAR){
         return call_expr(lexer, id);
     } 
-    node* id_expr = init_node(1,N_IDENTIFIER);
+    node* id_expr = init_node(1,N_IDENTIFIER, lexer->line, lexer->column);
     vector_push(id_expr->children, id);
     return id_expr;
 }
 
 static node* cast_expr(lexer* lexer){
-    node* cast = init_node(2, N_CAST);
+    node* cast = init_node(2, N_CAST, lexer->line, lexer->column);
     type* t = parse_type(lexer);
     vector_push(cast->children, t);
     expect(lexer->tok, T_RIGHT_SQUARE, "]");
@@ -77,7 +77,7 @@ static node* cast_expr(lexer* lexer){
 }
 
 static node* index_expr(lexer* lexer, node* array){
-    node* expr = init_node(2, N_INDEX_EXPR);
+    node* expr = init_node(2, N_INDEX_EXPR, lexer->line, lexer->column);
     vector_push(expr->children, array);
     read_next(lexer);
     node* index = parse_expr(lexer);
@@ -121,7 +121,7 @@ static node* parse_primary_expr(lexer* lexer){
         node* expr = parse_expr(lexer);
         expect(lexer->tok, T_RIGHT_PAR, "')'");
         read_next(lexer);
-        return paren_expr(expr);
+        return paren_expr(lexer, expr);
     case T_LEFT_SQUARE:
         read_next(lexer);
         return cast_expr(lexer);
@@ -162,7 +162,7 @@ node* parse_expr(lexer* lexer){
         read_next(lexer);
         node* right = parse_expr(lexer);
 
-        node* binary = init_node(3, N_BINARY_EXPR);
+        node* binary = init_node(3, N_BINARY_EXPR, lexer->line, lexer->column);
         vector_push(binary->children, left);
         vector_push(binary->children, right);
         vector_push(binary->children, &op);
@@ -173,15 +173,15 @@ node* parse_expr(lexer* lexer){
 
     if(lexer->tok->type == T_TERNARY_OP){
         read_next(lexer);
-        node* if_true = parse_expr(lexer);
+        node* if_1 = parse_expr(lexer);
         
         expect(lexer->tok, T_COLON, "':'");
         read_next(lexer);
         node* if_false = parse_expr(lexer);
 
-        node* ternary = init_node(3, N_TERNARY_EXPR);
+        node* ternary = init_node(3, N_TERNARY_EXPR, lexer->line, lexer->column);
         vector_push(ternary->children, left);
-        vector_push(ternary->children, if_true);
+        vector_push(ternary->children, if_1);
         vector_push(ternary->children, if_false);
         return ternary;
     }

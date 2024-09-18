@@ -24,8 +24,6 @@ foreign char string::pop();
     Strings are not a dynamic array, perform operations
     with them usually creates new strings.
 */
-
-// internamente esto es string::op+(string this, string s)
 foreign string string::operator+(string s);
 foreign string string::operator*(uint n);
 foreign string string::operator-(uint64 n);

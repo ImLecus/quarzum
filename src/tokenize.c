@@ -1,14 +1,18 @@
 #include "quarzum.h"
+#include "core/file.h"
 
 static uint32_t last_line_pos;
 
-bool is_operator(uint8_t t){
+int is_operator(uint8_t t){
     return t == T_EQUAL || t == T_COMPARATION_OP ||
     t == T_ARITHMETIC_OP || t == T_LOGICAL_OP || 
     t == T_BITWISE_OP || t == T_ASSIGN_OP;
 }
 
 lexer* init_lexer(char* filename, char* input){
+    if(strcmp(get_extension(filename), ".qz") != 0){
+        throw_warning(filename,0,0,"File format is not '.qz'");
+    }
     if(!input) return NULL;
     lexer* lex = malloc(sizeof(lexer));
     if(!lex) return NULL;
@@ -132,7 +136,7 @@ static int read_numeric_literal(lexer* lexer){
             return 0;
         }
         if(lexer_peek(lexer) == '.'){
-           printf(RED "[ERROR] " RESET "(%s) Too many decimal points on numeric literal at line %d\n%s", lexer->file, lexer->line, get_error_line(lexer));
+            invalid_decimal_err(lexer->file, lexer->line, lexer->column);
         }
         return 1;
     }
@@ -160,7 +164,7 @@ static int read_numeric_literal(lexer* lexer){
             return 0;
         }
         if(lexer_peek(lexer) == '.'){
-           printf(RED "[ERROR] " RESET "(%s) Too many decimal points on numeric literal at line %d\n%s", lexer->file, lexer->line, get_error_line(lexer));
+           invalid_decimal_err(lexer->file, lexer->line, lexer->column);
         }
         return 1;
     }
@@ -187,8 +191,7 @@ static int read_symbol(lexer* lexer){
     }
     int search = binary_search(lexer->buffer->value, symbols, SYMBOLS_SIZE);
     if(search == -1){
-        printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d\n %s", 
-    lexer->file, string_copy(lexer->buffer), lexer->line, get_error_line(lexer));
+        unexpected_token_err(lexer->file, lexer->line, lexer->column, string_copy(lexer->buffer));
         return T_TOKEN_ERROR;
     }
     return symbol_types[search];
@@ -218,7 +221,7 @@ static void ignore_multi_comment(lexer* lexer){
     lexer_advance(lexer);
 }
 
-static bool check_comment(lexer* lexer){
+static int check_comment(lexer* lexer){
     if(lexer_peek(lexer) == '/'){
         lexer_advance(lexer);
         if(lexer_peek(lexer) == '/'){
@@ -245,13 +248,13 @@ char* get_error_line(lexer* lexer){
     sprintf(lineno, " %d | ", lexer->line);
     string_append(line, lineno);
     
-    bool ignored_spaces = false;
+    int ignored_spaces = 0;
     while(lexer->input[i] != '\n'){
         if(isspace(lexer->input[i]) && !ignored_spaces){
             ++i;
             continue;
         }
-        if(!ignored_spaces){ignored_spaces = true;}
+        if(!ignored_spaces){ignored_spaces = 1;}
         string_push(line, lexer->input[i++]);
     }
     string_push(line, '\n');
@@ -308,8 +311,7 @@ token* next_token(lexer* lexer){
         return new_token(T_EOF, lexer);
     }
     
-    printf(RED "[ERROR] " RESET "(%s) Unexpected token '%s' at line %d\n %s", 
-    lexer->file, string_copy(lexer->buffer), lexer->line, get_error_line(lexer));
+    unexpected_token_err(lexer->file, lexer->line, lexer->column, string_copy(lexer->buffer));
     lexer_advance(lexer);
     return new_token(T_TOKEN_ERROR, lexer);
 }

@@ -1,10 +1,19 @@
 import "@std/console.qz"
 import "@std/string.qz"
 
-function main(string* args){
-    string name = "Quarzum";
-    uint64 len = name.length();
-    out("Hello world!");
-    out(args[0]);
-    string your_name = input();
+num int::out(char* msg){
+    return 5.4;
+}
+
+function num::low(){
+    return;
+}
+
+function main(char** args){
+    int i = 7;
+    
+    i.out("Hello world!").low();
+
+    console.out("me");
+
 }

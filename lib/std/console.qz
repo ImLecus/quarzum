@@ -1,9 +1,11 @@
-
-// Prints a message in console, terminated with the separator character
-foreign function out(char* message, char separator = '\n');
-// Prints a message in console at debug level
-foreign function debug(char* message, char separator = '\n');
-// Returns a string with the console input. Can print a previous message
-foreign char* input(char* message = "");
-// Prints an error message and finishes the program
-foreign function error(char* message);
+/*
+    This module contains all the standard console input/output
+    functions.
+*/
+module console {
+    foreign function out(char* message, char separator = '\n');
+    foreign function debug(char* message, char separator = '\n');
+    foreign char* input(char* message = "");
+    foreign function error(char* message);
+    foreign function table();
+}

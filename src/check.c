@@ -1,6 +1,6 @@
 #include "quarzum.h"
 static int has_errors = 0;
-hashmap* symbol_table;
+hashmap_t* symbol_table;
 static void check_statement(node* n);
 static char* prefix = "";
 
@@ -15,7 +15,7 @@ static void check_symbol(symbol* s){
         has_errors = 1;
         return;
     }
-    printf("%s -> %s \n", s->name, s->mangled_name);
+    //printf("%s -> %s \n", s->name, s->mangled_name);
     hashmap_add(symbol_table, s->name, s);
     // Functions
     if(s->type->flags & FUNCTION_FLAG){
@@ -34,13 +34,13 @@ static void check_module(node* module_node){
         has_errors = 1;
         return;
     }
-    printf("mod: %s \n", module->name);
+    //printf("mod: %s \n", module->name);
     hashmap_add(symbol_table, module->name, module);
 }
 
 
 static symbol* try_get_symbol(char* name, char* prefix){
-    printf("Trying to get symbol %s...\n", mangle_namespace(name, prefix));
+    //printf("Trying to get symbol %s...\n", mangle_namespace(name, prefix));
     symbol* s = hashmap_get(symbol_table, mangle_namespace(name, prefix));
     if(!s){
         printf(RED"[ERROR] "RESET"Symbol '%s' does not exist \n", name);

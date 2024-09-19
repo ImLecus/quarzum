@@ -1,9 +1,14 @@
-#include "quarzum.h"
+/**
+ * \file            type.c
+ * \brief           Quarzum type implementations
+ * \copyright       2024 Marcos González GPL3
+ */
+#include "type.h"
 
-hashmap* type_map;
+hashmap_t* type_map;
 
-hashmap* init_type_map(){
-    hashmap* type_map = init_hashmap(64);
+hashmap_t* init_type_map(){
+    hashmap_t* type_map = init_hashmap(64);
     hashmap_add(type_map, "int8", ty_int8);
     hashmap_add(type_map, "int16", ty_int16);
     hashmap_add(type_map, "int32", ty_int32);
@@ -50,7 +55,7 @@ inline void convert_to_pointer(type* t){
     t->align = 8;
     t->flags |= POINTER_FLAG;
     t->size = 8;
-    string* new_name = init_string(strlen(t->name) + 1);
+    string_t* new_name = init_string(strlen(t->name) + 1);
     string_append(new_name, t->name);
     string_push(new_name, '*');
     t->name = string_copy(new_name);

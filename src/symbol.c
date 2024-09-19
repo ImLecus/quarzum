@@ -1,7 +1,7 @@
 #include "quarzum.h"
 #define USER_DEFINED_PREFIX "_Z"
 
-static void mangle_type(type* t, string* mangled_name){
+static void mangle_type(type* t, string_t* mangled_name){
     if(t->flags & CONST_FLAG){
         string_push(mangled_name, 'C');
     }
@@ -25,7 +25,7 @@ static void mangle_type(type* t, string* mangled_name){
 
 char* mangle_namespace(char* id, char* last_namespace){
     int len = strlen(last_namespace);
-    string* ns = init_string(len+strlen(id)+2);
+    string_t* ns = init_string(len+strlen(id)+2);
     
     if( len > 0 ) { 
         string_append(ns, last_namespace);
@@ -38,7 +38,7 @@ char* mangle_namespace(char* id, char* last_namespace){
 }
 
 char* mangle_name(symbol* s){
-    string* mangled_name = init_string(strlen(s->name)* 2);
+    string_t* mangled_name = init_string(strlen(s->name)* 2);
     mangle_type(s->type, mangled_name);
     
     string_push(mangled_name, ';');

@@ -14,6 +14,6 @@ function main(char** args){
     
     i.out("Hello world!").low();
 
-    console.out("me");
+    //console.out("me");
 
 }

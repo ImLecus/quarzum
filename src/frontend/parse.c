@@ -1,19 +1,20 @@
-#include "quarzum.h"
-static node* parse_statement(lexer* lexer);
-static node* parse_decl(lexer* lexer, int scope);
+#include "parse.h"
+#include "../quarzum.h"
+static node* parse_statement(lexer_t* lexer);
+static node* parse_decl(lexer_t* lexer, int scope);
 
 static int filled = 1;
-static hashmap* imported_files;
-static string* last_namespace;
+static hashmap_t* imported_files;
+static string_t* last_namespace;
 
 /**
  * Initializes static variables one time per program.
  */
-static void start_parsing(lexer* lexer){
+static void start_parsing(lexer_t* lexer){
     if(!imported_files){
         imported_files = init_hashmap(32);
     }
-    hashmap_add(imported_files, lexer->file, &(int){1});
+    hashmap_add(imported_files, lexer->position.file, &(int){1});
     if(!type_map){
         type_map = init_type_map();
     }
@@ -23,15 +24,15 @@ static void start_parsing(lexer* lexer){
 }
 
 static inline void add_namespace(char* namespace){
-    if(last_namespace->len > 0){
+    if(last_namespace->length > 0){
         string_append(last_namespace, "::");
     }
     string_append(last_namespace, namespace);
 }
 
 static void delete_last_namespace(){
-    for(uint32_t i = last_namespace->len; i > 0; --i){
-        if(last_namespace->value[i] == ':' && last_namespace->value[i-1] == ':'){
+    for(uint32_t i = last_namespace->length; i > 0; --i){
+        if(last_namespace->content[i] == ':' && last_namespace->content[i-1] == ':'){
             string_pop(last_namespace);
             string_pop(last_namespace);
             return;
@@ -41,7 +42,7 @@ static void delete_last_namespace(){
     }
 }
 
-inline void* n_get(node* n, uint index){
+inline void* n_get(node* n, unsigned int index){
     return vector_get(n->children, index);
 }
 
@@ -50,16 +51,16 @@ static inline void free_node(node* n){
     free(n);
 }
 
-node* init_node(uint32_t children, uint8_t type, uint32_t line, uint32_t column){
+node* init_node(uint32_t children, uint8_t type, pos_t pos){
     node* n = malloc(sizeof(node));
     n->children = init_vector(children);
     n->type = type;
     return n;
 }
 
-inline void expect(token* t, uint8_t type, char* what){
+inline void expect(token_t* t, uint8_t type, char* what){
     if(t->type != type){
-        expected_token_err(t->file, t->line, t->column, what);
+        expected_token_err(t->position, what);
     }
 }
 
@@ -78,8 +79,8 @@ static function_info* init_function_info(){
 //
 
 // Tries to parse a return statement (RETURN EXPR;) | (RETURN;)
-static node* parse_return_statement(lexer* lexer){
-    node* return_node = init_node(1,N_RETURN, lexer->line, lexer->column);
+static node* parse_return_statement(lexer_t* lexer){
+    node* return_node = init_node(1,N_RETURN, lexer->position);
     read_next(lexer);
     if(lexer->tok->type == T_SEMICOLON){
         vector_push(return_node->children, NULL_EXPR);
@@ -94,8 +95,8 @@ static node* parse_return_statement(lexer* lexer){
 }
 
 // Tries to parse an if statement (IF(expr){statement*})
-static node* parse_if_statement(lexer* lexer){
-    node* if_stmt = init_node(2,N_IF, lexer->line, lexer->column);
+static node* parse_if_statement(lexer_t* lexer){
+    node* if_stmt = init_node(2,N_IF, lexer->position);
     read_next(lexer);
     expect(lexer->tok, T_LEFT_PAR, "'(");
     read_next(lexer);
@@ -117,8 +118,8 @@ static node* parse_if_statement(lexer* lexer){
 }
 
 // Tries to parse a while statement (WHILE(expr){statement*})
-static node* parse_while_statement(lexer* lexer){
-    node* while_stmt = init_node(2,N_WHILE, lexer->line, lexer->column);
+static node* parse_while_statement(lexer_t* lexer){
+    node* while_stmt = init_node(2,N_WHILE, lexer->position);
     read_next(lexer);
     expect(lexer->tok, T_LEFT_PAR, "'(");
     read_next(lexer);
@@ -144,7 +145,7 @@ static node* parse_while_statement(lexer* lexer){
 // - Expressions where the first token is an IDENTIFIER
 // - If, While, DoWhile, For & Foreach statements
 // - Local variables, lambdas or functions
-static node* parse_statement(lexer* lexer){
+static node* parse_statement(lexer_t* lexer){
     switch (lexer->tok->type)
     {
     case T_KEYWORD_RETURN: return parse_return_statement(lexer);
@@ -163,7 +164,7 @@ static node* parse_statement(lexer* lexer){
     case T_SPECIFIER: return parse_decl(lexer, S_LOCAL);
     
     default:
-        throw_error(lexer->file, lexer->line, lexer->column, "Invalid statement");
+        throw_error(lexer->position, "Invalid statement");
         read_next(lexer);
         return NULL;
     }
@@ -171,11 +172,11 @@ static node* parse_statement(lexer* lexer){
     return NULL;
 }
 
-type* parse_type(lexer* lexer){
+type* parse_type(lexer_t* lexer){
     type* t = malloc(sizeof(type));
     type* template = hashmap_get(type_map, lexer->tok->value);
     if(!template){
-        undefined_type_err(lexer->file, lexer->line, lexer->column, lexer->tok->value);
+        undefined_type_err(lexer->position, lexer->tok->value);
         template = ty_null;    
     }
     *t = *template;
@@ -188,8 +189,7 @@ type* parse_type(lexer* lexer){
         }
         if(strcmp(lexer->tok->value, "[") ==  0){
             read_next(lexer);
-            token* tok = lexer->tok;
-            expect(tok, T_INT_LITERAL, "integer literal");
+            expect(lexer->tok, T_INT_LITERAL, "integer literal");
             read_next(lexer);
             expect(lexer->tok, T_RIGHT_SQUARE, "']");
             // apply array and size to the type
@@ -201,7 +201,7 @@ type* parse_type(lexer* lexer){
 }
 
 
-static node* parse_class_statement(lexer* lexer) {
+static node* parse_class_statement(lexer_t* lexer) {
     expect(lexer->tok, T_ACCESS, "attribute or method");
     
     read_next(lexer);
@@ -209,8 +209,8 @@ static node* parse_class_statement(lexer* lexer) {
     return class_stmt_node;
 }
 
-static node* parse_class(lexer* lexer){
-    node* class_node = init_node(3, N_CLASS, lexer->line, lexer->column);
+static node* parse_class(lexer_t* lexer){
+    node* class_node = init_node(3, N_CLASS, lexer->position);
     read_next(lexer);
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     
@@ -236,7 +236,7 @@ static node* parse_class(lexer* lexer){
 /**
  * Parses the sequence SPECIFIER* TYPE ID
  */
-static symbol* parse_symbol(lexer* lexer, int scope){
+static symbol* parse_symbol(lexer_t* lexer, int scope){
     symbol* s = malloc(sizeof(symbol));
     int flags = 0;
     s->scope = scope;
@@ -245,13 +245,13 @@ static symbol* parse_symbol(lexer* lexer, int scope){
         {
         case 'c':
             if(flags & CONST_FLAG){
-                duplicated_flag_warning(lexer->file, lexer->line, lexer->column, "const");
+                duplicated_flag_warning(lexer->position, "const");
             }
             flags |= CONST_FLAG;
             break;
         case 'f':
             if(flags & FOREIGN_FLAG){
-                duplicated_flag_warning(lexer->file, lexer->line, lexer->column, "foreign");            
+                duplicated_flag_warning(lexer->position, "foreign");            
             }
             flags |= FOREIGN_FLAG;
             break;
@@ -284,7 +284,7 @@ static symbol* parse_symbol(lexer* lexer, int scope){
         }
     }
     expect(lexer->tok, T_IDENTIFIER, "identifier");
-    s->name = mangle_namespace(lexer->tok->value, last_namespace->value);
+    s->name = mangle_namespace(lexer->tok->value, last_namespace->content);
     s->mangled_name = mangle_name(s);    
     return s;
 }
@@ -294,8 +294,8 @@ static symbol* parse_symbol(lexer* lexer, int scope){
 //
 
 // Tries to parse a variable statement (symbol = expr;) | (symbol;)
-static node* parse_var(lexer* l, symbol* s, int has_value){
-    node* var_node = init_node(2, N_VAR, l->line, l->column);
+static node* parse_var(lexer_t* l, symbol* s, int has_value){
+    node* var_node = init_node(2, N_VAR, l->position);
     vector_push(var_node->children, s);
     if(has_value){
         expect(l->tok, T_EQUAL, "'='");
@@ -313,7 +313,7 @@ static node* parse_var(lexer* l, symbol* s, int has_value){
 }
 
 // Tries to parse a lambda function (symbol(args) => expr;) | (symbol(args) => {expr};)
-static node* parse_lambda(lexer* lexer,symbol* s){
+static node* parse_lambda(lexer_t* lexer,symbol* s){
     s->type->flags |= LAMBDA_FLAG;
     s->type->flags |= FUNCTION_FLAG;
     int inside_curly_brackets = lexer->tok->type == T_LEFT_CURLY;
@@ -328,7 +328,7 @@ static node* parse_lambda(lexer* lexer,symbol* s){
     expect(lexer->tok, T_SEMICOLON, "semicolon");
     read_next(lexer);
 
-    node* lambda = init_node(2, N_LAMBDA, lexer->line, lexer->column);
+    node* lambda = init_node(2, N_LAMBDA, lexer->position);
     vector_push(lambda->children, s);
 
 
@@ -336,8 +336,8 @@ static node* parse_lambda(lexer* lexer,symbol* s){
     return lambda;
 }
 
-static node* parse_enum(lexer* l, symbol* s){
-    node* enum_node = init_node(2, N_ENUM, l->line, l->column);
+static node* parse_enum(lexer_t* l, symbol* s){
+    node* enum_node = init_node(2, N_ENUM, l->position);
     vector_push(enum_node->children, s);
     expect(l->tok, T_LEFT_CURLY, "'{'");
     read_next(l);
@@ -357,7 +357,7 @@ static node* parse_enum(lexer* l, symbol* s){
 /**
  * Parses the sequence "struct" ID "{" ([symbol]";")* "}"
  */
-static void parse_struct(lexer* l){
+static void parse_struct(lexer_t* l){
     read_next(l);
     expect(l->tok, T_IDENTIFIER, "identifier");
     char* id = l->tok->value;
@@ -381,7 +381,7 @@ static void parse_struct(lexer* l){
 
     type* duplicated = hashmap_get(type_map, id);
     if(duplicated){
-        duplicated_type_err(l->file, l->line, l->column, id);
+        duplicated_type_err(l->position, id);
         read_next(l);
         return;
     }
@@ -389,12 +389,12 @@ static void parse_struct(lexer* l){
     read_next(l);
 }
 
-static node* parse_class_special_methods(lexer* lexer){
+static node* parse_class_special_methods(lexer_t* lexer){
 
     return NULL;
 }   
 
-static function_info* parse_function_args(lexer* lexer){
+static function_info* parse_function_args(lexer_t* lexer){
     function_info* info = init_function_info();
     read_next(lexer);
     int optional_args = 0;
@@ -426,7 +426,7 @@ static function_info* parse_function_args(lexer* lexer){
     return info;
 }
 
-static node* parse_decl(lexer* lexer, int scope){
+static node* parse_decl(lexer_t* lexer, int scope){
     if(scope == S_CLASS && 
     (lexer->tok->type == T_KEYWORD_CONSTRUCTOR ||
     lexer->tok->type == T_KEYWORD_DESTRUCTOR)){
@@ -456,7 +456,7 @@ static node* parse_decl(lexer* lexer, int scope){
             return parse_lambda(lexer, s);
         }
 
-        node* func_decl_node = init_node(2,N_FUNCTION, lexer->line, lexer->column);
+        node* func_decl_node = init_node(2,N_FUNCTION, lexer->position);
         vector_push(func_decl_node->children, s);
         
         if(lexer->tok->type == T_LEFT_CURLY){
@@ -488,7 +488,7 @@ static node* parse_decl(lexer* lexer, int scope){
 // - Classes
 // - Structs
 // - Enums
-static node* parse_global(lexer* lexer){
+static node* parse_global(lexer_t* lexer){
     switch (lexer->tok->type)
     {
     case T_KEYWORD_CLASS: return parse_class(lexer);
@@ -498,7 +498,7 @@ static node* parse_global(lexer* lexer){
     case T_IDENTIFIER: return parse_decl(lexer, S_GLOBAL);
 
     default:
-        unexpected_token_err(lexer->file, lexer->line, lexer->column, lexer->tok->value);        read_next(lexer);
+        unexpected_token_err(lexer->position, lexer->tok->value);        read_next(lexer);
         break;
     }
     return NULL;
@@ -509,14 +509,14 @@ static node* parse_global(lexer* lexer){
 // 
 
 // Tries to parse a module (MODULE ID { (module | global)* })
-static node* parse_module(lexer* lexer){
-    node* module_node = init_node(2, N_MODULE, lexer->line, lexer->column);
+static node* parse_module(lexer_t* lexer){
+    node* module_node = init_node(2, N_MODULE, lexer->position);
     read_next(lexer);
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     char* id = lexer->tok->value;
 
     symbol* s = malloc(sizeof(symbol));
-    s->name = mangle_namespace(id, last_namespace->value);
+    s->name = mangle_namespace(id, last_namespace->content);
     s->type = ty_module;
     s->mangled_name = NULL;
     
@@ -542,7 +542,7 @@ static node* parse_module(lexer* lexer){
 
 // Tries to parse an import (IMPORT STRING) and merges the target AST
 // with the main one.
-static void parse_import(lexer* lexer, node* ast){
+static void parse_import(lexer_t* lexer, node* ast){
     read_next(lexer);
     expect(lexer->tok, T_STRING_LITERAL, "import path");
     char* path = resolve_path(delete_quotes(lexer->tok->value));
@@ -563,7 +563,7 @@ static void parse_import(lexer* lexer, node* ast){
 // Tries to parse a type definition (TYPEDEF ID = type)
 // Internally, creates an entry on the type table pointing
 // to the type.
-static void parse_typedef(lexer* lexer){
+static void parse_typedef(lexer_t* lexer){
     read_next(lexer);
     char* id = lexer->tok->value;
     expect(lexer->tok, T_IDENTIFIER, "type name");
@@ -580,31 +580,30 @@ static void parse_typedef(lexer* lexer){
 // Parses a list of tokens and returns a ParseTree containing 
 // the AST, the type table and the symbol table.
 node* parse(char* file){
-    string* input = read_file(file);
+    string_t* input = read_file(file);
     if(!input){return NULL;}
-    lexer* lexer = init_lexer(file,input->value);
-    if(!lexer){return NULL;}
-    start_parsing(lexer);
+    lexer_t lexer = *init_lexer(file, input->content);
+    if(!&lexer){return NULL;}
+    start_parsing(&lexer);
 
-    read_next(lexer);
-    node* ast = init_node(16, N_ROOT, lexer->line, lexer->column);
-    while (lexer->tok->type != T_EOF)
+    read_next(&lexer);
+    node* ast = init_node(16, N_ROOT, lexer.position);
+    while (lexer.tok->type != T_EOF)
     {
-        switch(lexer->tok->type){
+        switch(lexer.tok->type){
             case T_KEYWORD_IMPORT:
-                parse_import(lexer, ast);
+                parse_import(&lexer, ast);
                 break;
             case T_KEYWORD_MODULE:
-                vector_push(ast->children, parse_module(lexer));  
+                vector_push(ast->children, parse_module(&lexer));  
                 break;
             case T_KEYWORD_TYPEDEF:
-                parse_typedef(lexer);
+                parse_typedef(&lexer);
                 break;
             default:
-                vector_push(ast->children, parse_global(lexer));  
+                vector_push(ast->children, parse_global(&lexer));  
                 break;
         } 
     }
-    free(lexer);
     return ast;
 }

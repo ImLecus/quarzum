@@ -1,5 +1,0 @@
-import "@std/console.qz";
-
-function main(){
-    out("Hello world!");
-}

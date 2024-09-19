@@ -1,13 +1,13 @@
 #include "quarzum.h"
 
-static node* call_expr(lexer* lexer, char* id);
-static node* non_literal_expr(lexer* lexer);
-static node* index_expr(lexer* lexer, node* array);
+static node* call_expr(lexer_t* lexer, char* id);
+static node* non_literal_expr(lexer_t* lexer);
+static node* index_expr(lexer_t* lexer, node* array);
 
 // Returns an expression with the form [expr].[expr]
-static node* member_expr(lexer* lexer, node* parent){
+static node* member_expr(lexer_t* lexer, node* parent){
     read_next(lexer);
-    node* member = init_node(2, N_MEMBER_EXPR, lexer->line, lexer->column);
+    node* member = init_node(2, N_MEMBER_EXPR, lexer->position);
     vector_push(member->children, parent);
     node* child = non_literal_expr(lexer);
 
@@ -22,8 +22,8 @@ static node* member_expr(lexer* lexer, node* parent){
 }
 
 // Returns an expression with the form [id]([expr]? (,[expr])*)
-static node* call_expr(lexer* lexer, char* id){
-    node* expr = init_node(2, N_CALL_EXPR, lexer->line, lexer->column);
+static node* call_expr(lexer_t* lexer, char* id){
+    node* expr = init_node(2, N_CALL_EXPR, lexer->position);
     vector_push(expr->children, id);
     read_next(lexer);
     while(lexer->tok->type != T_RIGHT_PAR){
@@ -39,8 +39,8 @@ static node* call_expr(lexer* lexer, char* id){
     return expr;
 }
 
-static node* literal_expr(lexer* lexer, type* t){
-    node* lit_expr = init_node(2, N_LITERAL, lexer->line, lexer->column);
+static node* literal_expr(lexer_t* lexer, type* t){
+    node* lit_expr = init_node(2, N_LITERAL, lexer->position);
     type* lit_type = malloc(sizeof(type));
     vector_push(lit_expr->children, lexer->tok->value);
     memcpy(lit_type, t, sizeof(type));
@@ -49,25 +49,25 @@ static node* literal_expr(lexer* lexer, type* t){
     return lit_expr;
 }
 
-static node* paren_expr(lexer* lexer, node* expr){
-    node* par_expr = init_node(1, N_PAREN_EXPR, lexer->line, lexer->column);
+static node* paren_expr(lexer_t* lexer, node* expr){
+    node* par_expr = init_node(1, N_PAREN_EXPR, lexer->position);
     vector_push(par_expr->children, expr);
     return par_expr;
 }
 
-static node* non_literal_expr(lexer* lexer){
+static node* non_literal_expr(lexer_t* lexer){
     char* id = lexer->tok->value;
     read_next(lexer);
     if(lexer->tok->type == T_LEFT_PAR){
         return call_expr(lexer, id);
     } 
-    node* id_expr = init_node(1,N_IDENTIFIER, lexer->line, lexer->column);
+    node* id_expr = init_node(1,N_IDENTIFIER, lexer->position);
     vector_push(id_expr->children, id);
     return id_expr;
 }
 
-static node* cast_expr(lexer* lexer){
-    node* cast = init_node(2, N_CAST, lexer->line, lexer->column);
+static node* cast_expr(lexer_t* lexer){
+    node* cast = init_node(2, N_CAST, lexer->position);
     type* t = parse_type(lexer);
     vector_push(cast->children, t);
     expect(lexer->tok, T_RIGHT_SQUARE, "]");
@@ -76,8 +76,8 @@ static node* cast_expr(lexer* lexer){
     return cast;
 }
 
-static node* index_expr(lexer* lexer, node* array){
-    node* expr = init_node(2, N_INDEX_EXPR, lexer->line, lexer->column);
+static node* index_expr(lexer_t* lexer, node* array){
+    node* expr = init_node(2, N_INDEX_EXPR, lexer->position);
     vector_push(expr->children, array);
     read_next(lexer);
     node* index = parse_expr(lexer);
@@ -94,12 +94,12 @@ static node* index_expr(lexer* lexer, node* array){
     return expr;
 }
 
-static node* stack_var_expr(lexer* lexer){
+static node* stack_var_expr(lexer_t* lexer){
    
     return NULL;
 }
 
-static node* parse_primary_expr(lexer* lexer){
+static node* parse_primary_expr(lexer_t* lexer){
     switch (lexer->tok->type)
     {
     case T_INT_LITERAL:
@@ -139,14 +139,14 @@ static node* parse_primary_expr(lexer* lexer){
     case T_KEYWORD_NEW:
         return stack_var_expr(lexer);
     default:
-        printf(RED"[ERROR]"RESET" (%s) Invalid expression at line %d\n", lexer->file, lexer->line); 
+        printf(RED"[ERROR]"RESET" (%s) Invalid expression at line %d\n", lexer->position.file, lexer->position.line); 
         break;
     }
 
     return NULL;
 }
 
-node* parse_expr(lexer* lexer){
+node* parse_expr(lexer_t* lexer){
     node* left = parse_primary_expr(lexer);
     if(!left){
         return NULL_EXPR;
@@ -162,7 +162,7 @@ node* parse_expr(lexer* lexer){
         read_next(lexer);
         node* right = parse_expr(lexer);
 
-        node* binary = init_node(3, N_BINARY_EXPR, lexer->line, lexer->column);
+        node* binary = init_node(3, N_BINARY_EXPR, lexer->position);
         vector_push(binary->children, left);
         vector_push(binary->children, right);
         vector_push(binary->children, &op);
@@ -179,7 +179,7 @@ node* parse_expr(lexer* lexer){
         read_next(lexer);
         node* if_false = parse_expr(lexer);
 
-        node* ternary = init_node(3, N_TERNARY_EXPR, lexer->line, lexer->column);
+        node* ternary = init_node(3, N_TERNARY_EXPR, lexer->position);
         vector_push(ternary->children, left);
         vector_push(ternary->children, if_1);
         vector_push(ternary->children, if_false);

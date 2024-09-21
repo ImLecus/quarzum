@@ -5,8 +5,6 @@
  */
 #ifndef LEXER_H
 #define LEXER_H
-#include "../core/string.h"
-#include "../core/error.h"
 #include "../core/file.h"
 #include "../core/vector.h"
 
@@ -15,14 +13,9 @@
  */
 typedef enum {
     T_TOKEN_ERROR,
-    T_LOGICAL_OP,
     T_SPECIFIER,
     T_UNARY,
     T_ACCESS,
-    T_TYPE,
-    T_BITWISE_OP,
-    T_ARITHMETIC_OP,
-    T_ASSIGN_OP,
     T_IDENTIFIER,
     T_EOF,
     T_SYMBOL,
@@ -64,18 +57,22 @@ typedef enum {
     T_DOT,
     T_COLON,
     T_SEMICOLON,
-    T_COMPARATION_OP,
+    T_KEYWORD_OPERATOR,
+    T_TYPE_EXTENSION_OP,
     T_TERNARY_OP,
     T_LEFT_SQUARE,
     T_RIGHT_SQUARE,
     T_LEFT_CURLY,
     T_RIGHT_CURLY,
     T_ARROW,
-    T_EQUAL,
-    T_KEYWORD_OPERATOR,
-    T_TYPE_EXTENSION_OP
+    T_EQUAL = 0xf0,
+    T_COMPARATION_OP = 0xf1,
+    T_LOGICAL_OP = 0xf2,
+    T_BITWISE_OP = 0xf3,
+    T_ARITHMETIC_OP = 0xf4,
+    T_ASSIGN_OP = 0xf5
 } token_type_t;
-
+#define IS_OPERATOR(t) (uint8_t)(t) >= 0xf0
 /**
  * Keywords and symbols
  * --------------------
@@ -147,12 +144,6 @@ typedef struct {
 } lexer_t;
 
 /**
- * \brief           Returns 1 if the token type is an operator,
- *                  0 otherwise.
- */
-int is_operator(token_type_t t);
-
-/**
  * \brief           Allocates a `lexer_t` on the heap.
  * \returns         A pointer to the allocated `lexer_t`
  * \warning         The function will return `NULL` if the
@@ -173,7 +164,7 @@ token_t* next_token(lexer_t* lexer);
  * \brief           Tells the lexer to read the next token
  *                  and stores it in `lexer->tok`
  */
-void read_next(lexer_t* lexer);
+void next(lexer_t* lexer);
 
 
 #define DEFAULT_TOKENIZER_BUFFER_SIZE 10

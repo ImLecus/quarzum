@@ -60,7 +60,8 @@ int hash(char* key, int len, uint32_t seed){
 
 void* hashmap_get(hashmap_t* map, char* key){
     int hashed_key = hash(key, strlen(key), HASH_SEED)%map->size;
-    if(map->content[hashed_key] != NULL){
+
+    if(hashed_key < map->size && map->content[hashed_key] != NULL){
         if(strcmp(map->content[hashed_key]->key, key) != 0){
             for(unsigned int i = hashed_key; i < map->size; ++i){
                 if(map->content[i] != NULL && strcmp(map->content[i]->key, key) == 0){

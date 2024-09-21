@@ -1,5 +1,9 @@
-// File: error.c
-// Description: Quarzum error handling implementation
+/**
+ * \file            error.c
+ * \brief           Error handling implementation for the
+ *                  Quarzum compiler
+ * \copyright       2024 Marcos González GPL3
+ */
 #include "error.h"
 
 error_t ERROR_LIST[MAX_ERRORS];
@@ -82,18 +86,22 @@ inline void undefined_type_err(pos_t pos, char* typename){
     throw_error(pos, message);  
 }
 
-void duplicated_flag_warning(pos_t pos, char* flag){
+inline void duplicated_flag_warning(pos_t pos, char* flag){
     char* message;
     sprintf(message, "Duplicated flag '%s'", flag);
     throw_error(pos, message); 
 }
 
-void duplicated_symbol_err(pos_t pos, char* symbol){
+inline void duplicated_symbol_err(pos_t pos, char* symbol){
     char* message;
     sprintf(message, "Symbol '%s' already exists", symbol);
     throw_error(pos, message); 
 }
 
-void file_not_found_err(char* filename){
+inline void file_not_found_err(char* filename){
     throw_error((pos_t){-1, 0, filename}, "File not found");
+}
+
+inline void invalid_expr_err(pos_t pos){
+    throw_error(pos, "Invalid expression");
 }

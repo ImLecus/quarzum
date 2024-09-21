@@ -1,4 +1,9 @@
-#include "quarzum.h"
+/**
+ * \file            process.c
+ * \brief           Process implementation file.
+ * \copyright       2024 Marcos González GPL3
+ */
+#include "process.h"
 
 inline struct process start_process(char* name){
     return (struct process){

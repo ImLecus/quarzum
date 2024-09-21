@@ -61,4 +61,6 @@ void duplicated_symbol_err(pos_t pos, char* symbol);
 
 void file_not_found_err(char* filename);
 
+void invalid_expr_err(pos_t pos);
+
 #endif

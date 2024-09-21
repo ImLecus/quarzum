@@ -1,4 +1,4 @@
-#include "quarzum.h"
+#include "symbol.h"
 #define USER_DEFINED_PREFIX "_Z"
 
 static void mangle_type(type* t, string_t* mangled_name){

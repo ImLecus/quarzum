@@ -3,7 +3,7 @@
 int main(int argc, char** argv) {
     struct process task = start_process("Task");
     // Lexical & Syntax analisys
-    node* ast = parse("code.qz");
+    node_t* ast = parse("code.qz");
     check_errors();
     // Semantic analisys
     check_ast(ast);

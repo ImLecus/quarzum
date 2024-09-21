@@ -11,38 +11,38 @@
  * \brief           Defines a vector, a dynamic array of any type.
  */
 typedef struct {
-    unsigned int size, len;
+    uint32_t size, len;
     void** value;
-} vector;
+} vector_t;
 
 /**
  * \brief           Allocates a `vector_t` with a determined size on 
  *                  the heap.
  * \returns         A pointer to a `vector_t` or `NULL` in case of error.
  */
-vector* init_vector(unsigned int size);
+vector_t* init_vector(uint32_t size);
 
 /**
  * \brief           Frees an allocated `vector_t`.
  */
-void free_vector(vector* v);
+void free_vector(vector_t* v);
 
 /**
  * \brief           Adds a new value at the end of an existing `vector_t`.
  */
-void vector_push(vector* v, void* element);
+void vector_push(vector_t* v, void* element);
 
 /**
  * \brief           Deletes the last value of a `vector_t` without returning it.
  */
-void vector_pop(vector* v);
+void vector_pop(vector_t* v);
 
 /**
  * \brief           Gets the nth element of a `vector_t`.
  * \warning         Returns `NULL` if n is greater than the
  *                  vector length.
  */
-void* vector_get(vector* v, unsigned int index);
+void* vector_get(vector_t* v, uint32_t index);
 
 /**
  * \brief           Searches a symbol inside a list with fixed size.
@@ -51,6 +51,6 @@ void* vector_get(vector* v, unsigned int index);
  * \note            The list must be sorted.
  * \returns         The index of the element inside the list.
  */
-int binary_search(const char* symbol, const char** list, unsigned int size);
+int binary_search(const char* symbol, const char** list, uint32_t size);
 
 #endif

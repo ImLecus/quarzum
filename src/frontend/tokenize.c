@@ -1,11 +1,5 @@
 #include "tokenize.h"
 
-int is_operator(token_type_t t){
-    return t == T_EQUAL || t == T_COMPARATION_OP ||
-    t == T_ARITHMETIC_OP || t == T_LOGICAL_OP || 
-    t == T_BITWISE_OP || t == T_ASSIGN_OP;
-}
-
 lexer_t* init_lexer(char* filename, char* input){
     if(strcmp(get_extension(filename), ".qz") != 0){
         throw_warning((pos_t){0,0,filename},"File format is not '.qz'");
@@ -27,7 +21,7 @@ lexer_t* init_lexer(char* filename, char* input){
 static inline void advance(lexer_t* lexer){
     if(lexer->input[lexer->pos] == '\n'){
         ++lexer->position.line;
-        lexer->position.column = 1;
+        lexer->position.column = 0;
     }
     ++lexer->pos; 
     ++lexer->position.column;
@@ -39,6 +33,7 @@ static inline char peek(lexer_t* lexer){
 }
 
 static inline char consume(lexer_t* lexer){
+    if(lexer->pos > strlen(lexer->input)) return '\0';
     return lexer->input[lexer->pos++];
 }
 
@@ -122,8 +117,7 @@ static inline void read_digit_chain(lexer_t* lexer){
 
 static int read_numeric_literal(lexer_t* lexer){
     string_push(lexer->buffer, peek(lexer));
-    char c = consume(lexer);
-    if(c != '0'){
+    if(consume(lexer) != '0'){
         read_digit_chain(lexer);
         if(peek(lexer) == '.'){
             string_push(lexer->buffer, consume(lexer));
@@ -195,7 +189,7 @@ static int read_symbol(lexer_t* lexer){
 }
 
 static void ignore_comment(lexer_t* lexer){
-    while(peek(lexer) && peek(lexer) != '\n'){
+    while(peek(lexer) != '\n'){
         advance(lexer);
     }
     advance(lexer);
@@ -299,8 +293,7 @@ token_t* next_token(lexer_t* lexer){
                             T_INT_LITERAL, lexer);
     }
     else if(ispunct(c)){
-        int search = read_symbol(lexer);
-        return new_token(search, lexer);
+        return new_token(read_symbol(lexer), lexer);
     }
     else if(c == '\0'){
         return new_token(T_EOF, lexer);
@@ -311,6 +304,6 @@ token_t* next_token(lexer_t* lexer){
     return new_token(T_TOKEN_ERROR, lexer);
 }
 
-inline void read_next(lexer_t* lexer){
+inline void next(lexer_t* lexer){
     lexer->tok = next_token(lexer);
 }

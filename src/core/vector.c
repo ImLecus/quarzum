@@ -7,7 +7,7 @@
 
 #include "vector.h"
 
-vector_t* init_vector(uint32_t size){
+vector_t* init_vector(const uint32_t size){
     vector_t* vec = malloc(sizeof(vector_t));
     if(vec == NULL) return NULL;
     vec->size = size;
@@ -26,7 +26,7 @@ void vector_push(vector_t* v, void* element){
     if(v == NULL) return;
     // Tries to reallocate the vector_t if it's full
     if(v->len >= v->size){
-        unsigned int new_size = v->size*2;
+        const unsigned int new_size = v->size*2;
         v->value = realloc(v->value,sizeof(void*)*new_size);
         if(!v->value){
             printf("ERROR: vector_t could not reallocate\n");
@@ -45,24 +45,24 @@ void vector_pop(vector_t* v){
     }
 }
 
-void* vector_get(vector_t* v, uint32_t index){
+void* vector_get(const vector_t* v, const uint32_t index){
     return (v != NULL && index < v->len) ? v->value[index] : NULL;
 }
 
-int binary_search(const char* symbol, const char** list, uint32_t size){
-    int left = 0;
-    int right = size - 1;
+int binary_search(const char* symbol, const char** list, const uint32_t size){
+    u_int32_t left = 0;
+    u_int32_t right = size - 1;
     while(left <= right){
-        int mid = left + (right - left)/2;
+        const int mid = left + (right - left)/2;
         if(mid >= size){
             return -1;
         }
-        int cmp = strcmp(symbol, list[mid]);
+        const int cmp = strcmp(symbol, list[mid]);
 
         if(cmp == 0){
             return mid;
         }
-        else if(cmp < 0){
+        if(cmp < 0){
             right = mid - 1;
         }
         else {

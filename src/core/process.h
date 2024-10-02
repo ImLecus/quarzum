@@ -8,7 +8,7 @@
 #include "core.h"
 struct process {
     char* name;
-    int start, end;
+    clock_t start, end;
 };
 
 struct process start_process(char* name);

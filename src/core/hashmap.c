@@ -27,7 +27,7 @@ void free_hashmap(hashmap_t* map){
  * \details         This function uses the MurmurHash2 hash
  *                  algorithm.
  */
-int hash(char* key, int len, uint32_t seed){
+int hash(const char* key, int len, uint32_t seed){
     const uint32_t m = 0x5bd1e995;
     const int r = 24;
     uint32_t h = seed ^ len;
@@ -58,7 +58,7 @@ int hash(char* key, int len, uint32_t seed){
     return h;
 }
 
-void* hashmap_get(hashmap_t* map, char* key){
+void* hashmap_get(hashmap_t* map, const char* key){
     int hashed_key = hash(key, strlen(key), HASH_SEED)%map->size;
 
     if(hashed_key < map->size && map->content[hashed_key] != NULL){
@@ -80,7 +80,7 @@ void* hashmap_get(hashmap_t* map, char* key){
     return NULL;
 }
 
-void hashmap_add(hashmap_t* map, char* key, void* value){
+void hashmap_add(hashmap_t* map, const char* key, void* value){
     if(map->len >= map->size){
         pair** new_content = realloc(map->content, sizeof(pair*) * map->size * 2);
         if(!new_content){

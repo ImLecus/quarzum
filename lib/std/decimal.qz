@@ -1,0 +1,38 @@
+/*
+    Decimal numeric type definiton.
+    Used for precise decimal operations without
+    the precision error of the floating point types.
+*/
+
+/*
+    Defines a decimal numeric type in base 10 notation.
+*/
+class decimal {
+    private int base;
+    private int exponent;
+    public constructor(int b, int e){
+        this.base = b; this.exponent = e;
+    }
+    public constructor(num f){
+        this.base = [int]f * 10^decimals;
+        f -= [int]f;
+        uint decimals = 0;
+
+    }
+}
+
+decimal decimal::operator+(decimal other){
+
+}
+
+decimal decimal::operator-(decimal other){
+
+}
+
+decimal decimal::operator*(decimal other){
+
+}
+
+decimal int::to_decimal(){
+    return {this, 0};
+}

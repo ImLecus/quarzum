@@ -9,11 +9,10 @@ function num::low(){
     return;
 }
 
-function main(char** args){
-    int i = 7;
-    
+async function main(char** args){
+    int i;
+    i = get_data();    
     i.out("Hello world!").low();
 
     //console.out("me");
-
 }

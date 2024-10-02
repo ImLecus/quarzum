@@ -7,7 +7,6 @@
 #define PARSE_H
 #include "symbol.h"
 #include "tokenize.h"
-
 /**
  * \brief           Defines a `node_t` type.
  */
@@ -50,6 +49,12 @@ typedef struct {
     pos_t pos;
     vector_t* children;
 } node_t;
+
+/**
+ * \note            Use `ast_t` only to indicate that the
+ *                  node passed is a root node.
+ */
+typedef node_t ast_t;
 
 /**
  * \brief           Gets the nth child of a `node_t`.
@@ -97,7 +102,7 @@ type* parse_type(lexer_t* lexer);
  *                  only at the main file.
  * \param           file: the file path to be parsed.
  */
-node_t* parse(char* file);
+node_t* parse(const char* file);
 
 
 #ifndef NULL_EXPR

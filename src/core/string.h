@@ -59,7 +59,7 @@ char* string_copy(string_t* s);
 /**
  * \brief           Adds one or more characters to a string.
  */
-void string_append(string_t* s, char* c);
+void string_append(string_t* s, const char* c);
 
 /**
  * \brief           Deletes the quotes around a string literal.
@@ -67,7 +67,7 @@ void string_append(string_t* s, char* c);
  *                  quotes ("").
  * \returns         A new char* with the string content without the quotes.
  */
-char* delete_quotes(char* c);
+char* delete_quotes(const char* c);
 
 // Temporal library path
 #define LIB_PATH "./lib/"

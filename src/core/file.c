@@ -5,15 +5,16 @@
  */
 #include "file.h"
 
-char* get_extension(char* file){
+char* get_extension(const char* file){
     for(unsigned int i = strlen(file); i > 0; --i){
         if(file[i] == '.'){
             return file+i;
         }
     }
+    return NULL;
 }
 
-inline string_t* read_file(char* filename){
+inline string_t* read_file(const char* filename){
     FILE* file = fopen(filename, "r");
     if(file == NULL){
         file_not_found_err(filename);

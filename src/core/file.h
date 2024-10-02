@@ -12,7 +12,7 @@
  * \brief           Returns the file extension.
  * \return          The file last extension
  */
-char* get_extension(char* file);
+char* get_extension(const char* file);
 
 /**
  * \brief           Reads a file and returns its content.
@@ -21,7 +21,7 @@ char* get_extension(char* file);
  * \param           filename: the target file path
  * \warning         If the file can not be opened, returns `NULL`.
  */
-string_t* read_file(char* filename);
+string_t* read_file(const char* filename);
 
 /**
  * \brief           Writes content inside a file.

@@ -159,6 +159,7 @@ static node_t* parse_statement(lexer_t* lexer){
     case T_KEYWORD_IF: return parse_if_statement(lexer);
     case T_KEYWORD_WHILE: return parse_while_statement(lexer);
     
+    case T_KEYWORD_ASYNC: next(lexer);
     case T_SPECIFIER: return parse_decl(lexer, S_LOCAL);
     
     default:
@@ -490,6 +491,9 @@ static node_t* parse_global(lexer_t* lexer){
     {
     case T_KEYWORD_CLASS: return parse_class(lexer);
     case T_KEYWORD_STRUCT: parse_struct(lexer); break;
+    case T_KEYWORD_ASYNC:
+        next(lexer);
+        return parse_decl(lexer, S_GLOBAL);
     case T_SPECIFIER:
     case T_IDENTIFIER: return parse_decl(lexer, S_GLOBAL);
 
@@ -572,7 +576,7 @@ static void parse_typedef(lexer_t* lexer){
 
 // Parses a list of tokens and returns a ParseTree containing 
 // the AST, the type table and the symbol table.
-node_t* parse(char* file){
+node_t* parse(const char* file){
     string_t* input = read_file(file);
     if(!input) return NULL;
     lexer_t lexer = *init_lexer(file, input->content);

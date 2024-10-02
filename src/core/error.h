@@ -16,8 +16,8 @@
  *                  inside a file during the compilation
  */
 typedef struct {
-    unsigned int line, column;
-    char* file;
+    int line, column;
+    const char* file;
 } pos_t;
 
 typedef struct {

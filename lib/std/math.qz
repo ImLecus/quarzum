@@ -1,11 +1,3 @@
-module Constants {
-    const num PI = 3.14;
-    const num E = 2.71;
-
-    const uint8 CHAR_MAX = 127;
-    const uint8 CHAR_MIN = -128;
+module math {
+    
 }
-
-foreign num64 abs(num64 n);
-foreign num64 sin(num64 n);
-foreign num64 cos(num64 n);

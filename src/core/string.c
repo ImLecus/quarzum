@@ -55,16 +55,16 @@ inline char* string_copy(string_t* s){
     return result;
 }
 
-void string_append(string_t* s, char* c){
+void string_append(string_t* s, const char* c){
     if(c == NULL || s == NULL) return;
-    int len = strlen(c);
+    const size_t len = strlen(c);
     for(unsigned int i = 0; i < len; ++i){
         string_push(s,c[i]);
     }
 }
 
-char* delete_quotes(char* c){
-    int len = strlen(c);
+char* delete_quotes(const char* c){
+    const size_t len = strlen(c);
     char* new_str = malloc(len - 2);
     strcpy(new_str, c + 1);
     new_str[len - 2] = 0;

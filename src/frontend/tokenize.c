@@ -1,11 +1,11 @@
 #include "tokenize.h"
 
-lexer_t* init_lexer(char* filename, char* input){
+lexer_t* init_lexer(const char* filename, char* input){
     if(strcmp(get_extension(filename), ".qz") != 0){
         throw_warning((pos_t){0,0,filename},"File format is not '.qz'");
     }
     lexer_t* lex = malloc(sizeof(lexer_t));
-    if(!lex) return NULL;
+    if(lex == NULL) return NULL;
 
     lex->position = (pos_t){
         .line = 1,
@@ -229,48 +229,11 @@ static int check_comment(lexer_t* lexer){
     return 0;
 }
 
-// char* get_error_line(lexer_t* lexer){
-//     string_t* line = init_string(10);
-//     char lineno[10];
-//     uint32_t i = last_line_pos;
-
-//     sprintf(lineno, " %d | ", lexer->position.line);
-//     string_append(line, lineno);
-    
-//     int ignored_spaces = 0;
-//     while(lexer->input[i] != '\n'){
-//         if(isspace(lexer->input[i]) && !ignored_spaces){
-//             ++i;
-//             continue;
-//         }
-//         if(!ignored_spaces){ignored_spaces = 1;}
-//         string_push(line, lexer->input[i++]);
-//     }
-//     string_push(line, '\n');
-//     i = 0;
-//     while(i < strlen(lineno)){
-//         string_push(line, ' ');
-//         ++i;
-//     }
-//     i = 0;
-//     while(i < lexer->position.column - 1){
-//         string_push(line, ' ');
-//         ++i;
-//     }
-//     string_append(line, RED"^^^"RESET);
-//     string_push(line, '\n');
-//     char* result = string_copy(line);
-//     free_string(line);
-//     return result;
-// }
-
 token_t* next_token(lexer_t* lexer){
     while (isspace(peek(lexer))){
         advance(lexer);
     }
-    if(check_comment(lexer) == 1){
-        return next_token(lexer);
-    }
+    if(check_comment(lexer) == 1) return next_token(lexer);
 
     char c = peek(lexer);
     
@@ -278,26 +241,24 @@ token_t* next_token(lexer_t* lexer){
        int type = read_id_or_keyword(lexer);
        return new_token(type, lexer);
     }
-    else if(c == '"'){
+    if(c == '"'){
         read_string_literal(lexer);
         return new_token(T_STRING_LITERAL, lexer);
     }
-    else if(c == '\''){
+    if(c == '\''){
         read_char_literal(lexer);
         return new_token(T_CHAR_LITERAL, lexer);
     }
-    else if(isdigit(c)){
+    if(isdigit(c)){
         int is_decimal = read_numeric_literal(lexer);
         return new_token(is_decimal == 1? 
                             T_NUMERIC_LITERAL :
                             T_INT_LITERAL, lexer);
     }
-    else if(ispunct(c)){
+    if(ispunct(c)){
         return new_token(read_symbol(lexer), lexer);
     }
-    else if(c == '\0'){
-        return new_token(T_EOF, lexer);
-    }
+    if(c == '\0') return new_token(T_EOF, lexer);
     
     unexpected_token_err(lexer->position, string_copy(lexer->buffer));
     advance(lexer);

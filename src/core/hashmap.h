@@ -40,7 +40,7 @@ void free_hashmap(hashmap_t* map);
  * \brief           Returns an integer number result of hashing the key.
  * \returns         An integer, the hashed key.
  */
-int hash(char* key, int len, uint32_t seed);
+int hash(const char* key, int len, uint32_t seed);
 
 /**
  * \brief           Returns the value linked to the passed key inside a
@@ -48,13 +48,13 @@ int hash(char* key, int len, uint32_t seed);
  * \returns         A pointer to any type value. `NULL` if the key-value
  *                  pair is not used or in case of error.
  */
-void* hashmap_get(hashmap_t* map, char* key);
+void* hashmap_get(hashmap_t* map, const char* key);
 
 /**
  * \brief           Adds a new element to a `hashmap_t`. 
  * In case of collision, the hashmap will try to add the element
  * in the first place possible, starting from the initial desired index.
  */
-void hashmap_add(hashmap_t* map, char* key, void* value);
+void hashmap_add(hashmap_t* map, const char* key, void* value);
 
 #endif

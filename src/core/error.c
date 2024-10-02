@@ -13,7 +13,7 @@ int warning_count;
 
 
 
-void throw_error(pos_t pos, char* message){
+void throw_error(const pos_t pos, char* message){
     if(error_count >= MAX_ERRORS){
         return;
     }
@@ -29,7 +29,7 @@ void throw_error(pos_t pos, char* message){
 
 }
 
-void throw_warning(pos_t pos, char* message){
+void throw_warning(const pos_t pos, char* message){
     if(warning_count >= MAX_ERRORS){
         return;
     }
@@ -58,8 +58,8 @@ inline void check_errors(){
     }
 }
 
-inline void unexpected_token_err(pos_t pos, char* buffer){
-    char* message;
+inline void unexpected_token_err(const pos_t pos, char* buffer){
+    char message[256];
     sprintf(message, "Unexpected token '%s'", buffer);
     throw_error(pos, message);   
 }
@@ -69,31 +69,31 @@ inline void invalid_decimal_err(pos_t pos){
 }
 
 inline void expected_token_err(pos_t pos, char* expected){
-    char* message;
+    char message[256];
     sprintf(message, "Expected %s", expected);
     throw_error(pos, message);   
 }
 
 inline void duplicated_type_err(pos_t pos, char* typename){
-    char* message;
+    char message[256];
     sprintf(message, "Type '%s' has been already defined", typename);
     throw_error(pos, message);   
 }
 
 inline void undefined_type_err(pos_t pos, char* typename){
-    char* message;
+    char message[256];
     sprintf(message, "Undefined type '%s'", typename);
     throw_error(pos, message);  
 }
 
 inline void duplicated_flag_warning(pos_t pos, char* flag){
-    char* message;
+    char message[256];
     sprintf(message, "Duplicated flag '%s'", flag);
     throw_error(pos, message); 
 }
 
 inline void duplicated_symbol_err(pos_t pos, char* symbol){
-    char* message;
+    char message[256];
     sprintf(message, "Symbol '%s' already exists", symbol);
     throw_error(pos, message); 
 }

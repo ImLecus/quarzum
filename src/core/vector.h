@@ -42,7 +42,7 @@ void vector_pop(vector_t* v);
  * \warning         Returns `NULL` if n is greater than the
  *                  vector length.
  */
-void* vector_get(vector_t* v, uint32_t index);
+void* vector_get(const vector_t* v,const uint32_t index);
 
 /**
  * \brief           Searches a symbol inside a list with fixed size.

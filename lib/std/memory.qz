@@ -3,22 +3,3 @@ foreign function malloc(var* container, uint64 size);
 foreign var* realloc(var* container, uint64 new_size);
 
 foreign function free(var* ptr);
-
-class Buffer<T> {
-    private T* elements; 
-
-    public function resize(uint64 size){
-        T* newContainer = realloc(this.elements, size);
-        if(T != null){
-            this.elements = newContainer;
-        }
-    }
-
-    public constructor(uint64 size){
-        this.elements = malloc(this.elements, sizeof(T) * size);
-    }
-
-    public destructor(){
-        free(this.elements);
-    }
-}

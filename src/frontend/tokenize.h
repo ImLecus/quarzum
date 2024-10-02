@@ -25,6 +25,7 @@ typedef enum {
     T_INT_LITERAL,
     T_NULL_LITERAL,
     T_KEYWORD_ALLOC,
+    T_KEYWORD_ASYNC,
     T_KEYWORD_BREAK,
     T_KEYWORD_CASE,
     T_KEYWORD_CLASS,
@@ -73,6 +74,7 @@ typedef enum {
     T_ASSIGN_OP = 0xf5
 } token_type_t;
 #define IS_OPERATOR(t) (uint8_t)(t) >= 0xf0
+
 /**
  * Keywords and symbols
  * --------------------
@@ -80,12 +82,11 @@ typedef enum {
  * Primitive types are not keywords. 
  * Both string arrays are sorted.
  */
-
-#define KEYWORDS_SIZE 39
+#define KEYWORDS_SIZE 40
 #define SYMBOLS_SIZE 41
 
 static const char* keywords[KEYWORDS_SIZE] = {
-    "alloc","and","break","case","class","const","constructor","continue","default",
+    "alloc","and","async","break","case","class","const","constructor","continue","default",
     "delete","destructor","do","else","enum",
     "false","for","foreach","foreign",
     "if","import","in",
@@ -96,7 +97,7 @@ static const char* keywords[KEYWORDS_SIZE] = {
 };
 
 static const int keyword_types[KEYWORDS_SIZE] = {
-    T_KEYWORD_ALLOC ,T_LOGICAL_OP, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, 
+    T_KEYWORD_ALLOC ,T_LOGICAL_OP,T_KEYWORD_ASYNC, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, 
     T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT, T_KEYWORD_DELETE, T_KEYWORD_DESTRUCTOR, T_KEYWORD_DO, T_KEYWORD_ELSE,
     T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, 
     T_SPECIFIER, T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN, T_KEYWORD_MODULE, T_KEYWORD_NEW,
@@ -150,7 +151,12 @@ typedef struct {
  *                  input does not exist or if there is not
  *                  enough memory to allocate the lexer.
  */
-lexer_t* init_lexer(char* filename, char* input);
+lexer_t* init_lexer(const char* filename, char* input);
+
+/**
+ * \brief           Advances the lexer position by 1.
+ */
+static inline void advance(lexer_t* lexer);
 
 /**
  * \brief           Analyzes the text to find the next token.

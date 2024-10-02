@@ -1,4 +1,0 @@
-// Finishes the program execution.
-foreign function exit(int code);
-
-foreign function swap(var a, var b);

@@ -9,7 +9,7 @@
 #include "tokenize.h"
 #include "expr.h"
 /**
- * \brief           Defines a `node_t` type.
+ * \brief           Defines a `Node` type.
  */
 typedef enum {
     N_ROOT,
@@ -42,39 +42,39 @@ typedef enum {
     N_CLASS_STMT,
 
     N_INVALID = 255
-} node_type_t;
+} NodeType;
 
 /**
  * \brief           Defines an AST node.
  */
 typedef struct {
-    node_type_t type;
+    NodeType type;
     pos_t pos;
-    vector_t* children;
-} node_t;
+    Vector* children;
+} Node;
 
 /**
- * \note            Use `ast_t` only to indicate that the
+ * \note            Use `AST` only to indicate that the
  *                  node passed is a root node.
  */
-typedef node_t ast_t;
+typedef Node AST;
 
 /**
- * \brief           Gets the nth child of a `node_t`.
+ * \brief           Gets the nth child of a `Node`.
  * \returns         A pointer to the nth child, `NULL` in
  *                  case of error.
  */
-void* n_get(node_t* n, uint32_t index);
+void* n_get(Node* const n, uint32_t index);
 
 /**
- * \brief           Allocates a new `node_t` on the heap.
- * \returns         A pointer to the allocated `node_t`.
+ * \brief           Allocates a new `Node` on the heap.
+ * \returns         A pointer to the allocated `Node`.
  * \warning         Returns `NULL` in case of allocation error.
  * \param           children: the initial children number of the node.
  * \param           type: the node type.
  * \param           pos: the node position in the file.
  */
-node_t* init_node(uint32_t children, node_type_t type, pos_t pos);
+Node* const init_node(const uint32_t children, const NodeType type, pos_t pos);
 
 /**
  * \brief           Checks if the token type is the same
@@ -84,7 +84,7 @@ node_t* init_node(uint32_t children, node_type_t type, pos_t pos);
  * \param           type: the expected token type
  * \param           what: error message.
  */
-void expect(const token_t* t, node_type_t type, char* what);
+void expect(const Token* t, const TokenType type, const char* what);
 
 /**
  * \brief           Parses a type defined in Quarzum.
@@ -94,18 +94,24 @@ void expect(const token_t* t, node_type_t type, char* what);
  * type has to be defined in the file before using it.
  * \returns         A pointer to a `type`, `NULL` in case of error. 
  */
-type* parse_type(lexer_t* lexer);
+Type* parse_type(Lexer* const lexer);
 
 /**
  * \brief           Parses a file.
- * \returns         A pointer to a `node_t`, containing the 
+ * \returns         A pointer to a `Node`, containing the 
  *                  AST as a result of the operation.
  * \note            This function is recursive due to how
  *                  `import` works in Quarzum. Call this function
  *                  only at the main file.
  * \param           file: the file path to be parsed.
  */
-node_t* parse(const char* file);
+Node* parse(const char* file);
+
+static Node* parse_statement(Lexer* lexer);
+static Node* parse_decl(Lexer* lexer, scope_t scope);
+
+static Hashmap* imported_files;
+static String* last_namespace;
 
 
 #ifndef NULL_EXPR
@@ -120,12 +126,12 @@ node_t* parse(const char* file);
 
 /**
  * \brief           Parses an expression.
- * \returns         A pointer to a `node_t`, containing the
+ * \returns         A pointer to a `Node`, containing the
  *                  expression. Returns `NULL_EXPR` in case
  *                  of error.
  * \note            This function does not return `NULL` in
  *                  any case.
  */
-node_t* parse_expr(lexer_t* lexer);
+Node* parse_expr(Lexer* lexer);
 
 #endif

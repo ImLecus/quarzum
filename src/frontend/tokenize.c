@@ -1,15 +1,15 @@
 #include "tokenize.h"
 
-lexer_t* init_lexer(const char* filename, char* input){
+Lexer* const init_lexer(const char* const filename, char* const input){
 
     if(strcmp(get_extension(filename), ".qz") != 0){
         throw_warning((pos_t){0,0,filename},"File format is not '.qz'");
     }
 
-    lexer_t* lex = malloc(sizeof(lexer_t));
+    Lexer* const lex = malloc(sizeof(Lexer));
     if(lex == NULL) return NULL;
 
-    *lex = (lexer_t){
+    *lex = (Lexer){
         .buffer = init_string(32),
         .input = input,
         .pos = 0,
@@ -23,7 +23,7 @@ lexer_t* init_lexer(const char* filename, char* input){
     return lex;
 }
 
-static inline void advance(lexer_t* lexer){
+void advance(Lexer* const lexer){
     if(lexer->input[lexer->pos++] == '\n'){
         ++lexer->position.line;
         lexer->position.column = 0;
@@ -31,22 +31,22 @@ static inline void advance(lexer_t* lexer){
     ++lexer->position.column;
 }
 
-static inline char peek(lexer_t* lexer){
+const char peek(const Lexer* const lexer){
     if(lexer->pos > strlen(lexer->input)) return '\0';
     return lexer->input[lexer->pos];
 }
 
-static inline char consume(lexer_t* lexer){
+const char consume(Lexer* const lexer){
     if(lexer->pos > strlen(lexer->input)) return '\0';
     return lexer->input[lexer->pos++];
 }
 
-static token_t* new_token(token_type_t  type, lexer_t* lexer){
+const Token* const new_token(const TokenType type, Lexer* const lexer){
 
-    token_t* tok = malloc(sizeof(token_t));
+    Token* const tok = malloc(sizeof(Token));
     if(tok == NULL) return NULL;
 
-    *tok = (token_t){
+    *tok = (Token){
         .type = type,
         .value = string_copy(lexer->buffer),
         .position = (pos_t){
@@ -60,7 +60,7 @@ static token_t* new_token(token_type_t  type, lexer_t* lexer){
     return tok;
 }
 
-static void read_escape_char(lexer_t* lexer){
+void read_escape_char(Lexer* const lexer){
     // the first char is the backslash '\'
     advance(lexer);
     switch (peek(lexer))
@@ -80,7 +80,7 @@ static void read_escape_char(lexer_t* lexer){
     advance(lexer);
 }
 
-static void read_char_literal(lexer_t* lexer){
+void read_char_literal(Lexer* const lexer){
     string_push(lexer->buffer, consume(lexer));
     const char c = peek(lexer);
     if(c == '\\'){
@@ -96,7 +96,7 @@ static void read_char_literal(lexer_t* lexer){
     string_push(lexer->buffer, consume(lexer));
 }
 
-static void read_string_literal(lexer_t* lexer){
+void read_string_literal(Lexer* const lexer){
     string_push(lexer->buffer, consume(lexer));
     char c = peek(lexer);
     pos_t first_pos = lexer->position;
@@ -117,13 +117,13 @@ static void read_string_literal(lexer_t* lexer){
     string_push(lexer->buffer, consume(lexer));
 }
 
-static inline void read_digit_chain(lexer_t* lexer){
+void read_digit_chain(Lexer* const lexer){
     while(isdigit(peek(lexer))){
         string_push(lexer->buffer, consume(lexer));
     }
 }
 
-static int read_numeric_literal(lexer_t* lexer){
+const int read_numeric_literal(Lexer* const lexer){
     string_push(lexer->buffer, peek(lexer));
     if(consume(lexer) != '0'){
         read_digit_chain(lexer);
@@ -169,7 +169,7 @@ static int read_numeric_literal(lexer_t* lexer){
     }
 }
 
-static inline int read_id_or_keyword(lexer_t* lexer){
+const int read_id_or_keyword(Lexer* const lexer){
     while(isalnum(peek(lexer)) || peek(lexer) == '_'){
         string_push(lexer->buffer, consume(lexer));
     }
@@ -177,7 +177,7 @@ static inline int read_id_or_keyword(lexer_t* lexer){
     return search == -1 ? T_IDENTIFIER : keyword_types[search];      
 }
 
-static int read_symbol(lexer_t* lexer){
+const int read_symbol(Lexer* const lexer){
     string_push(lexer->buffer, consume(lexer));
     if(ispunct(peek(lexer))){
         string_push(lexer->buffer, peek(lexer));
@@ -188,7 +188,7 @@ static int read_symbol(lexer_t* lexer){
         } 
         string_pop(lexer->buffer);
     }
-    int search = binary_search(lexer->buffer->content, symbols, SYMBOLS_SIZE);
+    const int search = binary_search(lexer->buffer->content, symbols, SYMBOLS_SIZE);
     if(search == -1){
         unexpected_token_err(lexer->position, string_copy(lexer->buffer));
         return T_TOKEN_ERROR;
@@ -196,7 +196,7 @@ static int read_symbol(lexer_t* lexer){
     return symbol_types[search];
 }
 
-static void ignore_multi_comment(lexer_t* lexer){
+void ignore_multi_comment(Lexer* const lexer){
     advance(lexer);
     char next = lexer->input[lexer->pos + 1];
     while(peek(lexer) != '*' || next != '/'){
@@ -211,22 +211,22 @@ static void ignore_multi_comment(lexer_t* lexer){
     advance(lexer);
 }
 
-static int check_comment(lexer_t* lexer){
-    if(peek(lexer) != '/') return 0;
+const bool check_comment(Lexer* const lexer){
+    if(peek(lexer) != '/') return false;
     char next = lexer->input[lexer->pos + 1];
     if(next == '/'){
         while(consume(lexer) != '\n'); // Ignore single-line comment
-        return 1;
+        return true;
     }
     if(next == '*'){
         advance(lexer);
         ignore_multi_comment(lexer);
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
-const token_t* next_token(lexer_t* lexer){
+const Token* const next_token(Lexer* const lexer){
     while (isspace(peek(lexer))) advance(lexer);
     if(check_comment(lexer) == 1) return next_token(lexer);
 
@@ -259,6 +259,6 @@ const token_t* next_token(lexer_t* lexer){
     return new_token(T_TOKEN_ERROR, lexer);
 }
 
-inline void next(lexer_t* lexer){
+inline void next(Lexer* const lexer){
     lexer->tok = next_token(lexer);
 }

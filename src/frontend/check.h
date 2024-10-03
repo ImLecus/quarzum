@@ -7,6 +7,6 @@
 #define CHECK_H
 #include "parse.h"
 
-void check_ast(node_t* tree);
+void check_ast(Node* tree);
 
 #endif /* CHECK_H */

@@ -36,10 +36,10 @@ typedef enum {
 } reg_t;
 
 typedef struct {
-    vector_t* data;
-    vector_t* instructions;
+    Vector* data;
+    Vector* instructions;
 } ir_t;
 
-ir_t* ast_to_ir(ast_t* ast);
+ir_t* ast_to_ir(AST* ast);
 
 #endif /* IR_H */

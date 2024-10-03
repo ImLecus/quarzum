@@ -11,42 +11,42 @@
 /**
  * \brief           String struct as a dynamic array
  */
-typedef struct {
-    unsigned int length, size;
+typedef struct String {
+    uint32_t length, size;
     char* content;
-} string_t;
+} String;
 
 
 /**
- * \brief           Allocates a new `string_t` on the heap.
+ * \brief           Allocates a new `String` on the heap.
  * \param           size: the initial size of the string.
- * \returns         A pointer to the allocated `string_t`.
+ * \returns         A pointer to the allocated `String`.
  */
-string_t* init_string(const uint32_t size);
+String* const init_string(const uint32_t size);
 
 /**
- * \brief           Frees an allocated `string_t`.
+ * \brief           Frees an allocated `String`.
  * \note            The function does nothing if s is `NULL`.
  */
-void free_string(string_t* s);
+void free_string(String* const s);
 
 /**
  * \brief           Adds a character at the end of the string.
  * \note            If the string is full, it will resize and
  *                  duplicate its size.
  */
-void string_push(string_t* s, const char c);
+void string_push(String* const s, const char c);
 
 /**
  * \brief           Eliminates the last character of a string.
  * \note            The function does nothing if s is `NULL`.
  */
-void string_pop(string_t* s);
+void string_pop(String* const s);
 
 /**
  * \brief           Clears the content of a string.
  */
-void string_clear(string_t* s);
+void string_clear(String* const s);
 
 /**
  * \brief           Copies the content of a string.
@@ -54,12 +54,12 @@ void string_clear(string_t* s);
  * \note            The result of this function will not be
  *                  deleted if the original string is freed.
  */
-char* string_copy(string_t* s);
+const char* string_copy(const String* const s);
 
 /**
  * \brief           Adds one or more characters to a string.
  */
-void string_append(string_t* s, const char* c);
+void string_append(String* const s, const char* c);
 
 /**
  * \brief           Deletes the quotes around a string literal.
@@ -67,7 +67,7 @@ void string_append(string_t* s, const char* c);
  *                  quotes ("").
  * \returns         A new char* with the string content without the quotes.
  */
-char* delete_quotes(const char* c);
+const char* delete_quotes(const char* c);
 
 // Temporal library path
 #define LIB_PATH "./lib/"
@@ -80,6 +80,6 @@ char* delete_quotes(const char* c);
  * \return      The complete path using the real library path.
  * \warning     The path must be a libary path (starting with `@`)
  */
-char* resolve_path(char* c);
+const char* resolve_path(const char* c);
 
 #endif /* STRING_H */

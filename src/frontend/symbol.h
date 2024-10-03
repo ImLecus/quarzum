@@ -13,7 +13,7 @@
  * `symbol_table` is initialized after the parse phase. Do not use it
  * before initialization.
  */
-extern hashmap_t* symbol_table;
+extern Hashmap* symbol_table;
 
 /**
  * \brief           Defines the scope of a `symbol_t`
@@ -28,7 +28,7 @@ typedef enum {
 
 typedef struct {
     uint8_t min_args;
-    vector_t *args, *optional_values, *local_vars;
+    Vector *args, *optional_values, *local_vars;
     uint32_t align;
 } function_info;
 
@@ -36,8 +36,8 @@ typedef struct {
  * \brief           Defines a symbol.
  */
 typedef struct {
-    char *mangled_name, *name;
-    type* type;
+    const char *mangled_name, *name;
+    Type* type;
     scope_t scope;
     function_info* info;
     pos_t defined_pos;
@@ -45,8 +45,8 @@ typedef struct {
 
 
 
-char* mangle_name(symbol* s);
-char* mangle_namespace(char* id, char* last_namespace);
+const char* mangle_name(symbol* s);
+const char* mangle_namespace(const char* id, char* last_namespace);
 
 
 #endif /* SYMBOL_H */

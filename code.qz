@@ -7,5 +7,5 @@ function main(){
     console.out("Hello world!");
 
     // comment
-    int i = 5;
+    mut int i = 5;
 }

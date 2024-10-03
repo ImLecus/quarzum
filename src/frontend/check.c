@@ -5,8 +5,8 @@
  */
 #include "check.h"
 static int has_errors = 0;
-hashmap_t* symbol_table;
-static void check_statement(node_t* n);
+Hashmap* symbol_table;
+static void check_statement(Node* n);
 static char* prefix = "";
 
 
@@ -31,7 +31,7 @@ static void check_symbol(symbol* s){
     }
 }
 
-static void check_module(node_t* module_node){
+static void check_module(Node* module_node){
     symbol* module = n_get(module_node, 0);
     symbol* dup = hashmap_get(symbol_table, module->name);
     if(dup){
@@ -54,7 +54,7 @@ static symbol* try_get_symbol(char* name, char* prefix){
     return s;
 }
 
-static void check_type_compatibility(type* a, type* b){
+static void check_type_compatibility(Type* a, Type* b){
     if(!b){has_errors = 1; return;}
     if(!compare_types(a, b)){
         printf(RED"[ERROR] "RESET"Expected '%s'; received '%s'\n", a->name, b->name);
@@ -64,24 +64,24 @@ static void check_type_compatibility(type* a, type* b){
 
 // Returns the type that is storing the pointer.
 // Example: char* returns char, int** returns int*
-type* unmask_pointer(char* ptr_name){
+Type* unmask_pointer(char* ptr_name){
     ptr_name[strlen(ptr_name) - 1] = 0;
     if(ptr_name[strlen(ptr_name) - 1] == '*'){
-        return &(type){TY_PTR, ptr_name, 8, 8, POINTER_FLAG};
+        return &(Type){TY_PTR, ptr_name, 8, 8, POINTER_FLAG};
     }
     return hashmap_get(type_map, ptr_name);
 }
 
-static type* check_expr(node_t* expr){
+static Type* check_expr(Node* expr){
     switch (expr->type)
     {
     case N_CAST:
         // TODO: check if the conversion is possible
         return expr->children->value[0];
     case N_INDEX_EXPR:
-        node_t* array = n_get(expr, 0);
-        node_t* index = n_get(expr, 1);
-        type* array_type = check_expr(array);
+        Node* array = n_get(expr, 0);
+        Node* index = n_get(expr, 1);
+        Type* array_type = check_expr(array);
         if((array_type->flags & POINTER_FLAG) == 0){
             printf(RED"[ERROR] "RESET"Symbol '%s' is not an array or a pointer \n", array_type->name);
             return ty_var;
@@ -89,9 +89,9 @@ static type* check_expr(node_t* expr){
         return unmask_pointer(array_type->name);
     case N_TERNARY_EXPR:
 
-        node_t* if_1 = n_get(expr, 1);
+        Node* if_1 = n_get(expr, 1);
         check_expr(if_1);
-        node_t* if_false = n_get(expr, 2);
+        Node* if_false = n_get(expr, 2);
         check_expr(if_false);
         symbol* if_1_symbol = if_1->children->value[1];
         symbol* if_false_symbol = if_false->children->value[1];
@@ -108,19 +108,19 @@ static type* check_expr(node_t* expr){
         }
         return sym->type;
     case N_BINARY_EXPR:
-        type* left = check_expr(expr->children->value[0]);
-        type* right = check_expr(expr->children->value[1]);
+        Type* left = check_expr(expr->children->value[0]);
+        Type* right = check_expr(expr->children->value[1]);
         return left;//merge_types(left, right, expr->children->value[2]);
     case N_LITERAL:
         return n_get(expr, 1);
 
     case N_MEMBER_EXPR:
-        node_t* parent = n_get(expr, 0);
-        node_t* child = n_get(expr, 1);
+        Node* parent = n_get(expr, 0);
+        Node* child = n_get(expr, 1);
 
         // Gets the parent type and checks if the combined 
         // name matches (int t; t.to_string() => int::to_string)
-        type* base = check_expr(parent);
+        Type* base = check_expr(parent);
         if(base){
             prefix = base->name;
             if(base->type == TY_MODULE){
@@ -150,14 +150,14 @@ static type* check_expr(node_t* expr){
         }
 
         for(uint8_t n = 1; n < args + 1; ++n){
-            type* t = check_expr(expr->children->value[n]);
+            Type* t = check_expr(expr->children->value[n]);
             symbol* arg = i->args->value[n - 1];
             check_type_compatibility(t, arg->type);
         }
         // If some args are default, check the type of the default args
         if(args < i->args->len){
             for(uint8_t n = i->min_args; n < i->args->len; ++n){
-                type* t = check_expr(i->optional_values->value[n - i->min_args]);
+                Type* t = check_expr(i->optional_values->value[n - i->min_args]);
                 symbol* arg = i->args->value[n];
                 check_type_compatibility(arg->type, t);
             }
@@ -180,23 +180,23 @@ static type* check_expr(node_t* expr){
 
 // Checks if the variable symbol is not defined yet and
 // if its type and the expression type can match.
-static void check_var(node_t* var){
+static void check_var(Node* var){
     symbol* s = n_get(var, 0);
     check_symbol(s);
-    node_t* expr = n_get(var, 1);
+    Node* expr = n_get(var, 1);
     check_type_compatibility(s->type, check_expr(expr));
     prefix = "";
 }
 
-static void check_lambda(node_t* lambda){
+static void check_lambda(Node* lambda){
     symbol* s = lambda->children->value[0];
     check_symbol(s);
-    node_t* expr = lambda->children->value[1];
+    Node* expr = lambda->children->value[1];
     check_type_compatibility(s->type, check_expr(expr));
     prefix = "";
 }
 
-static void check_function_statement(node_t* n, type* t){
+static void check_function_statement(Node* n, Type* t){
     switch (n->type)
     {
     case N_VAR:
@@ -206,7 +206,7 @@ static void check_function_statement(node_t* n, type* t){
         check_lambda(n);
         break;
     case N_RETURN:
-        type* return_type = check_expr(n_get(n, 0));
+        Type* return_type = check_expr(n_get(n, 0));
         if(!compare_types(t, return_type)){
             printf(RED "[ERROR] " RESET "Expected a return type '%s', received '%s'\n", t->name, return_type->name);
             has_errors=1;
@@ -219,12 +219,12 @@ static void check_function_statement(node_t* n, type* t){
 }
 
 
-static void check_func(node_t* func){
+static void check_func(Node* func){
     symbol* s = n_get(func, 0);
     check_symbol(s);
 
     for(uint8_t i = 1; i < func->children->len; ++i){
-        node_t* n = n_get(func, i);
+        Node* n = n_get(func, i);
         if(n){
             check_function_statement(n, s->type);
         }
@@ -233,7 +233,7 @@ static void check_func(node_t* func){
     // check for "return" statements in case the function has a return value
 }
 
-static void check_statement(node_t* n){
+static void check_statement(Node* n){
     switch (n->type)
     {
     case N_VAR:
@@ -248,7 +248,7 @@ static void check_statement(node_t* n){
     case N_MODULE:
         check_module(n);
         for(uint16_t i = 1; i < n->children->len; ++i){
-            node_t* child = n->children->value[i];
+            Node* child = n->children->value[i];
             if(child != NULL) check_statement(child);    
         }
     default:
@@ -257,11 +257,11 @@ static void check_statement(node_t* n){
     }
 }
 
-void check_ast(node_t* ast){
+void check_ast(Node* ast){
     if(ast == NULL) return;
     symbol_table = init_hashmap(128);
     for(uint32_t i = 0; i < ast->children->len; ++i){
-        node_t* n = ast->children->value[i];
+        Node* n = ast->children->value[i];
         check_statement(n);
     }
 }

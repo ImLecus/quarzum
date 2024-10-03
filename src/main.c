@@ -3,8 +3,8 @@
 int main(int argc, char** argv) {
     
     int error_code = 0;
-    process_t task = start_process("Task");
-    ast_t* ast;
+    Process task = start_process("Task");
+    AST* ast;
     ir_t* ir;
 
 

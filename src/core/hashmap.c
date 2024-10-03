@@ -5,8 +5,8 @@
  */
 #include "hashmap.h"
 
-hashmap_t* init_hashmap(unsigned int size){
-    hashmap_t* map = malloc(sizeof(hashmap_t));
+Hashmap* const init_hashmap(uint32_t size){
+    Hashmap* const map = malloc(sizeof(Hashmap));
     if(map == NULL) return NULL;
     map->size = size;
     map->len =0;
@@ -17,7 +17,7 @@ hashmap_t* init_hashmap(unsigned int size){
     return map;
 }
 
-void free_hashmap(hashmap_t* map){
+void free_hashmap(Hashmap* const map){
     if(map == NULL) return;
     free(map->content);
     free(map);
@@ -58,7 +58,7 @@ int hash(const char* key, int len, uint32_t seed){
     return h;
 }
 
-void* hashmap_get(hashmap_t* map, const char* key){
+void* const hashmap_get(Hashmap* const map, const char* const key){
     int hashed_key = hash(key, strlen(key), HASH_SEED)%map->size;
 
     if(hashed_key < map->size && map->content[hashed_key] != NULL){
@@ -80,7 +80,7 @@ void* hashmap_get(hashmap_t* map, const char* key){
     return NULL;
 }
 
-void hashmap_add(hashmap_t* map, const char* key, void* value){
+void hashmap_add(Hashmap* map, const char* key, void* value){
     if(map->len >= map->size){
         pair** new_content = realloc(map->content, sizeof(pair*) * map->size * 2);
         if(!new_content){

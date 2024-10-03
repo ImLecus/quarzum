@@ -1,8 +1,8 @@
 #include "symbol.h"
 #define USER_DEFINED_PREFIX "_Z"
 
-static void mangle_type(type* t, string_t* mangled_name){
-    if(t->flags & CONST_FLAG){
+static void mangle_type(Type* t, String* mangled_name){
+    if(t->flags & MUTABLE_FLAG){
         string_push(mangled_name, 'C');
     }
     if(t->flags & POINTER_FLAG){
@@ -23,22 +23,22 @@ static void mangle_type(type* t, string_t* mangled_name){
     }
 }
 
-char* mangle_namespace(char* id, char* last_namespace){
+const char* mangle_namespace(const char* id, char* last_namespace){
     int len = strlen(last_namespace);
-    string_t* ns = init_string(len+strlen(id)+2);
+    String* ns = init_string(len+strlen(id)+2);
     
     if( len > 0 ) { 
         string_append(ns, last_namespace);
         string_append(ns, "::"); 
     }
     string_append(ns, id);
-    char* result = string_copy(ns);
+    const char* result = string_copy(ns);
     free_string(ns);
     return result;
 }
 
-char* mangle_name(symbol* s){
-    string_t* mangled_name = init_string(strlen(s->name)* 2);
+const char* mangle_name(symbol* s){
+    String* mangled_name = init_string(strlen(s->name)* 2);
     mangle_type(s->type, mangled_name);
     
     string_push(mangled_name, ';');

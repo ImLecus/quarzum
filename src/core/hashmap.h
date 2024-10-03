@@ -13,7 +13,7 @@
  * \brief           Defines a key-value pair.
  */
 typedef struct {
-    char* key;
+    const char* key;
     void* value;
 } pair;
 
@@ -23,18 +23,18 @@ typedef struct {
 typedef struct {
     pair** content;
     uint32_t size, len;
-} hashmap_t;
+} Hashmap;
 
 /**
- * \brief           Allocates a new `hashmap_t` on the heap.
+ * \brief           Allocates a new `Hashmap` on the heap.
  * \warning         Returns `NULL` if the hashmap can not be allocated.
  */
-hashmap_t* init_hashmap(unsigned int size);
+Hashmap* const init_hashmap(uint32_t size);
 
 /**
- * \brief           Frees an allocated `hashmap_t`.
+ * \brief           Frees an allocated `Hashmap`.
  */
-void free_hashmap(hashmap_t* map);
+void free_hashmap(Hashmap* const map);
 
 /**
  * \brief           Returns an integer number result of hashing the key.
@@ -44,17 +44,17 @@ int hash(const char* key, int len, uint32_t seed);
 
 /**
  * \brief           Returns the value linked to the passed key inside a
- *                  `hashmap_t`.
+ *                  `Hashmap`.
  * \returns         A pointer to any type value. `NULL` if the key-value
  *                  pair is not used or in case of error.
  */
-void* hashmap_get(hashmap_t* map, const char* key);
+void* const hashmap_get(Hashmap* const map, const char* const key);
 
 /**
- * \brief           Adds a new element to a `hashmap_t`. 
+ * \brief           Adds a new element to a `Hashmap`. 
  * In case of collision, the hashmap will try to add the element
  * in the first place possible, starting from the initial desired index.
  */
-void hashmap_add(hashmap_t* map, const char* key, void* value);
+void hashmap_add(Hashmap* const map, const char* const key, void* const value);
 
 #endif

@@ -5,8 +5,8 @@
  */
 #include "file.h"
 
-char* get_extension(const char* file){
-    for(unsigned int i = strlen(file); i > 0; --i){
+const char* get_extension(const char* file){
+    for(uint32_t i = strlen(file); i > 0; --i){
         if(file[i] == '.'){
             return file+i;
         }
@@ -14,13 +14,13 @@ char* get_extension(const char* file){
     return NULL;
 }
 
-inline string_t* read_file(const char* filename){
-    FILE* file = fopen(filename, "r");
+inline String* const read_file(const char* const filename){
+    FILE* const file = fopen(filename, "r");
     if(file == NULL){
         file_not_found_err(filename);
         return NULL;
     }
-    string_t* result = init_string(512);
+    String* const result = init_string(512);
     int c;
     while ((c = fgetc(file)) != EOF) {
         string_push(result,c);
@@ -29,7 +29,7 @@ inline string_t* read_file(const char* filename){
     return result;
 }
 
-inline void write_file(FILE* file, char* content){
+inline void write_file(FILE* file, char* const content){
     if(file == NULL) return;
     fprintf(file,"%s",content);
     fflush(file);

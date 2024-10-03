@@ -10,39 +10,39 @@
 /**
  * \brief           Defines a vector, a dynamic array of any type.
  */
-typedef struct {
+typedef struct Vector {
     uint32_t size, len;
     void** value;
-} vector_t;
+} Vector;
 
 /**
- * \brief           Allocates a `vector_t` with a determined size on 
+ * \brief           Allocates a `Vector` with a determined size on 
  *                  the heap.
- * \returns         A pointer to a `vector_t` or `NULL` in case of error.
+ * \returns         A pointer to a `Vector` or `NULL` in case of error.
  */
-vector_t* init_vector(uint32_t size);
+Vector* const init_vector(const uint32_t size);
 
 /**
- * \brief           Frees an allocated `vector_t`.
+ * \brief           Frees an allocated `Vector`.
  */
-void free_vector(vector_t* v);
+void free_vector(Vector* const v);
 
 /**
- * \brief           Adds a new value at the end of an existing `vector_t`.
+ * \brief           Adds a new value at the end of an existing `Vector`.
  */
-void vector_push(vector_t* v, void* element);
+void vector_push(Vector* v, const void* element);
 
 /**
- * \brief           Deletes the last value of a `vector_t` without returning it.
+ * \brief           Deletes the last value of a `Vector` without returning it.
  */
-void vector_pop(vector_t* v);
+void vector_pop(Vector* const const v);
 
 /**
- * \brief           Gets the nth element of a `vector_t`.
+ * \brief           Gets the nth element of a `Vector`.
  * \warning         Returns `NULL` if n is greater than the
  *                  vector length.
  */
-void* vector_get(const vector_t* v,const uint32_t index);
+void* vector_get(const Vector* const v,const uint32_t index);
 
 /**
  * \brief           Searches a symbol inside a list with fixed size.
@@ -51,6 +51,6 @@ void* vector_get(const vector_t* v,const uint32_t index);
  * \note            The list must be sorted.
  * \returns         The index of the element inside the list.
  */
-int binary_search(const char* symbol, const char* const * list, uint32_t size);
+const int binary_search(const char* symbol, const char* const * list, uint32_t size);
 
 #endif

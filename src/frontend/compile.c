@@ -5,7 +5,7 @@
  */
 #include "compile.h"
 
-int compile(const char* file, ast_t* ast){
+int compile(const char* const file, AST* ast){
     ast = parse(file);
     if(error_count > 0){
         check_errors();

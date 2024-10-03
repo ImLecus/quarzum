@@ -12,21 +12,21 @@
  * \brief           Returns the file extension.
  * \return          The file last extension
  */
-char* get_extension(const char* file);
+const char* get_extension(const char* file);
 
 /**
  * \brief           Reads a file and returns its content.
- * \returns         A pointer to a `string_t` with the content
+ * \returns         A pointer to a `String` with the content
  *                  of a file.
  * \param           filename: the target file path
  * \warning         If the file can not be opened, returns `NULL`.
  */
-string_t* read_file(const char* filename);
+String* const read_file(const char* const filename);
 
 /**
  * \brief           Writes content inside a file.
  * \warning         The file must be opened and exist.
  */
-void write_file(FILE* file, char* content);
+void write_file(FILE* file, char* const content);
 
 #endif

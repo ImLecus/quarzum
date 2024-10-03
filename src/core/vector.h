@@ -51,6 +51,6 @@ void* vector_get(const vector_t* v,const uint32_t index);
  * \note            The list must be sorted.
  * \returns         The index of the element inside the list.
  */
-int binary_search(const char* symbol, const char** list, uint32_t size);
+int binary_search(const char* symbol, const char* const * list, uint32_t size);
 
 #endif

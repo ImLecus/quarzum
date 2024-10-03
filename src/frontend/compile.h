@@ -11,6 +11,6 @@
  * \brief           Compiles a file and returns the AST.
  * \returns         An AST pointer, `NULL` in case of error.
  */
-ast_t* compile(const char* file);
+int compile(const char* file, ast_t* ast);
 
 #endif /* COMPILE_H */

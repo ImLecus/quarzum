@@ -6,12 +6,12 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 #include "core.h"
-struct process {
+typedef struct {
     char* name;
     clock_t start, end;
-};
+} process_t;
 
-struct process start_process(char* name);
-void end_process(struct process* process);
+process_t start_process(char* name);
+void end_process(process_t process);
 
 #endif /* PROCESS_H */

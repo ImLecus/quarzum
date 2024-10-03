@@ -1,0 +1,5 @@
+import "@std/collections/list.qz"
+
+class String => List<char> {
+       
+}

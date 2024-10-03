@@ -85,7 +85,7 @@ typedef enum {
 #define KEYWORDS_SIZE 40
 #define SYMBOLS_SIZE 41
 
-static const char* keywords[KEYWORDS_SIZE] = {
+static const char* const keywords[KEYWORDS_SIZE] = {
     "alloc","and","async","break","case","class","const","constructor","continue","default",
     "delete","destructor","do","else","enum",
     "false","for","foreach","foreign",
@@ -96,7 +96,7 @@ static const char* keywords[KEYWORDS_SIZE] = {
     "true","typedef","while","xor"
 };
 
-static const int keyword_types[KEYWORDS_SIZE] = {
+static const int const keyword_types[KEYWORDS_SIZE] = {
     T_KEYWORD_ALLOC ,T_LOGICAL_OP,T_KEYWORD_ASYNC, T_KEYWORD_BREAK, T_KEYWORD_CASE, T_KEYWORD_CLASS, T_SPECIFIER, T_KEYWORD_CONSTRUCTOR, 
     T_KEYWORD_CONTINUE, T_KEYWORD_DEFAULT, T_KEYWORD_DELETE, T_KEYWORD_DESTRUCTOR, T_KEYWORD_DO, T_KEYWORD_ELSE,
     T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, 
@@ -138,7 +138,7 @@ typedef struct {
  */
 typedef struct {
     pos_t position;
-    token_t* tok;
+    const token_t* tok;
     char* input;
     string_t* buffer;
     unsigned int pos;
@@ -164,7 +164,7 @@ static inline void advance(lexer_t* lexer);
  * \note            The function will ever return an EOF token once
  *                  the text has been arrived to the end.
  */
-token_t* next_token(lexer_t* lexer);
+const token_t* next_token(lexer_t* lexer);
 
 /**
  * \brief           Tells the lexer to read the next token

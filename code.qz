@@ -1,18 +1,11 @@
 import "@std/console.qz"
-import "@std/string.qz"
 
-num int::out(char* msg){
-    return 5.4;
-}
+/*
+    multi-comment
+*/
+function main(){
+    console.out("Hello world!");
 
-function num::low(){
-    return;
-}
-
-async function main(char** args){
-    int i;
-    i = get_data();    
-    i.out("Hello world!").low();
-
-    //console.out("me");
+    // comment
+    int i = 5;
 }

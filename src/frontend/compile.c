@@ -5,12 +5,18 @@
  */
 #include "compile.h"
 
-ast_t* compile(const char* file){
-    ast_t* ast = parse(file);
-    check_errors();
+int compile(const char* file, ast_t* ast){
+    ast = parse(file);
+    if(error_count > 0){
+        check_errors();
+        return -1;
+    }
     // check_ast(ast);
-    check_errors();
+    if(error_count > 0){
+        check_errors();
+        return -1;
+    }
     free(type_map);
     free(symbol_table);
-    return ast;
+
 }

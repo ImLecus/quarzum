@@ -2,7 +2,7 @@
     Defines a custom type to manage character arrays.
     A standard string is the same as a char*.
 */
-typedef string = char*
+typedef string = const char*
 
 foreign char string::at(uint64 i);
 foreign bool string::contains(char c);

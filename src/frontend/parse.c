@@ -57,7 +57,7 @@ node_t* init_node(uint32_t children, node_type_t type, pos_t pos){
     return n;
 }
 
-inline void expect(token_t* t, node_type_t type, char* what){
+inline void expect(const token_t* t, node_type_t type, char* what){
     if(t->type != type){
         expected_token_err(t->position, what);
     }
@@ -336,9 +336,8 @@ static node_t* parse_lambda(lexer_t* lexer,symbol* s){
     return lambda;
 }
 
-static node_t* parse_enum(lexer_t* l, symbol* s){
-    node_t* enum_node = init_node(2, N_ENUM, l->position);
-    vector_push(enum_node->children, s);
+static void parse_enum(lexer_t* l){
+
     expect(l->tok, T_LEFT_CURLY, "'{'");
     next(l);
     while(l->tok->type != T_RIGHT_CURLY){
@@ -351,7 +350,6 @@ static node_t* parse_enum(lexer_t* l, symbol* s){
         next(l);
     }
     next(l);
-    return enum_node;
 }
 
 /**

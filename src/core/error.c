@@ -68,6 +68,10 @@ inline void invalid_decimal_err(pos_t pos){
     throw_error(pos, "Too many decimal points on numeric literal");
 }
 
+inline void unclosed_quotes_err(pos_t pos){
+    throw_error(pos, "Unclosed quotes");
+}
+
 inline void expected_token_err(pos_t pos, char* expected){
     char message[256];
     sprintf(message, "Expected %s", expected);

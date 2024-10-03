@@ -5,15 +5,15 @@
  */
 #include "process.h"
 
-inline struct process start_process(char* name){
-    return (struct process){
+inline process_t start_process(char* name){
+    return (process_t){
         name, clock()
     };
 }
 
-inline void end_process(struct process* process){
-    process->end = clock();
+inline void end_process(process_t process){
+    process.end = clock();
     char buffer[100];
-    sprintf(buffer,"%s finished in %f seconds", process->name,  (float)(process->end - process->start)/CLOCKS_PER_SEC);
-    printf(DEBUG_MSG(buffer));
+    sprintf(buffer,MAGENTA"[DEBUG] " RESET"%s finished in %f seconds\n", process.name,  (float)(process.end - process.start)/CLOCKS_PER_SEC);
+    printf(buffer);
 }

@@ -49,6 +49,8 @@ void unexpected_token_err(pos_t pos, char* buffer);
 // Throws a lexical error with the form "Too many decimal points on numeric literal"
 void invalid_decimal_err(pos_t pos);
 
+void unclosed_quotes_err(pos_t pos);
+
 void expected_token_err(pos_t pos, char* expected);
 
 void duplicated_type_err(pos_t pos, char* typename);

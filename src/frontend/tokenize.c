@@ -1,29 +1,33 @@
 #include "tokenize.h"
 
 lexer_t* init_lexer(const char* filename, char* input){
+
     if(strcmp(get_extension(filename), ".qz") != 0){
         throw_warning((pos_t){0,0,filename},"File format is not '.qz'");
     }
+
     lexer_t* lex = malloc(sizeof(lexer_t));
     if(lex == NULL) return NULL;
 
-    lex->position = (pos_t){
-        .line = 1,
-        .column = 1,
-        .file = filename
+    *lex = (lexer_t){
+        .buffer = init_string(32),
+        .input = input,
+        .pos = 0,
+        .tok = NULL,
+        .position = (pos_t){
+            .line = 1,
+            .column = 1,
+            .file = filename
+        }
     };
-    lex->input = input;
-    lex->pos = 0;
-    lex->buffer = init_string(32);
     return lex;
 }
 
 static inline void advance(lexer_t* lexer){
-    if(lexer->input[lexer->pos] == '\n'){
+    if(lexer->input[lexer->pos++] == '\n'){
         ++lexer->position.line;
         lexer->position.column = 0;
     }
-    ++lexer->pos; 
     ++lexer->position.column;
 }
 
@@ -37,28 +41,29 @@ static inline char consume(lexer_t* lexer){
     return lexer->input[lexer->pos++];
 }
 
-// Generates a new token in the heap.
-// The lexer buffer will be the token value and
-// then it will be reseted.
 static token_t* new_token(token_type_t  type, lexer_t* lexer){
+
     token_t* tok = malloc(sizeof(token_t));
     if(tok == NULL) return NULL;
 
-    tok->type = type;
-    tok->value = string_copy(lexer->buffer);
-    tok->position.line = lexer->position.line;
-    tok->position.column = lexer->position.column;
-    tok->position.file = lexer->position.file;
+    *tok = (token_t){
+        .type = type,
+        .value = string_copy(lexer->buffer),
+        .position = (pos_t){
+            .column = lexer->position.column,
+            .line = lexer->position.line,
+            .file = lexer->position.file
+        }
+    };
 
     string_clear(lexer->buffer);
     return tok;
 }
 
 static void read_escape_char(lexer_t* lexer){
-    // the first char is the inverse bar
+    // the first char is the backslash '\'
     advance(lexer);
-    char c = peek(lexer);
-    switch (c)
+    switch (peek(lexer))
     {
     case 'n':
         string_push(lexer->buffer, '\n');
@@ -66,6 +71,8 @@ static void read_escape_char(lexer_t* lexer){
     case 't':
         string_push(lexer->buffer, '\t');
         break;
+    case '0':
+        string_push(lexer->buffer, '\0');
     default:
         // err
         break;
@@ -75,11 +82,11 @@ static void read_escape_char(lexer_t* lexer){
 
 static void read_char_literal(lexer_t* lexer){
     string_push(lexer->buffer, consume(lexer));
-    char c = peek(lexer);
+    const char c = peek(lexer);
     if(c == '\\'){
         read_escape_char(lexer);
     }
-    if(c != '\''){
+    else {
         string_push(lexer->buffer, consume(lexer));
     }
     if(peek(lexer) != '\''){
@@ -92,9 +99,10 @@ static void read_char_literal(lexer_t* lexer){
 static void read_string_literal(lexer_t* lexer){
     string_push(lexer->buffer, consume(lexer));
     char c = peek(lexer);
+    pos_t first_pos = lexer->position;
     while(c != '"'){
         if(c == 0){
-            // err
+            unclosed_quotes_err(first_pos);
             return;
         }
         if(c == '\\'){
@@ -188,13 +196,6 @@ static int read_symbol(lexer_t* lexer){
     return symbol_types[search];
 }
 
-static void ignore_comment(lexer_t* lexer){
-    while(peek(lexer) != '\n'){
-        advance(lexer);
-    }
-    advance(lexer);
-} 
-
 static void ignore_multi_comment(lexer_t* lexer){
     advance(lexer);
     char next = lexer->input[lexer->pos + 1];
@@ -211,35 +212,28 @@ static void ignore_multi_comment(lexer_t* lexer){
 }
 
 static int check_comment(lexer_t* lexer){
-    if(peek(lexer) == '/'){
+    if(peek(lexer) != '/') return 0;
+    char next = lexer->input[lexer->pos + 1];
+    if(next == '/'){
+        while(consume(lexer) != '\n'); // Ignore single-line comment
+        return 1;
+    }
+    if(next == '*'){
         advance(lexer);
-        if(peek(lexer) == '/'){
-            ignore_comment(lexer);
-            return 1;
-        }
-        else if(peek(lexer) == '*'){
-            ignore_multi_comment(lexer);
-            return 1;
-        }
-        else{
-            --lexer->pos;
-            --lexer->position.column;
-        }
+        ignore_multi_comment(lexer);
+        return 1;
     }
     return 0;
 }
 
-token_t* next_token(lexer_t* lexer){
-    while (isspace(peek(lexer))){
-        advance(lexer);
-    }
+const token_t* next_token(lexer_t* lexer){
+    while (isspace(peek(lexer))) advance(lexer);
     if(check_comment(lexer) == 1) return next_token(lexer);
 
-    char c = peek(lexer);
+    const char c = peek(lexer);
     
     if(isalpha(c) || c == '_'){
-       int type = read_id_or_keyword(lexer);
-       return new_token(type, lexer);
+       return new_token(read_id_or_keyword(lexer), lexer);
     }
     if(c == '"'){
         read_string_literal(lexer);

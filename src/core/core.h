@@ -23,7 +23,4 @@
 #define GRAY "\e[1;90m"
 #define ORANGE "\e[38;5;214m"
 
-
-#define ERROR_MSG(msg) RED"[ERROR] "RESET"%s\n",msg
-#define DEBUG_MSG(msg) MAGENTA"[DEBUG] "RESET"%s\n",msg
 #endif /* CORE_H */

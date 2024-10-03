@@ -7,6 +7,7 @@
 #define PARSE_H
 #include "symbol.h"
 #include "tokenize.h"
+#include "expr.h"
 /**
  * \brief           Defines a `node_t` type.
  */
@@ -38,7 +39,9 @@ typedef enum {
     N_LITERAL,
     N_CLASS,
     N_INIT_LIST,
-    N_CLASS_STMT
+    N_CLASS_STMT,
+
+    N_INVALID = 255
 } node_type_t;
 
 /**
@@ -81,7 +84,7 @@ node_t* init_node(uint32_t children, node_type_t type, pos_t pos);
  * \param           type: the expected token type
  * \param           what: error message.
  */
-void expect(token_t* t, node_type_t type, char* what);
+void expect(const token_t* t, node_type_t type, char* what);
 
 /**
  * \brief           Parses a type defined in Quarzum.

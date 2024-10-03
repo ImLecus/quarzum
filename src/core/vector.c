@@ -49,7 +49,7 @@ void* vector_get(const vector_t* v, const uint32_t index){
     return (v != NULL && index < v->len) ? v->value[index] : NULL;
 }
 
-int binary_search(const char* symbol, const char** list, const uint32_t size){
+int binary_search(const char* symbol, const char* const * list, const uint32_t size){
     u_int32_t left = 0;
     u_int32_t right = size - 1;
     while(left <= right){

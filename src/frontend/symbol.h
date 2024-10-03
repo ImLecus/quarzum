@@ -26,6 +26,12 @@ typedef enum {
     S_EXTEND
 } scope_t;
 
+typedef struct {
+    uint8_t min_args;
+    vector_t *args, *optional_values, *local_vars;
+    uint32_t align;
+} function_info;
+
 /**
  * \brief           Defines a symbol.
  */
@@ -33,15 +39,11 @@ typedef struct {
     char *mangled_name, *name;
     type* type;
     scope_t scope;
-    void* info;
+    function_info* info;
     pos_t defined_pos;
 } symbol;
 
-typedef struct {
-    uint8_t min_args;
-    vector_t *args, *optional_values, *local_vars;
-    uint32_t align;
-} function_info;
+
 
 char* mangle_name(symbol* s);
 char* mangle_namespace(char* id, char* last_namespace);

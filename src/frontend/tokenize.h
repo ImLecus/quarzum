@@ -48,6 +48,7 @@ typedef enum {
     T_KEYWORD_SIZEOF,
     T_KEYWORD_STRUCT,
     T_KEYWORD_SWITCH,
+    T_KEYWORD_THIS,
     T_KEYWORD_TRUE,
     T_KEYWORD_TYPEDEF,
     T_KEYWORD_WHILE,
@@ -83,7 +84,7 @@ typedef enum {
  * Primitive types are not keywords. 
  * Both string arrays are sorted.
  */
-#define KEYWORDS_SIZE 40
+#define KEYWORDS_SIZE 41
 #define SYMBOLS_SIZE 41
 
 static const char* const keywords[KEYWORDS_SIZE] = {
@@ -93,7 +94,7 @@ static const char* const keywords[KEYWORDS_SIZE] = {
     "if","import","in",
     "module","mut","new","not","null",
     "operator", "or","private","protected","public",
-    "return","sizeof","struct","switch",
+    "return","sizeof","struct","switch", "this",
     "true","typedef","while","xor"
 };
 
@@ -103,7 +104,7 @@ static const int keyword_types[KEYWORDS_SIZE] = {
     T_KEYWORD_ENUM, T_KEYWORD_FALSE, T_KEYWORD_FOR, T_KEYWORD_FOREACH, 
     T_KEYWORD_IF, T_KEYWORD_IMPORT, T_KEYWORD_IN, T_KEYWORD_MODULE,T_SPECIFIER, T_KEYWORD_NEW,
     T_UNARY, T_NULL_LITERAL, T_KEYWORD_OPERATOR, T_LOGICAL_OP, T_ACCESS, T_ACCESS, T_ACCESS, T_KEYWORD_RETURN,
-    T_KEYWORD_SIZEOF, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_TRUE,
+    T_KEYWORD_SIZEOF, T_KEYWORD_STRUCT, T_KEYWORD_SWITCH, T_KEYWORD_THIS, T_KEYWORD_TRUE,
     T_KEYWORD_TYPEDEF, T_KEYWORD_WHILE, T_LOGICAL_OP
 
 };
@@ -128,7 +129,7 @@ static const uint8_t symbol_types[SYMBOLS_SIZE] = {
  * \brief           Basic lexer result unit
  */
 typedef struct Token {
-    pos_t position;
+    Position position;
     TokenType type;
     const char* value;
 } Token;
@@ -138,7 +139,7 @@ typedef struct Token {
  *                  last iteration and its position
  */
 typedef struct Lexer {
-    pos_t position;
+    Position position;
     const Token* tok;
     char* input;
     String* buffer;

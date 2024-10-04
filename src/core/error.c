@@ -13,7 +13,7 @@ int warning_count;
 
 
 
-void throw_error(const pos_t pos, const char* const message){
+void throw_error(const Position pos, const char* const message){
     if(error_count >= MAX_ERRORS){
         return;
     }
@@ -29,7 +29,7 @@ void throw_error(const pos_t pos, const char* const message){
 
 }
 
-void throw_warning(const pos_t pos, const char* const message){
+void throw_warning(const Position pos, const char* const message){
     if(warning_count >= MAX_ERRORS){
         return;
     }
@@ -58,54 +58,54 @@ inline void check_errors(){
     }
 }
 
-inline void unexpected_token_err(const pos_t pos,const char* const buffer){
+inline void unexpected_token_err(const Position pos,const char* const buffer){
     char message[256];
     sprintf(message, "Unexpected token '%s'", buffer);
     throw_error(pos, message);   
 }
 
-inline void invalid_decimal_err(pos_t pos){
+inline void invalid_decimal_err(Position pos){
     throw_error(pos, "Too many decimal points on numeric literal");
 }
 
-inline void unclosed_quotes_err(pos_t pos){
+inline void unclosed_quotes_err(Position pos){
     throw_error(pos, "Unclosed quotes");
 }
 
-inline void expected_token_err(pos_t pos, const char* const expected){
+inline void expected_token_err(Position pos, const char* const expected){
     char message[256];
     sprintf(message, "Expected %s", expected);
     throw_error(pos, message);   
 }
 
-inline void duplicated_type_err(pos_t pos, const char* const typename){
+inline void duplicated_type_err(Position pos, const char* const typename){
     char message[256];
     sprintf(message, "Type '%s' has been already defined", typename);
     throw_error(pos, message);   
 }
 
-inline void undefined_type_err(pos_t pos, const char* const typename){
+inline void undefined_type_err(Position pos, const char* const typename){
     char message[256];
     sprintf(message, "Undefined type '%s'", typename);
     throw_error(pos, message);  
 }
 
-inline void duplicated_flag_warning(pos_t pos, const char* const flag){
+inline void duplicated_flag_warning(Position pos, const char* const flag){
     char message[256];
     sprintf(message, "Duplicated flag '%s'", flag);
     throw_error(pos, message); 
 }
 
-inline void duplicated_symbol_err(pos_t pos, const char* const symbol){
+inline void duplicated_symbol_err(Position pos, const char* const symbol){
     char message[256];
     sprintf(message, "Symbol '%s' already exists", symbol);
     throw_error(pos, message); 
 }
 
 inline void file_not_found_err(const char* const filename){
-    throw_error((pos_t){-1, 0, filename}, "File not found");
+    throw_error((Position){-1, 0, filename}, "File not found");
 }
 
-inline void invalid_expr_err(pos_t pos){
+inline void invalid_expr_err(Position pos){
     throw_error(pos, "Invalid expression");
 }

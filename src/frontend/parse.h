@@ -7,7 +7,6 @@
 #define PARSE_H
 #include "symbol.h"
 #include "tokenize.h"
-#include "expr.h"
 /**
  * \brief           Defines a `Node` type.
  */
@@ -49,7 +48,7 @@ typedef enum {
  */
 typedef struct {
     NodeType type;
-    pos_t pos;
+    Position pos;
     Vector* children;
 } Node;
 
@@ -64,7 +63,7 @@ typedef Node AST;
  * \returns         A pointer to the nth child, `NULL` in
  *                  case of error.
  */
-void* n_get(Node* const n, uint32_t index);
+void* const n_get(Node* const n, uint32_t index);
 
 /**
  * \brief           Allocates a new `Node` on the heap.
@@ -74,7 +73,7 @@ void* n_get(Node* const n, uint32_t index);
  * \param           type: the node type.
  * \param           pos: the node position in the file.
  */
-Node* const init_node(const uint32_t children, const NodeType type, pos_t pos);
+Node* const init_node(const uint32_t children, const NodeType type, Position pos);
 
 /**
  * \brief           Checks if the token type is the same
@@ -108,7 +107,7 @@ Type* parse_type(Lexer* const lexer);
 Node* parse(const char* file);
 
 static Node* parse_statement(Lexer* lexer);
-static Node* parse_decl(Lexer* lexer, scope_t scope);
+static Node* parse_decl(Lexer* lexer, Scope scope);
 
 static Hashmap* imported_files;
 static String* last_namespace;
@@ -132,6 +131,6 @@ static String* last_namespace;
  * \note            This function does not return `NULL` in
  *                  any case.
  */
-Node* parse_expr(Lexer* lexer);
+Node* const parse_expr(Lexer* const lexer);
 
 #endif

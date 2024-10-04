@@ -8,12 +8,6 @@
 #include "type.h"
 #include "../core/vector.h"
 #include "../core/error.h"
-/**
- * \brief           Defines a unique symbol table to all the program.
- * `symbol_table` is initialized after the parse phase. Do not use it
- * before initialization.
- */
-extern Hashmap* symbol_table;
 
 /**
  * \brief           Defines the scope of a `symbol_t`
@@ -24,7 +18,7 @@ typedef enum {
     S_PARAMETER,
     S_CLASS,
     S_EXTEND
-} scope_t;
+} Scope;
 
 typedef struct {
     uint8_t min_args;
@@ -36,16 +30,37 @@ typedef struct {
  * \brief           Defines a symbol.
  */
 typedef struct {
-    const char *mangled_name, *name;
+    const char *name;
     Type* type;
-    scope_t scope;
+    Scope scope;
     function_info* info;
-    pos_t defined_pos;
-} symbol;
+    Position defined_pos;
+} Symbol;
 
+typedef struct Table {
+    Scope scope;
+    const char* name;
+    struct Table* parent;
+    Hashmap* symbols;
+} Table;
 
+typedef struct SymbolTable {
+    Table* last_table;
+    Vector* tables;
+} SymbolTable;
 
-const char* mangle_name(symbol* s);
+extern SymbolTable* symbol_table;
+
+void init_symbol_table(SymbolTable* symbol_table);
+
+void add_scope(SymbolTable* const table, const char* const name, Scope scope);
+
+void close_scope(SymbolTable* const table);
+
+void insert_symbol(SymbolTable* symbol_table, Symbol* const s);
+
+Symbol* const find_symbol(Table* table, const char* const name);
+
 const char* mangle_namespace(const char* id, char* last_namespace);
 
 

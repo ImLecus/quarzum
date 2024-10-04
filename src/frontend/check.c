@@ -5,49 +5,49 @@
  */
 #include "check.h"
 static int has_errors = 0;
-Hashmap* symbol_table;
+SymbolTable* symbol_table;
 static void check_statement(Node* n);
-static char* prefix = "";
+static const char* prefix = "";
 
 
 // Checks if the symbol has been added to the symbol table and
 // its mangled name is the same as the symbol passed.
 // If the symbol has not been added yet, adds it to the symbol table.
-static void check_symbol(symbol* s){
-    symbol* dup = hashmap_get(symbol_table, s->name);
-    if(dup && strcmp(dup->mangled_name, s->mangled_name)==0){
+static void check_symbol(Symbol* s){
+    Symbol* dup = find_symbol(symbol_table->last_table, s->name);
+    if(dup != NULL){
         duplicated_symbol_err(s->defined_pos, s->name);
         has_errors = 1;
         return;
     }
-    //printf("%s -> %s \n", s->name, s->mangled_name);
-    hashmap_add(symbol_table, s->name, s);
+    printf("%s -> %s \n",symbol_table->last_table->name, s->name);
+    insert_symbol(symbol_table, s);
     // Functions
     if(s->type->flags & FUNCTION_FLAG){
         function_info* info = s->info;
         for(uint8_t i = 0; i < info->args->len; ++i){
-            //check_symbol(info->args->value[i]);
+            check_symbol(info->args->value[i]);
         }
     }
 }
 
 static void check_module(Node* module_node){
-    symbol* module = n_get(module_node, 0);
-    symbol* dup = hashmap_get(symbol_table, module->name);
+    Symbol* module = n_get(module_node, 0);
+    Symbol* dup = find_symbol(symbol_table->last_table, module->name);
     if(dup){
         printf(RED"[ERROR] "RESET"Module '%s' already exists \n", module->name);
         has_errors = 1;
         return;
     }
     //printf("mod: %s \n", module->name);
-    hashmap_add(symbol_table, module->name, module);
+    insert_symbol(symbol_table, module);
 }
 
 
-static symbol* try_get_symbol(char* name, char* prefix){
+static Symbol* try_get_symbol(char* name, const char* prefix){
     //printf("Trying to get symbol %s...\n", mangle_namespace(name, prefix));
-    symbol* s = hashmap_get(symbol_table, mangle_namespace(name, prefix));
-    if(!s){
+    Symbol* s = find_symbol(symbol_table->last_table, mangle_namespace(name, prefix));
+    if(s == NULL){
         printf(RED"[ERROR] "RESET"Symbol '%s' does not exist \n", name);
         has_errors = 1;
     }
@@ -93,8 +93,8 @@ static Type* check_expr(Node* expr){
         check_expr(if_1);
         Node* if_false = n_get(expr, 2);
         check_expr(if_false);
-        symbol* if_1_symbol = if_1->children->value[1];
-        symbol* if_false_symbol = if_false->children->value[1];
+        Symbol* if_1_symbol = if_1->children->value[1];
+        Symbol* if_false_symbol = if_false->children->value[1];
 
         if(compare_types(if_1_symbol->type, if_false_symbol->type)){
             return if_1_symbol->type;
@@ -102,7 +102,7 @@ static Type* check_expr(Node* expr){
         return ty_var;
 
     case N_IDENTIFIER:
-        symbol* sym = try_get_symbol(expr->children->value[0], prefix);
+        Symbol* sym = try_get_symbol(expr->children->value[0], prefix);
         if(!sym){
             break;
         }
@@ -124,7 +124,7 @@ static Type* check_expr(Node* expr){
         if(base){
             prefix = base->name;
             if(base->type == TY_MODULE){
-                symbol* namespace = n_get(parent, 0);
+                Symbol* namespace = n_get(parent, 0);
                 prefix = namespace->name;
             }
         }
@@ -132,7 +132,7 @@ static Type* check_expr(Node* expr){
         return check_expr(child);
     case N_CALL_EXPR:
         uint8_t args = expr->children->len - 1;
-        symbol* s = try_get_symbol(expr->children->value[0], prefix);
+        Symbol* s = try_get_symbol(expr->children->value[0], prefix);
         if(!s){
             break;
         }
@@ -151,14 +151,14 @@ static Type* check_expr(Node* expr){
 
         for(uint8_t n = 1; n < args + 1; ++n){
             Type* t = check_expr(expr->children->value[n]);
-            symbol* arg = i->args->value[n - 1];
+            Symbol* arg = i->args->value[n - 1];
             check_type_compatibility(t, arg->type);
         }
         // If some args are default, check the type of the default args
         if(args < i->args->len){
             for(uint8_t n = i->min_args; n < i->args->len; ++n){
                 Type* t = check_expr(i->optional_values->value[n - i->min_args]);
-                symbol* arg = i->args->value[n];
+                Symbol* arg = i->args->value[n];
                 check_type_compatibility(arg->type, t);
             }
         }
@@ -181,7 +181,7 @@ static Type* check_expr(Node* expr){
 // Checks if the variable symbol is not defined yet and
 // if its type and the expression type can match.
 static void check_var(Node* var){
-    symbol* s = n_get(var, 0);
+    Symbol* s = n_get(var, 0);
     check_symbol(s);
     Node* expr = n_get(var, 1);
     check_type_compatibility(s->type, check_expr(expr));
@@ -189,9 +189,9 @@ static void check_var(Node* var){
 }
 
 static void check_lambda(Node* lambda){
-    symbol* s = lambda->children->value[0];
+    Symbol* s = n_get(lambda, 0);
     check_symbol(s);
-    Node* expr = lambda->children->value[1];
+    Node* expr = n_get(lambda, 1);
     check_type_compatibility(s->type, check_expr(expr));
     prefix = "";
 }
@@ -220,7 +220,7 @@ static void check_function_statement(Node* n, Type* t){
 
 
 static void check_func(Node* func){
-    symbol* s = n_get(func, 0);
+    Symbol* s = n_get(func, 0);
     check_symbol(s);
 
     for(uint8_t i = 1; i < func->children->len; ++i){
@@ -246,6 +246,7 @@ static void check_statement(Node* n){
         check_lambda(n);
         break;
     case N_MODULE:
+        add_scope(symbol_table, "console" , S_LOCAL);
         check_module(n);
         for(uint16_t i = 1; i < n->children->len; ++i){
             Node* child = n->children->value[i];
@@ -259,7 +260,7 @@ static void check_statement(Node* n){
 
 void check_ast(Node* ast){
     if(ast == NULL) return;
-    symbol_table = init_hashmap(128);
+    init_symbol_table(symbol_table);
     for(uint32_t i = 0; i < ast->children->len; ++i){
         Node* n = ast->children->value[i];
         check_statement(n);

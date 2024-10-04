@@ -3,7 +3,7 @@
 Lexer* const init_lexer(const char* const filename, char* const input){
 
     if(strcmp(get_extension(filename), ".qz") != 0){
-        throw_warning((pos_t){0,0,filename},"File format is not '.qz'");
+        throw_warning((Position){0,0,filename},"File format is not '.qz'");
     }
 
     Lexer* const lex = malloc(sizeof(Lexer));
@@ -14,7 +14,7 @@ Lexer* const init_lexer(const char* const filename, char* const input){
         .input = input,
         .pos = 0,
         .tok = NULL,
-        .position = (pos_t){
+        .position = (Position){
             .line = 1,
             .column = 1,
             .file = filename
@@ -49,7 +49,7 @@ const Token* const new_token(const TokenType type, Lexer* const lexer){
     *tok = (Token){
         .type = type,
         .value = string_copy(lexer->buffer),
-        .position = (pos_t){
+        .position = (Position){
             .column = lexer->position.column,
             .line = lexer->position.line,
             .file = lexer->position.file
@@ -99,7 +99,7 @@ void read_char_literal(Lexer* const lexer){
 void read_string_literal(Lexer* const lexer){
     string_push(lexer->buffer, consume(lexer));
     char c = peek(lexer);
-    pos_t first_pos = lexer->position;
+    Position first_pos = lexer->position;
     while(c != '"'){
         if(c == 0){
             unclosed_quotes_err(first_pos);

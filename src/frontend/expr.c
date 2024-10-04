@@ -5,29 +5,9 @@
  */
 #include "parse.h"
 
-static Node* call_expr(Lexer* const lexer, const char* id);
-static Node* non_literal_expr(Lexer* const lexer);
-static Node* index_expr(Lexer* const lexer, Node* array);
+static Node* const member_expr(Lexer* const lexer, Node* const parent);
 
-// Returns an expression with the form [expr].[expr]
-static Node* member_expr(Lexer* const lexer, Node* parent){
-    next(lexer);
-    Node* member = init_node(2, N_MEMBER_EXPR, lexer->position);
-    vector_push(member->children, parent);
-    Node* child = non_literal_expr(lexer);
-
-    if(lexer->tok->type == T_DOT){
-        vector_push(member->children, member_expr(lexer, child));
-    }
-    vector_push(member->children, child);
-    if(lexer->tok->type == T_LEFT_SQUARE){
-        return index_expr(lexer, member);
-    }
-    return member;
-}
-
-// Returns an expression with the form [id]([expr]? (,[expr])*)
-static Node* call_expr(Lexer* const lexer, const char* id){
+static Node* const call_expr(Lexer* const lexer, const char* id){
     Node* expr = init_node(2, N_CALL_EXPR, lexer->position);
     vector_push(expr->children, id);
     next(lexer);
@@ -44,7 +24,7 @@ static Node* call_expr(Lexer* const lexer, const char* id){
     return expr;
 }
 
-static Node* literal_expr(Lexer* const lexer, Type* t){
+static Node* const literal_expr(Lexer* const lexer, Type* t){
     Node* lit_expr = init_node(2, N_LITERAL, lexer->position);
     Type* lit_type = malloc(sizeof(Type));
     vector_push(lit_expr->children, lexer->tok->value);
@@ -54,13 +34,13 @@ static Node* literal_expr(Lexer* const lexer, Type* t){
     return lit_expr;
 }
 
-static Node* paren_expr(Lexer* const lexer, Node* expr){
+static Node* const paren_expr(Lexer* const lexer, Node* expr){
     Node* par_expr = init_node(1, N_PAREN_EXPR, lexer->position);
     vector_push(par_expr->children, expr);
     return par_expr;
 }
 
-static Node* non_literal_expr(Lexer* const lexer){
+static Node* const non_literal_expr(Lexer* const lexer){
     const char* id = lexer->tok->value;
     next(lexer);
     if(lexer->tok->type == T_LEFT_PAR){
@@ -71,7 +51,7 @@ static Node* non_literal_expr(Lexer* const lexer){
     return id_expr;
 }
 
-static Node* cast_expr(Lexer* const lexer){
+static Node* const cast_expr(Lexer* const lexer){
     Node* cast = init_node(2, N_CAST, lexer->position);
     Type* t = parse_type(lexer);
     vector_push(cast->children, t);
@@ -81,7 +61,7 @@ static Node* cast_expr(Lexer* const lexer){
     return cast;
 }
 
-static Node* index_expr(Lexer* const lexer, Node* array){
+static Node* const index_expr(Lexer* const lexer, Node* array){
     Node* expr = init_node(2, N_INDEX_EXPR, lexer->position);
     vector_push(expr->children, array);
     next(lexer);
@@ -99,12 +79,29 @@ static Node* index_expr(Lexer* const lexer, Node* array){
     return expr;
 }
 
-static Node* stack_var_expr(Lexer* const lexer){
+static Node* const member_expr(Lexer* const lexer, Node* const parent){
+    next(lexer);
+    Node* member = init_node(2, N_MEMBER_EXPR, lexer->position);
+    vector_push(member->children, parent);
+    Node* const child = non_literal_expr(lexer);
+
+    if(lexer->tok->type == T_DOT){
+        vector_push(member->children, member_expr(lexer, child));
+    }
+    vector_push(member->children, child);
+    if(lexer->tok->type == T_LEFT_SQUARE){
+        return index_expr(lexer, member);
+    }
+    return member;
+}
+
+
+static Node* const stack_var_expr(Lexer* const lexer){
    
     return NULL;
 }
 
-static Node* parse_primary_expr(Lexer* const lexer){
+static Node* const parse_primary_expr(Lexer* const lexer){
     switch (lexer->tok->type)
     {
     case T_INT_LITERAL:
@@ -131,9 +128,10 @@ static Node* parse_primary_expr(Lexer* const lexer){
         next(lexer);
         return cast_expr(lexer);
     
+    case T_KEYWORD_THIS:
     case T_IDENTIFIER:
         // a non-literal can be an identifier or a function call
-        Node* non_literal = non_literal_expr(lexer);
+        Node* const non_literal = non_literal_expr(lexer);
         if(lexer->tok->type == T_DOT){
             return member_expr(lexer, non_literal);
         }
@@ -150,9 +148,9 @@ static Node* parse_primary_expr(Lexer* const lexer){
     return NULL;
 }
 
-Node* parse_expr(Lexer* const lexer){
-    Node* left = parse_primary_expr(lexer);
-    if(!left) return NULL_EXPR(lexer->position);
+Node* const parse_expr(Lexer* const lexer){
+    Node* const left = parse_primary_expr(lexer);
+    if(left == NULL) return NULL_EXPR(lexer->position);
 
     char op;
     switch (lexer->tok->type)
@@ -162,9 +160,10 @@ Node* parse_expr(Lexer* const lexer){
     case T_COMPARATION_OP:
         op = lexer->tok->value[0];
         next(lexer);
-        Node* right = parse_expr(lexer);
 
-        Node* binary = init_node(3, N_BINARY_EXPR, lexer->position);
+        Node* const right = parse_expr(lexer);
+        Node* const binary = init_node(3, N_BINARY_EXPR, lexer->position);
+        
         vector_push(binary->children, left);
         vector_push(binary->children, right);
         vector_push(binary->children, &op);
@@ -175,15 +174,15 @@ Node* parse_expr(Lexer* const lexer){
 
     if(lexer->tok->type == T_TERNARY_OP){
         next(lexer);
-        Node* if_1 = parse_expr(lexer);
+        Node* const if_true = parse_expr(lexer);
         
         expect(lexer->tok, T_COLON, "':'");
         next(lexer);
-        Node* if_false = parse_expr(lexer);
+        Node* const if_false = parse_expr(lexer);
 
-        Node* ternary = init_node(3, N_TERNARY_EXPR, lexer->position);
+        Node* const ternary = init_node(3, N_TERNARY_EXPR, lexer->position);
         vector_push(ternary->children, left);
-        vector_push(ternary->children, if_1);
+        vector_push(ternary->children, if_true);
         vector_push(ternary->children, if_false);
         return ternary;
     }

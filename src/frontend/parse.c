@@ -31,7 +31,7 @@ static void delete_last_namespace(){
     }
 }
 
-inline void* n_get(Node* const n, uint32_t index){
+inline void* const n_get(Node* const n, uint32_t index){
     return vector_get(n->children, index);
 }
 
@@ -40,7 +40,7 @@ static inline void free_node(Node* const n){
     free(n);
 }
 
-Node* const init_node(const uint32_t children, const NodeType type, pos_t pos){
+Node* const init_node(const uint32_t children, const NodeType type, Position pos){
     Node* const n = malloc(sizeof(Node));
     n->children = init_vector(children);
     n->type = type;
@@ -226,8 +226,8 @@ static Node* const parse_class(Lexer* const lexer){
 /**
  * Parses the sequence SPECIFIER* TYPE ID
  */
-static symbol* const parse_symbol(Lexer* const lexer, scope_t scope){
-    symbol* s = malloc(sizeof(symbol));
+static Symbol* const parse_symbol(Lexer* const lexer, Scope scope){
+    Symbol* s = malloc(sizeof(Symbol));
     int flags = 0;
     s->scope = scope;
     while(lexer->tok->type == T_SPECIFIER){
@@ -238,12 +238,6 @@ static symbol* const parse_symbol(Lexer* const lexer, scope_t scope){
                 duplicated_flag_warning(lexer->position, "mutable");
             }
             flags |= MUTABLE_FLAG;
-            break;
-        case 'f':
-            if(flags & FOREIGN_FLAG){
-                duplicated_flag_warning(lexer->position, "foreign");            
-            }
-            flags |= FOREIGN_FLAG;
             break;
         default:
             // err
@@ -269,13 +263,11 @@ static symbol* const parse_symbol(Lexer* const lexer, scope_t scope){
                 expect(lexer->tok, T_COMPARATION_OP, "operator");
             }
             s->name = lexer->tok->value;
-            s->mangled_name = mangle_name(s);    
             return s;
         }
     }
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     s->name = mangle_namespace(lexer->tok->value, last_namespace->content);
-    s->mangled_name = mangle_name(s);    
     return s;
 }
 
@@ -284,27 +276,27 @@ static symbol* const parse_symbol(Lexer* const lexer, scope_t scope){
 //
 
 // Tries to parse a variable statement (symbol = expr;) | (symbol;)
-static Node* const parse_var(Lexer* const l, symbol* s, int has_value){
+static Node* const parse_var(Lexer* const l, Symbol* s, bool has_value){
     Node* var_node = init_node(2, N_VAR, l->position);
     s->defined_pos = l->position;
     vector_push(var_node->children, s);
-    if(has_value){
-        expect(l->tok, T_EQUAL, "'='");
+    if(has_value == false){
+        expect(l->tok, T_SEMICOLON, "semicolon or declaration");
         next(l);
-        Node* expr = parse_expr(l);
-        expect(l->tok, T_SEMICOLON, "semicolon");
-        vector_push(var_node->children, expr);
-        next(l);
+        vector_push(var_node->children, NULL_EXPR(l->position));
         return var_node;
     }
-    expect(l->tok, T_SEMICOLON, "semicolon or declaration");
+    expect(l->tok, T_EQUAL, "'='");
     next(l);
-    vector_push(var_node->children, NULL_EXPR(l->position));
-    return var_node;
+    Node* expr = parse_expr(l);
+    expect(l->tok, T_SEMICOLON, "semicolon");
+    vector_push(var_node->children, expr);
+    next(l);
+    return var_node;   
 }
 
 // Tries to parse a lambda function (symbol(args) => expr;) | (symbol(args) => {expr};)
-static Node* const parse_lambda(Lexer* const lexer,symbol* s){
+static Node* const parse_lambda(Lexer* const lexer, Symbol* s){
     s->type->flags |= LAMBDA_FLAG;
     s->type->flags |= FUNCTION_FLAG;
     int inside_curly_brackets = lexer->tok->type == T_LEFT_CURLY;
@@ -356,7 +348,7 @@ static void parse_struct(Lexer* const l){
     next(l);
     uint32_t children = 0;
     while(l->tok->type != T_RIGHT_CURLY){
-        symbol* child = parse_symbol(l, S_PARAMETER);
+        Symbol* child = parse_symbol(l, S_PARAMETER);
         next(l);
         struct_type->align = max(child->type->align, struct_type->align);
         ++children;
@@ -388,7 +380,7 @@ static function_info* parse_function_args(Lexer* const lexer){
     next(lexer);
     int optional_args = 0;
     while(lexer->tok->type != T_RIGHT_PAR){
-        symbol* arg = parse_symbol(lexer, S_PARAMETER);
+        Symbol* arg = parse_symbol(lexer, S_PARAMETER);
         vector_push(info->args, arg);
         next(lexer);
         if(!optional_args){
@@ -415,24 +407,20 @@ static function_info* parse_function_args(Lexer* const lexer){
     return info;
 }
 
-static Node* const parse_decl(Lexer* const lexer, scope_t scope){
+static Node* const parse_decl(Lexer* const lexer, Scope scope){
     if(scope == S_CLASS && 
     (lexer->tok->type == T_KEYWORD_CONSTRUCTOR ||
     lexer->tok->type == T_KEYWORD_DESTRUCTOR)){
         return parse_class_special_methods(lexer);
     }
-    symbol* s = parse_symbol(lexer, scope);
+    Symbol* s = parse_symbol(lexer, scope);
     next(lexer);
     switch (lexer->tok->type)
     {
-    case T_EQUAL:
-        return parse_var(lexer, s, 1);
-    
-    case T_SEMICOLON:
-        return parse_var(lexer, s, 0);
+    case T_EQUAL: return parse_var(lexer, s, 1);
+    case T_SEMICOLON: return parse_var(lexer, s, 0);
 
     case T_LEFT_PAR:
-        s->mangled_name = mangle_name(s);
         add_namespace(s->name);
         
         s->type->flags |= FUNCTION_FLAG;
@@ -505,10 +493,9 @@ static Node* const parse_module(Lexer* const lexer){
     expect(lexer->tok, T_IDENTIFIER, "identifier");
     const char* id = lexer->tok->value;
 
-    symbol* const s = malloc(sizeof(symbol));
+    Symbol* const s = malloc(sizeof(Symbol));
     s->name = mangle_namespace(id, last_namespace->content);
     s->type = ty_module;
-    s->mangled_name = NULL;
     
     vector_push(module_node->children, s);
     next(lexer);

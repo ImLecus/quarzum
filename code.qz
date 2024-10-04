@@ -1,5 +1,8 @@
 import "@std/console.qz"
 
+function int32::print(){
+    console.out(this.to_string());
+}
 /*
     multi-comment
 */
@@ -7,5 +10,5 @@ function main(){
     console.out("Hello world!");
 
     // comment
-    mut int i = 5;
+    int32 i = 5;
 }

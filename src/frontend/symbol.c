@@ -1,27 +1,43 @@
 #include "symbol.h"
 #define USER_DEFINED_PREFIX "_Z"
 
-static void mangle_type(Type* t, String* mangled_name){
-    if(t->flags & MUTABLE_FLAG){
-        string_push(mangled_name, 'C');
+Symbol* const find_symbol(Table* table, const char* const name){
+    Symbol* s = hashmap_get(table->symbols, name);
+    if(s != NULL){
+        return s;
     }
-    if(t->flags & POINTER_FLAG){
-        string_push(mangled_name, 'P');
+    if(table->parent == NULL){
+        return NULL;
     }
-    if(t->type == TY_CUSTOM || t->type == TY_STRUCT){
-        string_append(mangled_name, t->name);
-    }
-    else{
-        char first_char = t->name[0];
-        string_push(mangled_name,first_char);
-        if(first_char == 'i' || first_char == 'u'){
-            char size[2];
-            sprintf(size, "%d", t->size * 8);
-            string_push(mangled_name,size[0]);
-            string_push(mangled_name,size[1]);
-        }
-    }
+    return find_symbol(table->parent, name);
 }
+
+inline void insert_symbol(SymbolTable* symbol_table, Symbol* const s){
+    hashmap_add(symbol_table->last_table->symbols, s->name, s);
+}
+
+inline void close_scope(SymbolTable* const table){
+    table->last_table = table->last_table->parent;
+}
+
+void add_scope(SymbolTable* const table, const char* const name, Scope scope){
+    Table* const t = malloc(sizeof(Table));
+    if(t == NULL) return;
+    t->parent = table->last_table;
+    t->name = name;
+    t->scope = scope;
+    t->symbols = init_hashmap(16);
+    table->last_table = t;
+}
+
+void init_symbol_table(SymbolTable* symbol_table){
+    symbol_table = malloc(sizeof(SymbolTable));
+    if(symbol_table == NULL) return;
+    symbol_table->last_table = NULL;
+    symbol_table->tables = init_vector(128);
+    add_scope(symbol_table, "@global", S_GLOBAL);
+}
+
 
 const char* mangle_namespace(const char* id, char* last_namespace){
     int len = strlen(last_namespace);
@@ -35,25 +51,4 @@ const char* mangle_namespace(const char* id, char* last_namespace){
     const char* result = string_copy(ns);
     free_string(ns);
     return result;
-}
-
-const char* mangle_name(symbol* s){
-    String* mangled_name = init_string(strlen(s->name)* 2);
-    mangle_type(s->type, mangled_name);
-    
-    string_push(mangled_name, ';');
-    string_append(mangled_name, s->name);
-
-    if( (s->type->flags & FUNCTION_FLAG) > 0 ){
-        if(strcmp(s->name, "main") == 0){return "main";}
-
-        function_info* info = s->info;
-        for(uint8_t i = 0; i < info->args->len; ++i){
-            symbol* arg = info->args->value[i];
-            string_push(mangled_name, ';');
-            mangle_type(arg->type, mangled_name);            
-        }
-        
-    }
-    return string_copy(mangled_name);
 }

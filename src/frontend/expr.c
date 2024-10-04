@@ -7,6 +7,22 @@
 
 static Node* const member_expr(Lexer* const lexer, Node* const parent);
 
+
+static Node* const array_expr(Lexer* const lexer){
+    next(lexer);
+    Node* const array = init_node(2, N_ARRAY_EXPR, lexer->position);
+    while(lexer->tok->type != T_RIGHT_SQUARE){
+        Node* const member = parse_expr(lexer);
+        vector_push(array->children, member);
+        if(lexer->tok->type != T_RIGHT_SQUARE){
+            expect(lexer->tok, T_COMMA, "end of array");
+            next(lexer);
+        }
+    }
+    next(lexer);
+    return array;
+}
+
 static Node* const call_expr(Lexer* const lexer, const char* id){
     Node* expr = init_node(2, N_CALL_EXPR, lexer->position);
     vector_push(expr->children, id);
@@ -49,16 +65,6 @@ static Node* const non_literal_expr(Lexer* const lexer){
     Node* id_expr = init_node(1,N_IDENTIFIER, lexer->position);
     vector_push(id_expr->children, id);
     return id_expr;
-}
-
-static Node* const cast_expr(Lexer* const lexer){
-    Node* cast = init_node(2, N_CAST, lexer->position);
-    Type* t = parse_type(lexer);
-    vector_push(cast->children, t);
-    expect(lexer->tok, T_RIGHT_SQUARE, "]");
-    next(lexer);
-    vector_push(cast->children, parse_expr(lexer));
-    return cast;
 }
 
 static Node* const index_expr(Lexer* const lexer, Node* array){
@@ -125,8 +131,7 @@ static Node* const parse_primary_expr(Lexer* const lexer){
         next(lexer);
         return paren_expr(lexer, expr);
     case T_LEFT_SQUARE:
-        next(lexer);
-        return cast_expr(lexer);
+        return array_expr(lexer);
     
     case T_KEYWORD_THIS:
     case T_IDENTIFIER:

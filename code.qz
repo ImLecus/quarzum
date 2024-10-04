@@ -11,4 +11,6 @@ function main(){
 
     // comment
     int32 i = 5;
+
+    var* my_array = [1, 2, "char"];
 }

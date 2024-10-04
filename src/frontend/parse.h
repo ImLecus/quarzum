@@ -32,7 +32,7 @@ typedef enum {
     N_MEMBER_EXPR,
     N_CALL_EXPR,
     N_NULL_EXPR,
-    N_CAST,
+    N_ARRAY_EXPR,
     N_INDEX_EXPR,
 
     N_LITERAL,

@@ -75,9 +75,9 @@ Type* unmask_pointer(char* ptr_name){
 static Type* check_expr(Node* expr){
     switch (expr->type)
     {
-    case N_CAST:
-        // TODO: check if the conversion is possible
-        return expr->children->value[0];
+    // case N_CAST:
+    //     // TODO: check if the conversion is possible
+    //     return expr->children->value[0];
     case N_INDEX_EXPR:
         Node* array = n_get(expr, 0);
         Node* index = n_get(expr, 1);

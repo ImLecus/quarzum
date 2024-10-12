@@ -2,13 +2,10 @@
     This module contains all the standard console input/output
     functions.
 */
+function out(string message, char separator = '\n'){
 
-module console {
-    function out(char* message, char separator = '\n'){
-
-    }
-
-    char* input(char* message = ""){
-
-    }  
 }
+
+string input(string message = ""){
+
+}  

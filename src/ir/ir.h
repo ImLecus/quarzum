@@ -7,19 +7,22 @@
 #define IR_H
 #include "../core/vector.h"
 #include "../frontend/parse.h"
-
 typedef enum {
     MOV,
     ADD,
     SUB,
+    IMUL,
     MUL,
+    IDIV,
     DIV,
     MOD,
     PUSH,
     POP,
     CALL,
     RET,
-    JMP
+    JMP,
+    LABEL,
+    SYSCALL
 } opcode_t;
 
 typedef enum {
@@ -32,8 +35,36 @@ typedef enum {
     R7,
     R8,
     RSB,
-    REP
+    REP,
+    RINVALID = 255
 } reg_t;
+
+typedef struct {
+    enum {
+        REGISTER,
+        POINTER,
+        CONSTANT,
+        VARIABLE
+    } optype;
+    enum {
+        S_BYTE,
+        S_WORD,
+        S_LONG,
+        S_QUAD,
+        S_ZERO
+    } size; 
+    union {
+        char* varname;
+        reg_t reg;
+        struct operand_t* address;
+        char* const_value;
+    } value;
+} operand_t;
+
+typedef struct {
+    opcode_t opcode;
+    operand_t operands[3];
+} instruction_t;
 
 typedef struct {
     Vector* data;

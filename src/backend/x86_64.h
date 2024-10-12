@@ -5,5 +5,11 @@
  */
 #ifndef ASM_X86_64_H
 #define ASM_X86_64_H
+#include "../ir/ir.h"
+#include "assemble.h"
+
+static char* registers[6] = {"rax", "rdi", "rsi","rcx", "rdx", "rbx"};
+
+int assemble_x86_64(ir_t* ir);
 
 #endif

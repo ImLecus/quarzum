@@ -1,10 +1,9 @@
 /*
-    Defines a custom type to manage character arrays.
-    A standard string is the same as a char*.
+    Defines type extensions for the primitive type str.
 */
-typedef string = const char*
 
-foreign char string::at(uint64 i);
+
+char string::at(uint64 i) => {i < this.length()? this[i] : null};
 foreign bool string::contains(char c);
 foreign uint64 string::length();
 foreign bool string::empty();

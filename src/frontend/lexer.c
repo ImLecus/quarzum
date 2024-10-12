@@ -1,9 +1,9 @@
-#include "tokenize.h"
+#include "lexer.h"
 
 Lexer* const init_lexer(const char* const filename, char* const input){
 
     if(strcmp(get_extension(filename), ".qz") != 0){
-        throw_warning((Position){0,0,filename},"File format is not '.qz'");
+        throw_warning((Position){filename, 0, 0},"File format is not '.qz'");
     }
 
     Lexer* const lex = malloc(sizeof(Lexer));
@@ -12,7 +12,6 @@ Lexer* const init_lexer(const char* const filename, char* const input){
     *lex = (Lexer){
         .buffer = init_string(32),
         .input = input,
-        .pos = 0,
         .tok = NULL,
         .position = (Position){
             .line = 1,
@@ -24,37 +23,22 @@ Lexer* const init_lexer(const char* const filename, char* const input){
 }
 
 void advance(Lexer* const lexer){
-    if(lexer->input[lexer->pos++] == '\n'){
-        ++lexer->position.line;
-        lexer->position.column = 0;
-    }
-    ++lexer->position.column;
+    update_pos(&lexer->position, lexer->input++[0]);
 }
 
-const char peek(const Lexer* const lexer){
-    if(lexer->pos > strlen(lexer->input)) return '\0';
-    return lexer->input[lexer->pos];
+const char peek(Lexer* lexer){
+    return lexer->input[0];
 }
 
-const char consume(Lexer* const lexer){
-    if(lexer->pos > strlen(lexer->input)) return '\0';
-    return lexer->input[lexer->pos++];
+const char consume(Lexer* lexer){
+    return lexer->input++[0];
 }
 
 const Token* const new_token(const TokenType type, Lexer* const lexer){
 
-    Token* const tok = malloc(sizeof(Token));
+    Token* tok = malloc(sizeof(Token));
     if(tok == NULL) return NULL;
-
-    *tok = (Token){
-        .type = type,
-        .value = string_copy(lexer->buffer),
-        .position = (Position){
-            .column = lexer->position.column,
-            .line = lexer->position.line,
-            .file = lexer->position.file
-        }
-    };
+    *tok = token_new(type, lexer->buffer->content);
 
     string_clear(lexer->buffer);
     return tok;
@@ -62,17 +46,14 @@ const Token* const new_token(const TokenType type, Lexer* const lexer){
 
 void read_escape_char(Lexer* const lexer){
     // the first char is the backslash '\'
-    advance(lexer);
+    string_push(lexer->buffer, consume(lexer));
     switch (peek(lexer))
     {
     case 'n':
-        string_push(lexer->buffer, '\n');
-        break;
     case 't':
-        string_push(lexer->buffer, '\t');
-        break;
     case '0':
-        string_push(lexer->buffer, '\0');
+        string_push(lexer->buffer, peek(lexer));
+        break;
     default:
         // err
         break;
@@ -174,7 +155,7 @@ const int read_id_or_keyword(Lexer* const lexer){
         string_push(lexer->buffer, consume(lexer));
     }
     int search = binary_search(lexer->buffer->content, keywords, KEYWORDS_SIZE);
-    return search == -1 ? T_IDENTIFIER : keyword_types[search];      
+    return search == -1 ? TK_IDENTIFIER : keyword_types[search];      
 }
 
 const int read_symbol(Lexer* const lexer){
@@ -191,21 +172,21 @@ const int read_symbol(Lexer* const lexer){
     const int search = binary_search(lexer->buffer->content, symbols, SYMBOLS_SIZE);
     if(search == -1){
         unexpected_token_err(lexer->position, string_copy(lexer->buffer));
-        return T_TOKEN_ERROR;
+        return TK_ERROR;
     }
     return symbol_types[search];
 }
 
 void ignore_multi_comment(Lexer* const lexer){
     advance(lexer);
-    char next = lexer->input[lexer->pos + 1];
+    char next = lexer->input[1];
     while(peek(lexer) != '*' || next != '/'){
         if(peek(lexer) == '\n'){
             ++lexer->position.line;
             lexer->position.column = 1;
         }
         advance(lexer);
-        next = lexer->input[lexer->pos + 1];
+        next = lexer->input[1];
     }
     advance(lexer);
     advance(lexer);
@@ -213,7 +194,7 @@ void ignore_multi_comment(Lexer* const lexer){
 
 const bool check_comment(Lexer* const lexer){
     if(peek(lexer) != '/') return false;
-    char next = lexer->input[lexer->pos + 1];
+    char next = lexer->input[1];
     if(next == '/'){
         while(consume(lexer) != '\n'); // Ignore single-line comment
         return true;
@@ -237,26 +218,26 @@ const Token* const next_token(Lexer* const lexer){
     }
     if(c == '"'){
         read_string_literal(lexer);
-        return new_token(T_STRING_LITERAL, lexer);
+        return new_token(TK_STRING_LITERAL, lexer);
     }
     if(c == '\''){
         read_char_literal(lexer);
-        return new_token(T_CHAR_LITERAL, lexer);
+        return new_token(TK_CHAR_LITERAL, lexer);
     }
     if(isdigit(c)){
         int is_decimal = read_numeric_literal(lexer);
         return new_token(is_decimal == 1? 
-                            T_NUMERIC_LITERAL :
-                            T_INT_LITERAL, lexer);
+                            TK_NUMERIC_LITERAL :
+                            TK_INT_LITERAL, lexer);
     }
     if(ispunct(c)){
         return new_token(read_symbol(lexer), lexer);
     }
-    if(c == '\0') return new_token(T_EOF, lexer);
+    if(c == '\0') return new_token(TK_EOF, lexer);
     
     unexpected_token_err(lexer->position, string_copy(lexer->buffer));
     advance(lexer);
-    return new_token(T_TOKEN_ERROR, lexer);
+    return new_token(TK_ERROR, lexer);
 }
 
 inline void next(Lexer* const lexer){

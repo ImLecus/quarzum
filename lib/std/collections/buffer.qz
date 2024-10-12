@@ -8,11 +8,11 @@ class Buffer<T> {
         }
     }
 
-    public constructor(uint64 size){
+    constructor(uint64 size){
         this.elements = malloc(this.elements, sizeof(T) * size);
     }
 
-    public destructor(){
+    destructor(){
         free(this.elements);
     }
 }

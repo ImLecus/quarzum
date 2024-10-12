@@ -5,7 +5,10 @@
  */
 #ifndef ASSEMBLE_H
 #define ASSEMBLE_H
+#include "x86_64.h"
 #include "../ir/ir.h"
+
+
 typedef enum {
     X86_64,
     X86_32

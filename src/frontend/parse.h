@@ -6,7 +6,7 @@
 #ifndef PARSE_H
 #define PARSE_H
 #include "symbol.h"
-#include "tokenize.h"
+#include "lexer.h"
 /**
  * \brief           Defines a `Node` type.
  */
@@ -15,7 +15,6 @@ typedef enum {
     N_IF,
     N_WHILE,
     N_VAR,
-    N_MODULE,
     N_BREAK,
     N_CONTINUE,
     N_FUNCTION,
@@ -37,7 +36,7 @@ typedef enum {
 
     N_LITERAL,
     N_CLASS,
-    N_INIT_LIST,
+    N_INITK_LIST,
     N_CLASS_STMT,
 
     N_INVALID = 255
@@ -83,7 +82,7 @@ Node* const init_node(const uint32_t children, const NodeType type, Position pos
  * \param           type: the expected token type
  * \param           what: error message.
  */
-void expect(const Token* t, const TokenType type, const char* what);
+void expect(Lexer* lexer, const TokenType type, const char* what);
 
 /**
  * \brief           Parses a type defined in Quarzum.

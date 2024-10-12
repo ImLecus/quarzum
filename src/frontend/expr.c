@@ -11,11 +11,11 @@ static Node* const member_expr(Lexer* const lexer, Node* const parent);
 static Node* const array_expr(Lexer* const lexer){
     next(lexer);
     Node* const array = init_node(2, N_ARRAY_EXPR, lexer->position);
-    while(lexer->tok->type != T_RIGHT_SQUARE){
+    while(lexer->tok->type != TK_RIGHT_SQUARE){
         Node* const member = parse_expr(lexer);
         vector_push(array->children, member);
-        if(lexer->tok->type != T_RIGHT_SQUARE){
-            expect(lexer->tok, T_COMMA, "end of array");
+        if(lexer->tok->type != TK_RIGHT_SQUARE){
+            expect(lexer, TK_COMMA, "end of array");
             next(lexer);
         }
     }
@@ -27,13 +27,13 @@ static Node* const call_expr(Lexer* const lexer, const char* id){
     Node* expr = init_node(2, N_CALL_EXPR, lexer->position);
     vector_push(expr->children, id);
     next(lexer);
-    while(lexer->tok->type != T_RIGHT_PAR){
+    while(lexer->tok->type != TK_RIGHT_PAR){
         Node* arg = parse_expr(lexer);
         vector_push(expr->children, arg);
-        if(lexer->tok->type == T_RIGHT_PAR){
+        if(lexer->tok->type == TK_RIGHT_PAR){
             break;
         }
-        expect(lexer->tok, T_COMMA, "',' or ')'");
+        expect(lexer, TK_COMMA, "',' or ')'");
         next(lexer);
     }
     next(lexer);
@@ -59,7 +59,7 @@ static Node* const paren_expr(Lexer* const lexer, Node* expr){
 static Node* const non_literal_expr(Lexer* const lexer){
     const char* id = lexer->tok->value;
     next(lexer);
-    if(lexer->tok->type == T_LEFT_PAR){
+    if(lexer->tok->type == TK_LEFT_PAR){
         return call_expr(lexer, id);
     } 
     Node* id_expr = init_node(1,N_IDENTIFIER, lexer->position);
@@ -72,14 +72,14 @@ static Node* const index_expr(Lexer* const lexer, Node* array){
     vector_push(expr->children, array);
     next(lexer);
     Node* index = parse_expr(lexer);
-    expect(lexer->tok, T_RIGHT_SQUARE, "']");
+    expect(lexer, TK_RIGHT_SQUARE, "']");
     vector_push(expr->children, index);
     next(lexer);
 
-    if(lexer->tok->type == T_DOT){
+    if(lexer->tok->type == TK_DOT){
         return member_expr(lexer, expr);
     }
-    if(lexer->tok->type == T_LEFT_SQUARE){
+    if(lexer->tok->type == TK_LEFT_SQUARE){
         return index_expr(lexer, expr);
     }
     return expr;
@@ -91,11 +91,11 @@ static Node* const member_expr(Lexer* const lexer, Node* const parent){
     vector_push(member->children, parent);
     Node* const child = non_literal_expr(lexer);
 
-    if(lexer->tok->type == T_DOT){
+    if(lexer->tok->type == TK_DOT){
         vector_push(member->children, member_expr(lexer, child));
     }
     vector_push(member->children, child);
-    if(lexer->tok->type == T_LEFT_SQUARE){
+    if(lexer->tok->type == TK_LEFT_SQUARE){
         return index_expr(lexer, member);
     }
     return member;
@@ -110,41 +110,41 @@ static Node* const stack_var_expr(Lexer* const lexer){
 static Node* const parse_primary_expr(Lexer* const lexer){
     switch (lexer->tok->type)
     {
-    case T_INT_LITERAL:
+    case TK_INT_LITERAL:
         return literal_expr(lexer, ty_int32);
-    case T_NUMERIC_LITERAL:
+    case TK_NUMERIC_LITERAL:
         return literal_expr(lexer, ty_num32);
-    case T_CHAR_LITERAL:
+    case TK_CHAR_LITERAL:
         return literal_expr(lexer, ty_char);
-    case T_STRING_LITERAL:
-        return literal_expr(lexer, ty_string);
-    case T_KEYWORD_TRUE:
-    case T_KEYWORD_FALSE:
+    case TK_STRING_LITERAL:
+        return literal_expr(lexer, ty_str);
+    case TK_TRUE:
+    case TK_FALSE:
         return literal_expr(lexer, ty_bool);
-    case T_NULL_LITERAL:
+    case TK_NULL_LITERAL:
         next(lexer);
         return NULL_EXPR(lexer->position);
-    case T_LEFT_PAR:
+    case TK_LEFT_PAR:
         next(lexer);
         Node* expr = parse_expr(lexer);
-        expect(lexer->tok, T_RIGHT_PAR, "')'");
+        expect(lexer, TK_RIGHT_PAR, "')'");
         next(lexer);
         return paren_expr(lexer, expr);
-    case T_LEFT_SQUARE:
+    case TK_LEFT_SQUARE:
         return array_expr(lexer);
     
-    case T_KEYWORD_THIS:
-    case T_IDENTIFIER:
+    case TK_THIS:
+    case TK_IDENTIFIER:
         // a non-literal can be an identifier or a function call
         Node* const non_literal = non_literal_expr(lexer);
-        if(lexer->tok->type == T_DOT){
+        if(lexer->tok->type == TK_DOT){
             return member_expr(lexer, non_literal);
         }
-        if(lexer->tok->type == T_LEFT_SQUARE){
+        if(lexer->tok->type == TK_LEFT_SQUARE){
             return index_expr(lexer, non_literal);
         }
         return non_literal;
-    case T_KEYWORD_NEW:
+    case TK_NEW:
         return stack_var_expr(lexer);
     default:
         invalid_expr_err(lexer->position);
@@ -160,9 +160,9 @@ Node* const parse_expr(Lexer* const lexer){
     char op;
     switch (lexer->tok->type)
     {
-    case T_ARITHMETIC_OP:
-    case T_LOGICAL_OP:
-    case T_COMPARATION_OP:
+    case TK_ARITHMETIC_OP:
+    case TK_LOGICAL_OP:
+    case TK_COMPARATION_OP:
         op = lexer->tok->value[0];
         next(lexer);
 
@@ -177,11 +177,11 @@ Node* const parse_expr(Lexer* const lexer){
         break;
     }
 
-    if(lexer->tok->type == T_TERNARY_OP){
+    if(lexer->tok->type == TK_TERNARY_OP){
         next(lexer);
         Node* const if_true = parse_expr(lexer);
         
-        expect(lexer->tok, T_COLON, "':'");
+        expect(lexer, TK_COLON, "':'");
         next(lexer);
         Node* const if_false = parse_expr(lexer);
 

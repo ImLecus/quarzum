@@ -4,39 +4,47 @@ import "@std/memory.qz"
     Defines a List type, a dynamic array-type.
 */
 
-class List<T> {
+class List <T> {
     private T* elements;
     private uint64 size;
     private uint64 length;
 
-    public foreign function reverse();
-    public foreign function clear();
-    public uint64 size() => {this.size};
-    public uint64 length() => {this.length};
-    public bool empty() => {this.length == 0};
-    public foreign function pop();
+    public function reverse(){
+        
+    }
+    public function clear(){
+        for(int i = 0; i < length; ++i){
+            elements[i] = null;
+        }
+    }
+    public uint64 size() => size ;
+    public uint64 length() => length ;
+    public bool empty() => length == 0 ;
+    public function pop(){
+        elements[length-- - 1] = null;
+    }
 
     public function resize(uint64 newsize){
-        this.size = newsize;
-        realloc(this.elements, sizeof(T)*newsize);
+        size = newsize;
+        realloc(elements, sizeof(T)*newsize);
     }
 
     public function push(T element){
-        if(this.length + 1 >= this.size){
-            this.size *= 2;
-            realloc(this.elements, sizeof(T) * this.size);
+        if(length + 1 >= size){
+            size *= 2;
+            realloc(elements, sizeof(T) * size);
         }
-        this.elements[this.length++] = element;
+        elements[length++] = element;
     }
 
-    public T get(uint64 index) => index >= this.length ? null : this.elements[index];
+    public T get(uint64 index) => index >= length ? null : elements[index];
 
-    public T get_first() => this.get(0);
-    public T get_last() => this.get(this.length - 1);
+    public T get_first() => get(0);
+    public T get_last() => get(length - 1);
 
     constructor(uint64 size = 0){
         this.size = size;
-        malloc(this.elements, sizeof(T) * size);
+        malloc(elements, sizeof(T) * size);
     }
 
     destructor(){

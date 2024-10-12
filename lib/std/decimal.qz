@@ -7,32 +7,35 @@
 /*
     Defines a decimal numeric type in base 10 notation.
 */
-class decimal {
+class Decimal {
     private int base;
     private int exponent;
-    public constructor(int b, int e){
+
+    constructor(int b, int e){
         this.base = b; this.exponent = e;
     }
-    public constructor(num f){
+     
+    constructor(num f){
         this.base = [int]f * 10^decimals;
         f -= [int]f;
         uint decimals = 0;
 
     }
+
+    public operator+(Decimal other){
+
+    }
+
+    public operator-(Decimal other){
+
+    }
+
+    public operator*(Decimal other){
+
+    }
+
 }
 
-decimal decimal::operator+(decimal other){
-
-}
-
-decimal decimal::operator-(decimal other){
-
-}
-
-decimal decimal::operator*(decimal other){
-
-}
-
-decimal int::to_decimal(){
+Decimal int::to_decimal(){
     return {this, 0};
 }

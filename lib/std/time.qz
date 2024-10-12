@@ -1,6 +1,6 @@
-import "@std/std.qz"
-
-foreign int time();
+int time(){
+    
+}
 
 class Timer {
     private int startTime;

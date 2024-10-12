@@ -103,7 +103,7 @@ inline void duplicated_symbol_err(Position pos, const char* const symbol){
 }
 
 inline void file_not_found_err(const char* const filename){
-    throw_error((Position){-1, 0, filename}, "File not found");
+    throw_error((Position){filename, -1, 0}, "File not found");
 }
 
 inline void invalid_expr_err(Position pos){

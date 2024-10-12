@@ -27,6 +27,7 @@ Hashmap* init_type_map(){
     hashmap_add(type_map, "function", ty_function);
     hashmap_add(type_map, "bool", ty_bool);
     hashmap_add(type_map, "var", ty_var);
+    hashmap_add(type_map, "string", ty_str);
 
     return type_map;
 }

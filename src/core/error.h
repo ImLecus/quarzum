@@ -8,17 +8,8 @@
 #define ERROR_H
 #include "core.h"
 #include "file.h"
-
+#include "position.h"
 #define MAX_ERRORS 100
-
-/**
- * \brief           Struct to store an element position
- *                  inside a file during the compilation
- */
-typedef struct {
-    int line, column;
-    const char* file;
-} Position;
 
 typedef struct {
     uint32_t line;

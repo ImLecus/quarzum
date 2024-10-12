@@ -1,16 +1,21 @@
 import "@std/console.qz"
 
 function int32::print(){
-    console.out(this.to_string());
+    out(this.to_string());
 }
+
 /*
     multi-comment
 */
 function main(){
-    console.out("Hello world!");
+    out("Hello world!");
 
     // comment
     int32 i = 5;
-
+    
     var* my_array = [1, 2, "char"];
+}
+
+class List {
+    
 }

@@ -7,7 +7,7 @@
 #define TYPE_H
 #include "../core/hashmap.h"
 #include "../core/string.h"
-enum {
+typedef enum {
     TY_FUNCTION,
     TY_INT,
     TY_NUM,
@@ -16,8 +16,7 @@ enum {
     TY_VAR, // "var" is basically a pointer of any type
     TY_NULL,
     TY_PTR,
-    TY_MODULE 
-};
+} Datatype;
 
 #define MUTABLE_FLAG    0b00000001
 #define UNSIGNED_FLAG   0b00000010
@@ -28,11 +27,21 @@ enum {
 #define LAMBDA_FLAG     0b01000000
 #define ENUM_FLAG       0b10000000
 
+/**
+ * TODO: change this structure. Pointers must have
+ * a "struct Type* pointer_to" instead of masking the name 
+ */
+
 typedef struct Type {
-    unsigned char type;
+    Datatype type;
     const char* name;
+
     unsigned int align, size;
     unsigned char flags;
+
+    struct Type* pointer_to;
+    unsigned int array_size;
+    
 } Type;
 
 static Type* const ty_function = &(Type){TY_FUNCTION,"function", 0, 0};
@@ -53,11 +62,9 @@ static Type* const ty_num16 =    &(Type){TY_NUM,"num16", 2, 2};
 static Type* const ty_num32 =    &(Type){TY_NUM,"num32", 4, 4};
 static Type* const ty_num64 =    &(Type){TY_NUM,"num64", 8, 8};
 
-static Type* const ty_string =   &(Type){TY_PTR,"char*", 8, 8, POINTER_FLAG};
+static Type* const ty_str =      &(Type){TY_PTR,"string", 8, 8, POINTER_FLAG};
 static Type* const ty_var =      &(Type){TY_VAR,"var", 8, 8, POINTER_FLAG};
 static Type* const ty_null =     &(Type){TY_NULL,"null",0,0};
-
-static Type* const ty_module = &(Type){TY_MODULE,"module",0,0};
 
 extern Hashmap* type_map;
 

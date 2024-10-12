@@ -31,18 +31,6 @@ static void check_symbol(Symbol* s){
     }
 }
 
-static void check_module(Node* module_node){
-    Symbol* module = n_get(module_node, 0);
-    Symbol* dup = find_symbol(symbol_table->last_table, module->name);
-    if(dup){
-        printf(RED"[ERROR] "RESET"Module '%s' already exists \n", module->name);
-        has_errors = 1;
-        return;
-    }
-    //printf("mod: %s \n", module->name);
-    insert_symbol(symbol_table, module);
-}
-
 
 static Symbol* try_get_symbol(char* name, const char* prefix){
     //printf("Trying to get symbol %s...\n", mangle_namespace(name, prefix));
@@ -123,10 +111,6 @@ static Type* check_expr(Node* expr){
         Type* base = check_expr(parent);
         if(base){
             prefix = base->name;
-            if(base->type == TY_MODULE){
-                Symbol* namespace = n_get(parent, 0);
-                prefix = namespace->name;
-            }
         }
         
         return check_expr(child);
@@ -245,13 +229,6 @@ static void check_statement(Node* n){
     case N_LAMBDA:
         check_lambda(n);
         break;
-    case N_MODULE:
-        add_scope(symbol_table, "console" , S_LOCAL);
-        check_module(n);
-        for(uint16_t i = 1; i < n->children->len; ++i){
-            Node* child = n->children->value[i];
-            if(child != NULL) check_statement(child);    
-        }
     default:
         check_expr(n);
         break;

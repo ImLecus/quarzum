@@ -4,13 +4,13 @@
 */
 
 struct File {
-    char* name;
+    string name;
     int fd;
     bool is_open;
 }
 
-foreign File open_file(char* name, int flags, int mode);
-foreign function File::close();
-foreign char* File::read();
-foreign function File::write(char* message);
-foreign char* File::get_format();
+File open_file(string name, int flags, int mode);
+function File::close();
+string File::read();
+function File::write(string message);
+string File::get_format();

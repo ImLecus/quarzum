@@ -1,20 +1,7 @@
-import "@std/std.qz"
-import "@std/string.qz"
+int num::to_int(){
 
-foreign int to_int(num value);
-foreign int to_int(string value);
+}
 
-foreign num to_num(int value);
-foreign num to_num(uint value);
-
-
-//foreign string to_string(int value);
-foreign string int::to_string();
-
-// foreign string to_string(int64 value);
-// foreign string to_string(uint value);
-// foreign string to_string(uint64 value);
-// foreign string to_string(bool value);
-// foreign string to_string(num value);
-// foreign string to_string(num64 value);
-// foreign string to_string(char value);
+int string::to_int(){
+    
+}

@@ -7,8 +7,31 @@ set(CMAKE_CXX_EXTENSIONS ON)
 add_executable(quarzum ${SOURCES}
         src/lexer/token.cpp
         src/lexer/lexer.cpp
-        src/lexer/tests/lexer_test.cpp)
-target_include_directories(quarzum PRIVATE src/lexer/include)
+        src/parser/tests/parser_test.cpp
+        src/parser/parser.cpp
+        src/parser/include/parser.hpp
+        src/ast/src/blocknode.cpp
+        src/ast/src/vardeclarationnode.cpp
+        src/ast/src/boolliteralnode.cpp
+        src/parser/tests/parser_test.cpp
+        src/ast/src/functiondeclarationnode.cpp
+        src/ast/src/loopstatementnode.cpp
+        src/ast/include/returnstatementnode.hpp
+        src/ast/src/returnstatementnode.cpp
+        src/ast/include/breaknode.hpp
+        src/ast/include/continuenode.hpp
+        src/ast/include/ifstatementnode.hpp
+        src/ast/src/ifstatementnode.cpp
+        src/ast/include/whilestatementnode.hpp
+        src/ast/src/whilestatementnode.cpp
+        src/ast/include/binaryexpressionnode.hpp
+        src/ast/src/binaryexpressionnode.cpp
+)
+target_include_directories(quarzum PRIVATE
+        src/lexer/include
+        src/ast/include
+        src/parser/include
+)
 target_compile_features(quarzum PRIVATE cxx_std_17)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Os -Wall -Wextra -Wpedantic")
 

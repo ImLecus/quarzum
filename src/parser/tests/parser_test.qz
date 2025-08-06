@@ -1,0 +1,9 @@
+var a = true or false;
+
+def main() {
+    while(false or false) break;
+    loop {
+        if(false and true) continue;
+    }
+    return true;
+}

@@ -3,7 +3,7 @@
  * \brief           Token implementation file
  * \copyright       2024 Marcos González GPL3
  */
-#include "token.h"
+#include "../lexer/include/token.h"
 
 Token token_new(TokenType type, char* value){
     Token tok;

@@ -10,22 +10,22 @@ languages like C or C++.
 ## Features of Quarzum
 
 * Clean and simple syntax
+* Low and high level, depending on the programmer.
 * Operator Overloading
-* High performance
-* Supports OOP paradigm
+* High performance and low-level operations
+* Supports OOP and functional paradigm
 
 ## State of the project
 
-Quarzum is currently under development. The estimated date for the
-firt alpha version is close to December 2024. 
+Quarzum is currently under development. There is no estimated release date yet.
 
 # Say hello, Quarzum!
 
 ```
 import "@std/console.qz"
 
-function main(){
-    console.out("Hello world!");
+def main(){
+    print("Hello world!");
 }
 
 ```

@@ -7,7 +7,7 @@
 #define LEXER_H
 #include "../core/file.h"
 #include "../core/vector.h"
-#include "token.h"
+#include "../lexer/include/token.h"
 
 /**
  * Keywords and symbols

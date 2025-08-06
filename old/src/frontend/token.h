@@ -85,7 +85,7 @@ typedef struct Token {
 
 /**
  * \brief           Initializes a new `Token`
- * 
+ *
  * \param           type : The new Token type
  * \param           value : The new Token value
  */
@@ -95,7 +95,7 @@ Token token_new(TokenType type, char* value);
  * \brief           Prints a Token information in console
  * \note            Does not print the Token position
  */
-void print_token(Token t);  
+void print_token(Token t);
 
 
 #endif /* TOKEN_H */

@@ -26,6 +26,11 @@ add_executable(quarzum ${SOURCES}
         src/ast/src/whilestatementnode.cpp
         src/ast/include/binaryexpressionnode.hpp
         src/ast/src/binaryexpressionnode.cpp
+        src/ast/include/dowhilestatementnode.hpp
+        src/ast/src/dowhilestatementnode.cpp
+        src/ast/include/switchstatementnode.hpp
+        src/ast/src/switchstatementnode.cpp
+        src/ast/include/integerliteralnode.hpp
 )
 target_include_directories(quarzum PRIVATE
         src/lexer/include

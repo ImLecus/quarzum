@@ -7,7 +7,8 @@ class IfStatementNode: public StatementNode
 private:
 	ExpressionNode* condition;
 	StatementNode* body;
+	StatementNode* else_body;
 public:
-	IfStatementNode(ExpressionNode*, StatementNode*);
+	IfStatementNode(ExpressionNode*, StatementNode*, StatementNode*);
 	~IfStatementNode();
 };

@@ -1,3 +1,4 @@
 #include "../include/boolliteralnode.hpp"
 
-BoolLiteralNode::BoolLiteralNode(const bool _value) : value(_value) {}
+BoolLiteralNode::BoolLiteralNode(const bool _value) :
+	LiteralExpressionNode(_value ? "true" : "false"){}

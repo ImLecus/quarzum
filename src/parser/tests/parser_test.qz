@@ -1,9 +1,12 @@
-var a = true or false;
+var a : bool = true or false;
 
-def main() {
-    while(false or false) break;
-    loop {
-        if(false and true) continue;
+def main() : void {
+
+    switch(true){
+        case false: return 7;
+        case true : {
+            break;
+        }
+        default: continue;
     }
-    return true;
 }
